@@ -20,17 +20,17 @@
                 <a href="{{ route('admin.dashboard') }}" class="block px-3 py-2 rounded hover:bg-primary-700">Dashboard</a>
                 <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Reservasi</a>
                 <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Kalender</a>
-                <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Kamar</a>
+                <a href="{{ route('admin.room-types.index') }}" class="block px-3 py-2 rounded hover:bg-primary-700">Kamar</a>
                 <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Tamu</a>
                 <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Pembayaran</a>
                 <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Promo</a>
                 <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Loyalty</a>
                 <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Room Block</a>
-                <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Galeri</a>
-                <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Kebijakan</a>
+                <a href="{{ route('admin.galleries.index') }}" class="block px-3 py-2 rounded hover:bg-primary-700">Galeri</a>
+                <a href="{{ route('admin.policies.index') }}" class="block px-3 py-2 rounded hover:bg-primary-700">Kebijakan</a>
                 <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Pengeluaran</a>
                 <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Laporan</a>
-                <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Pengaturan</a>
+                <a href="{{ route('admin.settings.edit', 'general') }}" class="block px-3 py-2 rounded hover:bg-primary-700">Pengaturan</a>
             </nav>
         </aside>
 

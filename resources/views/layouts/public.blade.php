@@ -19,10 +19,10 @@
                 {{-- Desktop Nav --}}
                 <nav class="hidden md:flex items-center space-x-6 text-sm">
                     <a href="{{ route('home') }}" class="text-gray-600 hover:text-primary-600">Beranda</a>
-                    <a href="#" class="text-gray-600 hover:text-primary-600">Kamar</a>
-                    <a href="#" class="text-gray-600 hover:text-primary-600">Tentang</a>
-                    <a href="#" class="text-gray-600 hover:text-primary-600">Lokasi</a>
-                    <a href="#" class="text-gray-600 hover:text-primary-600">Kebijakan</a>
+                    <a href="{{ route('rooms.index') }}" class="text-gray-600 hover:text-primary-600">Kamar</a>
+                    <a href="{{ route('about') }}" class="text-gray-600 hover:text-primary-600">Tentang</a>
+                    <a href="{{ route('location') }}" class="text-gray-600 hover:text-primary-600">Lokasi</a>
+                    <a href="{{ route('policy') }}" class="text-gray-600 hover:text-primary-600">Kebijakan</a>
                     <a href="#" class="text-gray-600 hover:text-primary-600">Cek Booking</a>
                     @auth
                         <a href="{{ route('member.dashboard') }}" class="text-primary-600 font-medium">Dashboard</a>
@@ -45,10 +45,10 @@
         <div x-show="open" x-transition class="md:hidden border-t border-gray-100 bg-white">
             <div class="px-4 py-3 space-y-2">
                 <a href="{{ route('home') }}" class="block text-gray-600 hover:text-primary-600">Beranda</a>
-                <a href="#" class="block text-gray-600 hover:text-primary-600">Kamar</a>
-                <a href="#" class="block text-gray-600 hover:text-primary-600">Tentang</a>
-                <a href="#" class="block text-gray-600 hover:text-primary-600">Lokasi</a>
-                <a href="#" class="block text-gray-600 hover:text-primary-600">Kebijakan</a>
+                <a href="{{ route('rooms.index') }}" class="block text-gray-600 hover:text-primary-600">Kamar</a>
+                <a href="{{ route('about') }}" class="block text-gray-600 hover:text-primary-600">Tentang</a>
+                <a href="{{ route('location') }}" class="block text-gray-600 hover:text-primary-600">Lokasi</a>
+                <a href="{{ route('policy') }}" class="block text-gray-600 hover:text-primary-600">Kebijakan</a>
                 <a href="#" class="block text-gray-600 hover:text-primary-600">Cek Booking</a>
                 @auth
                     <a href="{{ route('member.dashboard') }}" class="block text-primary-600 font-medium">Dashboard</a>
