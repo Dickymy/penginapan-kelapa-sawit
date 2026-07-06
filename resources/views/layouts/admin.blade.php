@@ -18,18 +18,28 @@
             </div>
             <nav class="p-4 space-y-1 text-sm overflow-y-auto">
                 <a href="{{ route('admin.dashboard') }}" class="block px-3 py-2 rounded hover:bg-primary-700">Dashboard</a>
-                <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Reservasi</a>
-                <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Kalender</a>
+                <a href="{{ route('admin.bookings.index') }}" class="block px-3 py-2 rounded hover:bg-primary-700">Reservasi</a>
+                <a href="{{ route('admin.room-blocks.index') }}" class="block px-3 py-2 rounded hover:bg-primary-700">Room Block</a>
                 <a href="{{ route('admin.room-types.index') }}" class="block px-3 py-2 rounded hover:bg-primary-700">Kamar</a>
                 <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Tamu</a>
                 <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Pembayaran</a>
-                <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Promo</a>
-                <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Loyalty</a>
-                <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Room Block</a>
+                <a href="{{ route('admin.promotions.index') }}" class="block px-3 py-2 rounded hover:bg-primary-700">Promo</a>
+                <a href="{{ route('admin.loyalty.index') }}" class="block px-3 py-2 rounded hover:bg-primary-700">Loyalty</a>
                 <a href="{{ route('admin.galleries.index') }}" class="block px-3 py-2 rounded hover:bg-primary-700">Galeri</a>
                 <a href="{{ route('admin.policies.index') }}" class="block px-3 py-2 rounded hover:bg-primary-700">Kebijakan</a>
-                <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Pengeluaran</a>
-                <a href="#" class="block px-3 py-2 rounded text-primary-300 cursor-not-allowed">Laporan</a>
+                <a href="{{ route('admin.expenses.index') }}" class="block px-3 py-2 rounded hover:bg-primary-700">Pengeluaran</a>
+                <div x-data="{ open: false }">
+                    <button @click="open = !open" class="w-full text-left block px-3 py-2 rounded hover:bg-primary-700 flex items-center justify-between">
+                        <span>Laporan</span>
+                        <svg class="w-3 h-3 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div x-show="open" x-cloak class="ml-4 space-y-1 mt-1">
+                        <a href="{{ route('admin.reports.revenue') }}" class="block px-3 py-1.5 rounded text-sm hover:bg-primary-700">Pendapatan</a>
+                        <a href="{{ route('admin.reports.occupancy') }}" class="block px-3 py-1.5 rounded text-sm hover:bg-primary-700">Okupansi</a>
+                        <a href="{{ route('admin.reports.profit') }}" class="block px-3 py-1.5 rounded text-sm hover:bg-primary-700">Laba Rugi</a>
+                        <a href="{{ route('admin.reports.sources') }}" class="block px-3 py-1.5 rounded text-sm hover:bg-primary-700">Sumber Booking</a>
+                    </div>
+                </div>
                 <a href="{{ route('admin.settings.edit', 'general') }}" class="block px-3 py-2 rounded hover:bg-primary-700">Pengaturan</a>
             </nav>
         </aside>

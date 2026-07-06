@@ -149,5 +149,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Refunds
         Route::get('bookings/{booking}/refund', [\App\Http\Controllers\Admin\RefundController::class, 'create'])->name('refunds.create');
         Route::post('bookings/{booking}/refund', [\App\Http\Controllers\Admin\RefundController::class, 'store'])->name('refunds.store');
+
+        // Expenses
+        Route::resource('expenses', \App\Http\Controllers\Admin\ExpenseController::class)->except(['show']);
+
+        // Reports
+        Route::get('reports/revenue', [\App\Http\Controllers\Admin\ReportController::class, 'revenue'])->name('reports.revenue');
+        Route::get('reports/occupancy', [\App\Http\Controllers\Admin\ReportController::class, 'occupancy'])->name('reports.occupancy');
+        Route::get('reports/profit', [\App\Http\Controllers\Admin\ReportController::class, 'profit'])->name('reports.profit');
+        Route::get('reports/sources', [\App\Http\Controllers\Admin\ReportController::class, 'sources'])->name('reports.sources');
     });
 });

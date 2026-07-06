@@ -2,6 +2,10 @@
 
 @section('title', 'Status Pembayaran - ' . $booking->booking_code)
 
+@section('meta')
+<meta name="robots" content="noindex, nofollow">
+@endsection
+
 @section('content')
 <div class="max-w-2xl mx-auto px-4 py-8 text-center">
     <h1 class="text-2xl font-bold text-gray-900 mb-4">Terima Kasih</h1>
