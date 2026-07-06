@@ -67,6 +67,7 @@ Route::middleware(['auth', 'verified'])->prefix('member')->name('member.')->grou
     Route::put('/profile', [\App\Http\Controllers\Member\ProfileController::class, 'update'])->name('profile.update');
     Route::get('/claim', [\App\Http\Controllers\Member\ClaimController::class, 'index'])->name('claim.index');
     Route::post('/claim/{booking}', [\App\Http\Controllers\Member\ClaimController::class, 'claim'])->name('claim.claim');
+    Route::get('/points', [\App\Http\Controllers\Member\PointController::class, 'index'])->name('points.index');
 });
 
 /*
@@ -133,5 +134,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('room-blocks/create', [\App\Http\Controllers\Admin\RoomBlockController::class, 'create'])->name('room-blocks.create');
         Route::post('room-blocks', [\App\Http\Controllers\Admin\RoomBlockController::class, 'store'])->name('room-blocks.store');
         Route::delete('room-blocks/{roomBlock}', [\App\Http\Controllers\Admin\RoomBlockController::class, 'destroy'])->name('room-blocks.destroy');
+
+        // Loyalty
+        Route::get('loyalty', [\App\Http\Controllers\Admin\LoyaltyController::class, 'index'])->name('loyalty.index');
+        Route::get('loyalty/{user}', [\App\Http\Controllers\Admin\LoyaltyController::class, 'show'])->name('loyalty.show');
+        Route::post('loyalty/{user}/adjust', [\App\Http\Controllers\Admin\LoyaltyController::class, 'adjust'])->name('loyalty.adjust');
+
+        // Promotions
+        Route::resource('promotions', \App\Http\Controllers\Admin\PromotionController::class)->except(['show']);
     });
 });
