@@ -14,7 +14,9 @@ use App\Http\Controllers\Public\AvailabilityController;
 use App\Http\Controllers\Public\BookingController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\PageController;
+use App\Http\Controllers\Public\PaymentController;
 use App\Http\Controllers\Public\RoomController as PublicRoomController;
+use App\Http\Controllers\Webhook\MidtransWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -37,6 +39,15 @@ Route::post('/booking', [BookingController::class, 'store'])->name('booking.stor
 Route::get('/booking/{bookingCode}/konfirmasi', [BookingController::class, 'confirmation'])->name('booking.confirmation');
 Route::get('/cek-booking', [BookingController::class, 'verifyForm'])->name('booking.verify.form');
 Route::post('/cek-booking', [BookingController::class, 'verifyAccess'])->name('booking.verify');
+
+// Payment
+Route::get('/booking/{bookingCode}/bayar', [PaymentController::class, 'pay'])->name('booking.pay');
+Route::get('/booking/{bookingCode}/selesai', [PaymentController::class, 'finish'])->name('booking.finish');
+
+// Webhook (no CSRF)
+Route::post('/webhook/midtrans', [MidtransWebhookController::class, 'handle'])
+    ->name('webhook.midtrans')
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 /*
 |--------------------------------------------------------------------------

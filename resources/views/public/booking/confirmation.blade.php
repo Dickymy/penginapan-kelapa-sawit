@@ -91,11 +91,11 @@
 
     {{-- CTA Buttons --}}
     <div class="flex flex-col sm:flex-row gap-3">
-        {{-- Bayar Sekarang (placeholder for SPEC 04) --}}
-        <button disabled
-                class="flex-1 bg-gray-300 text-gray-500 py-3 px-6 rounded-lg font-semibold text-center cursor-not-allowed">
+        {{-- Bayar Sekarang --}}
+        <a href="{{ route('booking.pay', $booking->booking_code) }}"
+           class="flex-1 bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold text-center hover:bg-primary-700 transition">
             Bayar Sekarang
-        </button>
+        </a>
 
         {{-- Cek Status --}}
         <a href="{{ route('booking.verify.form') }}"
