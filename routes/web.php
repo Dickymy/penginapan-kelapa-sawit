@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\RoomImageController;
 use App\Http\Controllers\Admin\RoomTypeController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
+use App\Http\Controllers\Public\AvailabilityController;
+use App\Http\Controllers\Public\BookingController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\PageController;
 use App\Http\Controllers\Public\RoomController as PublicRoomController;
@@ -27,6 +29,14 @@ Route::get('/kamar/{slug}', [PublicRoomController::class, 'show'])->name('rooms.
 Route::get('/tentang', [PageController::class, 'about'])->name('about');
 Route::get('/lokasi', [PageController::class, 'location'])->name('location');
 Route::get('/kebijakan', [PageController::class, 'policy'])->name('policy');
+
+// Availability & Booking
+Route::get('/ketersediaan', [AvailabilityController::class, 'search'])->name('availability.search');
+Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('booking.checkout');
+Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+Route::get('/booking/{bookingCode}/konfirmasi', [BookingController::class, 'confirmation'])->name('booking.confirmation');
+Route::get('/cek-booking', [BookingController::class, 'verifyForm'])->name('booking.verify.form');
+Route::post('/cek-booking', [BookingController::class, 'verifyAccess'])->name('booking.verify');
 
 /*
 |--------------------------------------------------------------------------
