@@ -44,6 +44,9 @@ Route::post('/cek-booking', [BookingController::class, 'verifyAccess'])->name('b
 Route::get('/booking/{bookingCode}/bayar', [PaymentController::class, 'pay'])->name('booking.pay');
 Route::get('/booking/{bookingCode}/selesai', [PaymentController::class, 'finish'])->name('booking.finish');
 
+// Invoice
+Route::get('/booking/{bookingCode}/invoice', [\App\Http\Controllers\Public\InvoiceController::class, 'download'])->name('booking.invoice');
+
 // Google OAuth
 Route::get('/auth/google', [\App\Http\Controllers\Auth\GoogleController::class, 'redirect'])->name('auth.google');
 Route::get('/auth/google/callback', [\App\Http\Controllers\Auth\GoogleController::class, 'callback'])->name('auth.google.callback');
@@ -142,5 +145,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Promotions
         Route::resource('promotions', \App\Http\Controllers\Admin\PromotionController::class)->except(['show']);
+
+        // Refunds
+        Route::get('bookings/{booking}/refund', [\App\Http\Controllers\Admin\RefundController::class, 'create'])->name('refunds.create');
+        Route::post('bookings/{booking}/refund', [\App\Http\Controllers\Admin\RefundController::class, 'store'])->name('refunds.store');
     });
 });

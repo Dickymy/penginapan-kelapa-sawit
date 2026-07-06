@@ -97,6 +97,10 @@ class BookingController extends Controller
             ]);
         });
 
+        $booking->refresh();
+        app(\App\Services\PromotionService::class)->releaseForBooking($booking);
+        app(\App\Services\LoyaltyPointService::class)->reverseRedemptionForBooking($booking);
+
         return back()->with('success', 'Booking berhasil dibatalkan.');
     }
 
@@ -157,6 +161,10 @@ class BookingController extends Controller
                 'created_at' => now(),
             ]);
         });
+
+        $booking->refresh();
+        app(\App\Services\LoyaltyPointService::class)->awardForCompletedBooking($booking);
+
         return back()->with('success', 'Booking selesai.');
     }
 
