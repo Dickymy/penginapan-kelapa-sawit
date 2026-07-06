@@ -44,6 +44,10 @@ Route::post('/cek-booking', [BookingController::class, 'verifyAccess'])->name('b
 Route::get('/booking/{bookingCode}/bayar', [PaymentController::class, 'pay'])->name('booking.pay');
 Route::get('/booking/{bookingCode}/selesai', [PaymentController::class, 'finish'])->name('booking.finish');
 
+// Google OAuth
+Route::get('/auth/google', [\App\Http\Controllers\Auth\GoogleController::class, 'redirect'])->name('auth.google');
+Route::get('/auth/google/callback', [\App\Http\Controllers\Auth\GoogleController::class, 'callback'])->name('auth.google.callback');
+
 // Webhook (no CSRF)
 Route::post('/webhook/midtrans', [MidtransWebhookController::class, 'handle'])
     ->name('webhook.midtrans')
@@ -57,6 +61,12 @@ Route::post('/webhook/midtrans', [MidtransWebhookController::class, 'handle'])
 
 Route::middleware(['auth', 'verified'])->prefix('member')->name('member.')->group(function () {
     Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/bookings', [\App\Http\Controllers\Member\BookingController::class, 'index'])->name('bookings.index');
+    Route::get('/bookings/{booking}', [\App\Http\Controllers\Member\BookingController::class, 'show'])->name('bookings.show');
+    Route::get('/profile', [\App\Http\Controllers\Member\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [\App\Http\Controllers\Member\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/claim', [\App\Http\Controllers\Member\ClaimController::class, 'index'])->name('claim.index');
+    Route::post('/claim/{booking}', [\App\Http\Controllers\Member\ClaimController::class, 'claim'])->name('claim.claim');
 });
 
 /*
@@ -106,5 +116,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('galleries', [AdminGalleryController::class, 'store'])->name('galleries.store');
         Route::patch('galleries/{gallery}/toggle', [AdminGalleryController::class, 'toggleActive'])->name('galleries.toggle');
         Route::delete('galleries/{gallery}', [AdminGalleryController::class, 'destroy'])->name('galleries.destroy');
+
+        // Bookings
+        Route::get('bookings', [\App\Http\Controllers\Admin\BookingController::class, 'index'])->name('bookings.index');
+        Route::get('bookings/create', [\App\Http\Controllers\Admin\BookingController::class, 'create'])->name('bookings.create');
+        Route::post('bookings', [\App\Http\Controllers\Admin\BookingController::class, 'store'])->name('bookings.store');
+        Route::get('bookings/{booking}', [\App\Http\Controllers\Admin\BookingController::class, 'show'])->name('bookings.show');
+        Route::patch('bookings/{booking}/cancel', [\App\Http\Controllers\Admin\BookingController::class, 'cancel'])->name('bookings.cancel');
+        Route::patch('bookings/{booking}/check-in', [\App\Http\Controllers\Admin\BookingController::class, 'checkIn'])->name('bookings.check-in');
+        Route::patch('bookings/{booking}/check-out', [\App\Http\Controllers\Admin\BookingController::class, 'checkOut'])->name('bookings.check-out');
+        Route::patch('bookings/{booking}/complete', [\App\Http\Controllers\Admin\BookingController::class, 'complete'])->name('bookings.complete');
+        Route::patch('bookings/{booking}/no-show', [\App\Http\Controllers\Admin\BookingController::class, 'noShow'])->name('bookings.no-show');
+
+        // Room Blocks
+        Route::get('room-blocks', [\App\Http\Controllers\Admin\RoomBlockController::class, 'index'])->name('room-blocks.index');
+        Route::get('room-blocks/create', [\App\Http\Controllers\Admin\RoomBlockController::class, 'create'])->name('room-blocks.create');
+        Route::post('room-blocks', [\App\Http\Controllers\Admin\RoomBlockController::class, 'store'])->name('room-blocks.store');
+        Route::delete('room-blocks/{roomBlock}', [\App\Http\Controllers\Admin\RoomBlockController::class, 'destroy'])->name('room-blocks.destroy');
     });
 });

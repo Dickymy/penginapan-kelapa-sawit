@@ -170,6 +170,72 @@ class BookingService
     }
 
     /**
+     * Create manual booking by admin (walk-in, WhatsApp, phone, etc.).
+     */
+    public function createManualBooking(array $data, \App\Models\Admin $admin): Booking
+    {
+        $checkIn = Carbon::parse($data['check_in']);
+        $checkOut = Carbon::parse($data['check_out']);
+        $roomId = $data['room_id'];
+        $guestCount = $data['guest_count'] ?? 1;
+
+        $booking = DB::transaction(function () use ($data, $admin, $checkIn, $checkOut, $roomId, $guestCount) {
+            $room = Room::where('id', $roomId)->lockForUpdate()->first();
+            $this->availability->assertRoomAvailableForBooking($room->id, $checkIn, $checkOut);
+
+            $roomType = $room->roomType;
+            $pricePerNight = $data['price_per_night'] ?? $roomType->base_price;
+            $nights = $this->pricing->calculateNights($checkIn, $checkOut);
+            $subtotal = $nights * $pricePerNight;
+            $totalAmount = $subtotal;
+
+            $bookingCode = $this->sequence->generateBookingCode();
+
+            $isPaid = ($data['payment_status'] ?? 'unpaid') === 'paid';
+            $status = $isPaid ? BookingStatus::Confirmed->value : BookingStatus::PendingPayment->value;
+
+            $booking = Booking::create([
+                'booking_code' => $bookingCode,
+                'room_id' => $room->id,
+                'created_by_admin_id' => $admin->id,
+                'source' => $data['source'],
+                'status' => $status,
+                'payment_status' => $data['payment_status'] ?? 'unpaid',
+                'check_in' => $checkIn->toDateString(),
+                'check_out' => $checkOut->toDateString(),
+                'nights' => $nights,
+                'guest_count' => $guestCount,
+                'guest_name' => $data['guest_name'],
+                'guest_email' => $data['guest_email'] ?? null,
+                'guest_whatsapp' => PhoneNormalizer::normalize($data['guest_whatsapp']),
+                'room_type_name_snapshot' => $roomType->name,
+                'room_name_snapshot' => $room->name,
+                'price_per_night_snapshot' => $pricePerNight,
+                'subtotal' => $subtotal,
+                'total_amount' => $totalAmount,
+                'currency' => 'IDR',
+                'eligible_loyalty_amount' => $totalAmount,
+                'internal_notes' => $data['internal_notes'] ?? null,
+                'payment_expires_at' => $isPaid ? null : now()->addMinutes(config('booking.hold_minutes', 30)),
+            ]);
+
+            BookingStatusHistory::create([
+                'booking_id' => $booking->id,
+                'from_status' => null,
+                'to_status' => $status,
+                'reason' => 'Booking manual oleh admin',
+                'actor_type' => 'admin',
+                'actor_id' => $admin->id,
+                'created_at' => now(),
+            ]);
+
+            return $booking;
+        });
+
+        return $booking;
+    }
+
+    /**
      * Find first available room and lock it.
      */
     private function findAndLockRoom(int $roomTypeId, Carbon $checkIn, Carbon $checkOut): Room

@@ -37,6 +37,12 @@
         <x-button class="w-full justify-center">Masuk</x-button>
     </form>
 
+    <div class="mt-4 text-center">
+        <a href="{{ route('auth.google') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+            Masuk dengan Google
+        </a>
+    </div>
+
     <p class="mt-6 text-center text-sm text-gray-600">
         Belum punya akun? <a href="{{ route('register') }}" class="text-primary-600 hover:text-primary-800 font-medium">Daftar</a>
     </p>
