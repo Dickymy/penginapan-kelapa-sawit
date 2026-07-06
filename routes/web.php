@@ -62,7 +62,7 @@ Route::post('/webhook/midtrans', [MidtransWebhookController::class, 'handle'])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'verified'])->prefix('member')->name('member.')->group(function () {
+Route::middleware(['auth'])->prefix('member')->name('member.')->group(function () {
     Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('dashboard');
     Route::get('/bookings', [\App\Http\Controllers\Member\BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/{booking}', [\App\Http\Controllers\Member\BookingController::class, 'show'])->name('bookings.show');
