@@ -5,7 +5,13 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     {{-- Title --}}
-    <h1 class="text-2xl font-bold text-gray-900 mb-6">Hasil Pencarian Ketersediaan</h1>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Hasil Pencarian Ketersediaan</h1>
+        <a href="{{ route('home') }}#cari-kamar"
+           class="text-sm text-primary-600 hover:text-primary-800 mt-1 sm:mt-0">
+            ← Ubah tanggal atau jumlah tamu
+        </a>
+    </div>
 
     {{-- Info Bar --}}
     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">

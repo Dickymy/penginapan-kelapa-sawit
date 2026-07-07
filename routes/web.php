@@ -35,13 +35,13 @@ Route::get('/kebijakan', [PageController::class, 'policy'])->name('policy');
 // Availability & Booking
 Route::get('/ketersediaan', [AvailabilityController::class, 'search'])->name('availability.search');
 Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('booking.checkout');
-Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+Route::post('/booking', [BookingController::class, 'store'])->name('booking.store')->middleware('throttle:booking-store');
 Route::get('/booking/{bookingCode}/konfirmasi', [BookingController::class, 'confirmation'])->name('booking.confirmation');
 Route::get('/cek-booking', [BookingController::class, 'verifyForm'])->name('booking.verify.form');
-Route::post('/cek-booking', [BookingController::class, 'verifyAccess'])->name('booking.verify');
+Route::post('/cek-booking', [BookingController::class, 'verifyAccess'])->name('booking.verify')->middleware('throttle:booking-verify');
 
 // Payment
-Route::get('/booking/{bookingCode}/bayar', [PaymentController::class, 'pay'])->name('booking.pay');
+Route::get('/booking/{bookingCode}/bayar', [PaymentController::class, 'pay'])->name('booking.pay')->middleware('throttle:payment-initiate');
 Route::get('/booking/{bookingCode}/selesai', [PaymentController::class, 'finish'])->name('booking.finish');
 
 // Invoice
@@ -83,7 +83,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Guest admin routes
     Route::middleware('guest:admin')->group(function () {
         Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('login');
-        Route::post('/login', [AdminLoginController::class, 'login']);
+        Route::post('/login', [AdminLoginController::class, 'login'])->middleware('throttle:admin-login');
     });
 
     // Authenticated admin routes

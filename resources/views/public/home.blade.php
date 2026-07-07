@@ -22,12 +22,27 @@
 </section>
 
 {{-- Availability Search --}}
-<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
+<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10" id="cari-kamar">
     <div class="bg-white rounded-xl shadow-lg p-5 md:p-6 border border-gray-100">
         <h2 class="text-lg font-semibold text-gray-800 mb-4 text-center md:text-left">Cari Kamar Tersedia</h2>
         <form action="{{ route('availability.search') }}" method="GET"
               class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end"
-              x-data="{ submitting: false, checkIn: '', checkOut: '', error: '' }"
+              x-data="{
+                  submitting: false,
+                  checkIn: '{{ request('check_in', old('check_in', date('Y-m-d'))) }}',
+                  checkOut: '{{ request('check_out', old('check_out', date('Y-m-d', strtotime('+1 day')))) }}',
+                  guestCount: {{ request('guest_count', old('guest_count', 1)) }},
+                  error: '',
+                  adjustCheckOut() {
+                      if (this.checkOut <= this.checkIn) {
+                          const next = new Date(this.checkIn);
+                          next.setDate(next.getDate() + 1);
+                          this.checkOut = next.toISOString().split('T')[0];
+                      }
+                  },
+                  increment() { if (this.guestCount < 10) this.guestCount++; },
+                  decrement() { if (this.guestCount > 1) this.guestCount--; }
+              }"
               @submit.prevent="
                   error = '';
                   if (!checkIn) { error = 'Pilih tanggal check-in'; return; }
@@ -44,6 +59,7 @@
                 <label for="check_in" class="block text-sm font-medium text-gray-700 mb-1">Tanggal check-in <span class="text-red-500">*</span></label>
                 <input type="date" name="check_in" id="check_in" min="{{ date('Y-m-d') }}" required
                        x-model="checkIn"
+                       @change="adjustCheckOut()"
                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500">
             </div>
             <div>
@@ -53,9 +69,19 @@
                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500">
             </div>
             <div>
-                <label for="guest_count" class="block text-sm font-medium text-gray-700 mb-1">Jumlah tamu</label>
-                <input type="number" name="guest_count" id="guest_count" min="1" value="2"
-                       class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah tamu</label>
+                <div class="flex items-center border border-gray-300 rounded-lg shadow-sm overflow-hidden">
+                    <button type="button" @click="decrement()"
+                            class="px-3 py-2.5 text-gray-600 hover:bg-gray-100 active:bg-gray-200 transition text-lg font-bold"
+                            :class="guestCount <= 1 && 'opacity-40 cursor-not-allowed'"
+                            :disabled="guestCount <= 1">−</button>
+                    <input type="number" name="guest_count" x-model="guestCount" min="1" max="10" readonly
+                           class="flex-1 text-center border-0 focus:ring-0 text-sm font-medium py-2.5 bg-transparent [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                    <button type="button" @click="increment()"
+                            class="px-3 py-2.5 text-gray-600 hover:bg-gray-100 active:bg-gray-200 transition text-lg font-bold"
+                            :class="guestCount >= 10 && 'opacity-40 cursor-not-allowed'"
+                            :disabled="guestCount >= 10">+</button>
+                </div>
             </div>
             <div>
                 <button type="submit"

@@ -21,10 +21,8 @@
                 </a>
                 <div class="flex items-center space-x-4">
                     <span class="text-sm text-gray-600 hidden sm:inline">{{ auth()->user()->name }}</span>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="text-sm text-red-600 hover:text-red-800 font-medium">Keluar</button>
-                    </form>
+                    <button type="button" @click="$dispatch('open-confirm', { id: 'member-logout' })"
+                            class="text-sm text-red-600 hover:text-red-800 font-medium">Keluar</button>
                 </div>
             </div>
         </div>
@@ -83,5 +81,17 @@
             &copy; {{ date('Y') }} Penginapan Kelapa Sawit
         </div>
     </footer>
+
+    {{-- Member Logout Confirmation Modal --}}
+    <x-confirm-modal
+        id="member-logout"
+        title="Keluar dari akun?"
+        message="Anda perlu masuk kembali untuk melihat booking dan poin member."
+        confirm-text="Ya, Keluar"
+        cancel-text="Batal"
+        variant="danger"
+        form-action="{{ route('logout') }}"
+        method="POST"
+    />
 </body>
 </html>

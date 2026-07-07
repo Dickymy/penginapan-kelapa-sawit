@@ -3,7 +3,26 @@
 @section('title', 'Booking Manual')
 
 @section('content')
-<div class="max-w-2xl">
+<div class="max-w-2xl" x-data="{
+    rooms: @json($rooms->map(fn($r) => ['id' => $r->id, 'name' => $r->name, 'type_name' => $r->roomType->name, 'base_price' => $r->roomType->base_price])),
+    selectedRoom: '{{ old('room_id', '') }}',
+    pricePerNight: {{ old('price_per_night', 0) }},
+    checkIn: '{{ old('check_in', date('Y-m-d')) }}',
+    checkOut: '{{ old('check_out', date('Y-m-d', strtotime('+1 day'))) }}',
+    selectRoom() {
+        const room = this.rooms.find(r => r.id == this.selectedRoom);
+        if (room && this.pricePerNight === 0) {
+            this.pricePerNight = room.base_price;
+        }
+    },
+    adjustCheckOut() {
+        if (this.checkOut <= this.checkIn) {
+            const next = new Date(this.checkIn);
+            next.setDate(next.getDate() + 1);
+            this.checkOut = next.toISOString().split('T')[0];
+        }
+    }
+}">
     <h1 class="text-2xl font-bold text-gray-800 mb-6">Booking Manual</h1>
 
     <form method="POST" action="{{ route('admin.bookings.store') }}" class="space-y-6 bg-white p-6 rounded-lg shadow">
@@ -12,7 +31,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label for="room_id" class="block text-sm font-medium text-gray-700">Kamar</label>
-                <select name="room_id" id="room_id" required class="mt-1 block w-full rounded-md border-gray-300">
+                <select name="room_id" id="room_id" required class="mt-1 block w-full rounded-md border-gray-300"
+                        x-model="selectedRoom" @change="selectRoom()">
                     <option value="">Pilih Kamar</option>
                     @foreach($rooms as $room)
                         <option value="{{ $room->id }}" @selected(old('room_id') == $room->id)>
@@ -35,13 +55,13 @@
 
             <div>
                 <label for="check_in" class="block text-sm font-medium text-gray-700">Check-in</label>
-                <input type="date" name="check_in" id="check_in" value="{{ old('check_in') }}" required class="mt-1 block w-full rounded-md border-gray-300">
+                <input type="date" name="check_in" id="check_in" x-model="checkIn" @change="adjustCheckOut()" required class="mt-1 block w-full rounded-md border-gray-300">
                 <x-form-error field="check_in" />
             </div>
 
             <div>
                 <label for="check_out" class="block text-sm font-medium text-gray-700">Check-out</label>
-                <input type="date" name="check_out" id="check_out" value="{{ old('check_out') }}" required class="mt-1 block w-full rounded-md border-gray-300">
+                <input type="date" name="check_out" id="check_out" x-model="checkOut" :min="checkIn" required class="mt-1 block w-full rounded-md border-gray-300">
                 <x-form-error field="check_out" />
             </div>
         </div>
@@ -55,7 +75,7 @@
 
             <div>
                 <label for="guest_whatsapp" class="block text-sm font-medium text-gray-700">WhatsApp</label>
-                <input type="text" name="guest_whatsapp" id="guest_whatsapp" value="{{ old('guest_whatsapp') }}" required class="mt-1 block w-full rounded-md border-gray-300">
+                <input type="tel" name="guest_whatsapp" id="guest_whatsapp" value="{{ old('guest_whatsapp') }}" required inputmode="tel" placeholder="08xxxxxxxxxx" class="mt-1 block w-full rounded-md border-gray-300">
                 <x-form-error field="guest_whatsapp" />
             </div>
 
@@ -75,14 +95,18 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label for="price_per_night" class="block text-sm font-medium text-gray-700">Harga per Malam (IDR)</label>
-                <input type="number" name="price_per_night" id="price_per_night" value="{{ old('price_per_night') }}" min="0" required class="mt-1 block w-full rounded-md border-gray-300">
+                <input type="number" name="price_per_night" id="price_per_night" x-model="pricePerNight" min="0" required class="mt-1 block w-full rounded-md border-gray-300">
+                <p class="text-xs text-gray-400 mt-1" x-show="selectedRoom">
+                    Harga dasar kamar:
+                    <span x-text="'Rp' + (rooms.find(r => r.id == selectedRoom)?.base_price || 0).toLocaleString('id-ID')"></span>
+                </p>
                 <x-form-error field="price_per_night" />
             </div>
 
             <div>
                 <label for="payment_status" class="block text-sm font-medium text-gray-700">Status Pembayaran</label>
                 <select name="payment_status" id="payment_status" required class="mt-1 block w-full rounded-md border-gray-300">
-                    <option value="unpaid" @selected(old('payment_status') === 'unpaid')>Belum Bayar</option>
+                    <option value="unpaid" @selected(old('payment_status', 'unpaid') === 'unpaid')>Belum Bayar</option>
                     <option value="paid" @selected(old('payment_status') === 'paid')>Sudah Bayar</option>
                 </select>
                 <x-form-error field="payment_status" />

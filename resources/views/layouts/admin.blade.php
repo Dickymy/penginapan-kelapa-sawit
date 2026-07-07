@@ -62,10 +62,8 @@
                 </button>
                 <div class="flex items-center space-x-4 ml-auto">
                     <span class="text-sm text-gray-600">{{ auth('admin')->user()->name }}</span>
-                    <form method="POST" action="{{ route('admin.logout') }}">
-                        @csrf
-                        <button type="submit" class="text-sm text-red-600 hover:text-red-800">Keluar</button>
-                    </form>
+                    <button type="button" @click="$dispatch('open-confirm', { id: 'admin-logout' })"
+                            class="text-sm text-red-600 hover:text-red-800 font-medium">Keluar</button>
                 </div>
             </header>
 
@@ -88,5 +86,17 @@
             </main>
         </div>
     </div>
+
+    {{-- Admin Logout Confirmation Modal --}}
+    <x-confirm-modal
+        id="admin-logout"
+        title="Keluar dari Admin?"
+        message="Sesi admin akan diakhiri dan Anda perlu masuk kembali untuk mengelola penginapan."
+        confirm-text="Ya, Keluar"
+        cancel-text="Batal"
+        variant="danger"
+        form-action="{{ route('admin.logout') }}"
+        method="POST"
+    />
 </body>
 </html>

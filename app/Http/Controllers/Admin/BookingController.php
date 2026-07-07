@@ -52,10 +52,11 @@ class BookingController extends Controller
             'guest_name' => ['required', 'string', 'max:150'],
             'guest_email' => ['nullable', 'email'],
             'guest_whatsapp' => ['required', 'string', 'max:32'],
-            'source' => ['required', 'string'],
+            'source' => ['required', 'string', \Illuminate\Validation\Rule::in(array_column(BookingSource::cases(), 'value'))],
             'price_per_night' => ['required', 'integer', 'min:0'],
-            'payment_status' => ['required', 'string'],
+            'payment_status' => ['required', 'string', \Illuminate\Validation\Rule::in(array_column(PaymentStatus::cases(), 'value'))],
             'internal_notes' => ['nullable', 'string'],
+            'hold_minutes' => ['nullable', 'integer', 'min:1', 'max:10080'],
         ]);
 
         $admin = Auth::guard('admin')->user();
@@ -80,15 +81,20 @@ class BookingController extends Controller
             if (!$booking->status->canTransitionTo(BookingStatus::Cancelled)) {
                 abort(422, 'Booking tidak dapat dibatalkan dari status saat ini.');
             }
+
+            // Capture fromStatus BEFORE update
+            $fromStatus = $booking->status->value;
+
             $booking->update([
                 'status' => BookingStatus::Cancelled->value,
                 'cancelled_at' => now(),
                 'cancellation_reason' => $request->reason,
                 'cancelled_by_admin_id' => Auth::guard('admin')->id(),
             ]);
+
             BookingStatusHistory::create([
                 'booking_id' => $booking->id,
-                'from_status' => $booking->getOriginal('status'),
+                'from_status' => $fromStatus,
                 'to_status' => BookingStatus::Cancelled->value,
                 'reason' => $request->reason,
                 'actor_type' => 'admin',

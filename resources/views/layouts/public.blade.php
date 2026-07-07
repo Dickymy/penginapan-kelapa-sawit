@@ -33,9 +33,47 @@
                 {{-- Desktop Account --}}
                 <div class="hidden lg:flex items-center gap-3">
                     @auth
-                        <a href="{{ route('member.dashboard') }}" class="px-4 py-2 text-sm font-medium text-primary-700 bg-primary-50 rounded-lg hover:bg-primary-100 transition">
-                            Dashboard
-                        </a>
+                        <div x-data="{ accountOpen: false }" class="relative">
+                            <button @click="accountOpen = !accountOpen" @click.outside="accountOpen = false"
+                                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                                <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
+                                    <span class="text-sm font-bold text-primary-700">{{ substr(auth()->user()->name, 0, 1) }}</span>
+                                </div>
+                                <span class="hidden xl:inline">{{ auth()->user()->name }}</span>
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div x-show="accountOpen" x-cloak
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                                <a href="{{ route('member.dashboard') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                                    Dashboard
+                                </a>
+                                <a href="{{ route('member.bookings.index') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                    Booking Saya
+                                </a>
+                                <a href="{{ route('member.points.index') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Poin Saya
+                                </a>
+                                <a href="{{ route('member.profile.edit') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                    Profil
+                                </a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <button type="button" @click="$dispatch('open-confirm', { id: 'member-logout' })"
+                                        class="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                    Keluar
+                                </button>
+                            </div>
+                        </div>
                     @else
                         <a href="{{ route('login') }}" class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition">
                             Masuk
@@ -103,9 +141,15 @@
                 {{-- Drawer Footer (Account) --}}
                 <div class="border-t border-gray-100 px-4 py-4 space-y-2">
                     @auth
-                        <a href="{{ route('member.dashboard') }}" @click="open = false" class="block w-full px-4 py-2.5 text-center text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition">
-                            Dashboard Saya
-                        </a>
+                        <p class="px-3 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Akun</p>
+                        <a href="{{ route('member.dashboard') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Dashboard</a>
+                        <a href="{{ route('member.bookings.index') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Booking Saya</a>
+                        <a href="{{ route('member.points.index') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Poin Saya</a>
+                        <a href="{{ route('member.profile.edit') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Profil</a>
+                        <button type="button" @click="open = false; $dispatch('open-confirm', { id: 'member-logout' })"
+                                class="flex items-center w-full px-3 py-2.5 rounded-lg text-sm text-red-600 hover:bg-red-50">
+                            Keluar
+                        </button>
                     @else
                         <a href="{{ route('login') }}" @click="open = false" class="block w-full px-4 py-2.5 text-center text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition">
                             Masuk
@@ -124,12 +168,7 @@
 
     {{-- Content --}}
     <main class="flex-1">
-        {{-- Flash Alerts --}}
-        @if (session('success'))
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-                <x-alert type="success" :message="session('success')" />
-            </div>
-        @endif
+        {{-- Flash Alerts (for warnings and errors that need to stay visible) --}}
         @if (session('error'))
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
                 <x-alert type="error" :message="session('error')" />
@@ -138,11 +177,6 @@
         @if (session('warning'))
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
                 <x-alert type="warning" :message="session('warning')" />
-            </div>
-        @endif
-        @if (session('info'))
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-                <x-alert type="info" :message="session('info')" />
             </div>
         @endif
 
@@ -185,5 +219,18 @@
             </div>
         </div>
     </footer>
+    {{-- Member Logout Confirmation Modal --}}
+    @auth
+    <x-confirm-modal
+        id="member-logout"
+        title="Keluar dari akun?"
+        message="Anda perlu masuk kembali untuk melihat booking dan poin member."
+        confirm-text="Ya, Keluar"
+        cancel-text="Batal"
+        variant="danger"
+        form-action="{{ route('logout') }}"
+        method="POST"
+    />
+    @endauth
 </body>
 </html>
