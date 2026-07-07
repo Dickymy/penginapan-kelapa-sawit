@@ -53,9 +53,14 @@
                 <td class="px-5 py-3 text-gray-500">{{ $expense->createdBy?->name ?? '-' }}</td>
                 <td class="px-5 py-3 text-center space-x-2">
                     <a href="{{ route('admin.expenses.edit', $expense) }}" class="text-primary-600 hover:underline text-xs">Edit</a>
-                    <form method="POST" action="{{ route('admin.expenses.destroy', $expense) }}" class="inline" onsubmit="return confirm('Hapus pengeluaran ini?')">
+                    <form method="POST" action="{{ route('admin.expenses.destroy', $expense) }}" class="inline"
+                          x-data="{ confirming: false }">
                         @csrf @method('DELETE')
-                        <button type="submit" class="text-red-600 hover:underline text-xs">Hapus</button>
+                        <button type="button" x-show="!confirming" @click="confirming = true" class="text-red-600 hover:underline text-xs">Hapus</button>
+                        <span x-show="confirming" x-cloak class="inline-flex items-center gap-1">
+                            <button type="submit" class="text-red-700 font-medium text-xs hover:underline">Ya, hapus</button>
+                            <button type="button" @click="confirming = false" class="text-gray-500 text-xs hover:underline">Batal</button>
+                        </span>
                     </form>
                 </td>
             </tr>

@@ -8,8 +8,18 @@
 
     {{-- Session Error --}}
     @if(session('error'))
-        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
-            {{ session('error') }}
+        <x-alert type="error" :message="session('error')" />
+    @endif
+
+    {{-- Validation Errors --}}
+    @if($errors->any())
+        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <p class="text-sm font-medium text-red-800 mb-2">Beberapa data belum benar:</p>
+            <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
 
@@ -117,10 +127,19 @@
                 </div>
 
                 {{-- Submit --}}
-                <button type="submit"
-                        class="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 transition text-center">
-                    Pesan Sekarang
-                </button>
+                <div x-data="{ submitting: false }">
+                    <button type="submit"
+                            x-on:click="setTimeout(() => submitting = true, 50)"
+                            :disabled="submitting"
+                            class="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 transition text-center disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center">
+                        <svg x-show="submitting" x-cloak class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span x-show="!submitting">Pesan Sekarang</span>
+                        <span x-show="submitting" x-cloak>Membuat booking...</span>
+                    </button>
+                </div>
             </form>
         </div>
 

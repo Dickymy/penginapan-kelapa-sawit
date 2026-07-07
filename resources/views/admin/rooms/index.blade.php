@@ -32,8 +32,8 @@
                 <td class="px-4 py-3 font-medium text-gray-800">{{ $room->name }}</td>
                 <td class="px-4 py-3 text-gray-500">{{ $room->roomType->name ?? '-' }}</td>
                 <td class="px-4 py-3">
-                    <x-badge type="{{ $room->status === 'active' ? 'success' : ($room->status === 'maintenance' ? 'warning' : 'secondary') }}">
-                        {{ ucfirst($room->status) }}
+                    <x-badge :type="$room->status === \App\Enums\RoomStatus::Active ? 'success' : ($room->status === \App\Enums\RoomStatus::Maintenance ? 'warning' : 'secondary')">
+                        {{ $room->status->label() }}
                     </x-badge>
                 </td>
                 <td class="px-4 py-3">

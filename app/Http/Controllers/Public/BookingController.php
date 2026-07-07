@@ -73,7 +73,7 @@ class BookingController extends Controller
             'check_out' => ['required', 'date', 'after:check_in'],
             'guest_count' => ['required', 'integer', 'min:1'],
             'guest_name' => ['required', 'string', 'max:150'],
-            'guest_email' => ['nullable', 'email', 'max:191'],
+            'guest_email' => ['required', 'email', 'max:191'],
             'guest_whatsapp' => ['required', 'string', 'max:32'],
             'arrival_estimate' => ['nullable', 'string', 'max:100'],
             'special_request' => ['nullable', 'string', 'max:1000'],

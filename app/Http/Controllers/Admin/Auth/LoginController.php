@@ -24,7 +24,7 @@ class LoginController extends Controller
         if (! Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
             return back()
                 ->withInput($request->only('email', 'remember'))
-                ->withErrors(['email' => 'Email atau password salah.']);
+                ->withErrors(['email' => 'Email atau kata sandi yang Anda masukkan tidak sesuai.']);
         }
 
         $admin = Auth::guard('admin')->user();

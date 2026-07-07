@@ -45,11 +45,22 @@
                     {{ $gallery->is_active ? '●' : '○' }}
                 </button>
             </form>
-            <form action="{{ route('admin.galleries.destroy', $gallery) }}" method="POST" onsubmit="return confirm('Hapus gambar ini?')">
+            <form action="{{ route('admin.galleries.destroy', $gallery) }}" method="POST"
+                  x-data @click.prevent="$dispatch('open-confirm', { id: 'delete-gallery-{{ $gallery->id }}' })">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="bg-white/90 text-red-600 text-xs px-2 py-1 rounded shadow">&times;</button>
+                <button type="button" class="bg-white/90 text-red-600 text-xs px-2 py-1 rounded shadow" title="Hapus">&times;</button>
             </form>
+            <x-confirm-modal
+                id="delete-gallery-{{ $gallery->id }}"
+                title="Hapus Gambar?"
+                message="Gambar ini akan dihapus secara permanen dari galeri."
+                confirm-text="Ya, Hapus"
+                cancel-text="Batal"
+                variant="danger"
+                :form-action="route('admin.galleries.destroy', $gallery)"
+                method="DELETE"
+            />
         </div>
         @if(!$gallery->is_active)
             <div class="absolute inset-0 bg-black/30 flex items-center justify-center">

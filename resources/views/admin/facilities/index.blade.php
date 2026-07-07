@@ -43,10 +43,15 @@
                     <div class="flex items-center space-x-2">
                         <a href="{{ route('admin.facilities.edit', $facility) }}" class="text-primary-600 hover:text-primary-800 text-xs font-medium">Edit</a>
                         @if($facility->room_types_count === 0)
-                        <form action="{{ route('admin.facilities.destroy', $facility) }}" method="POST" class="inline" onsubmit="return confirm('Hapus fasilitas ini?')">
+                        <form action="{{ route('admin.facilities.destroy', $facility) }}" method="POST" class="inline"
+                              x-data="{ confirming: false }">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-800 text-xs font-medium">Hapus</button>
+                            <button type="button" x-show="!confirming" @click="confirming = true" class="text-red-600 hover:text-red-800 text-xs font-medium">Hapus</button>
+                            <span x-show="confirming" x-cloak class="inline-flex items-center gap-1">
+                                <button type="submit" class="text-red-700 font-medium text-xs hover:underline">Ya, hapus</button>
+                                <button type="button" @click="confirming = false" class="text-gray-500 text-xs hover:underline">Batal</button>
+                            </span>
                         </form>
                         @endif
                     </div>

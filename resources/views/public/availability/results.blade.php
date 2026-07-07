@@ -47,7 +47,7 @@
                     {{-- Room Image --}}
                     <div class="md:w-72 h-48 md:h-auto flex-shrink-0">
                         @if($item['room_type']->coverImage)
-                            <img src="{{ asset('storage/' . $item['room_type']->coverImage->image_path) }}"
+                            <img src="{{ asset('storage/' . $item['room_type']->coverImage->path) }}"
                                  alt="{{ $item['room_type']->name }}"
                                  class="w-full h-full object-cover">
                         @else
@@ -91,8 +91,8 @@
                             </div>
                             <a href="{{ route('booking.checkout', [
                                     'room_type_id' => $item['room_type']->id,
-                                    'check_in' => $checkIn,
-                                    'check_out' => $checkOut,
+                                    'check_in' => $checkIn->format('Y-m-d'),
+                                    'check_out' => $checkOut->format('Y-m-d'),
                                     'guest_count' => $guestCount,
                                 ]) }}"
                                class="inline-flex items-center justify-center bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition">

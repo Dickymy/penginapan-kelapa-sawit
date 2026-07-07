@@ -164,7 +164,7 @@ return [
     'features' => [
         Features::registration(),
         Features::resetPasswords(),
-        // Features::emailVerification(), // Disabled for development — enable when SMTP configured
+        Features::emailVerification(),
         Features::updateProfileInformation(),
         Features::updatePasswords(),
     ],

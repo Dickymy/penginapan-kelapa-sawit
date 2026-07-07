@@ -19,20 +19,21 @@
 {{-- Availability Form Placeholder --}}
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
     <div class="bg-white rounded-lg shadow-lg p-6">
-        <form action="{{ route('rooms.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <form action="{{ route('availability.search') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
-                <input type="date" name="check_in" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500">
+                <input type="date" name="check_in" min="{{ date('Y-m-d') }}" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500" required>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Check-out</label>
-                <input type="date" name="check_out" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500">
+                <input type="date" name="check_out" min="{{ date('Y-m-d', strtotime('+1 day')) }}" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500" required>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Tamu</label>
-                <input type="number" name="guests" min="1" value="2" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500">
+                <input type="number" name="guest_count" min="1" value="2" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500">
             </div>
             <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">&nbsp;</label>
                 <button type="submit" class="w-full px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition">Cari Kamar</button>
             </div>
         </form>

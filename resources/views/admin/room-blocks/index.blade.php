@@ -15,7 +15,10 @@
         <x-alert type="success" :message="session('success')" />
     @endif
 
-    <div class="overflow-x-auto bg-white rounded-lg shadow">
+    @if($blocks->isEmpty())
+        <x-empty-state message="Belum ada block kamar." :action="route('admin.room-blocks.create')" action-text="+ Block Baru" />
+    @else
+    <div class="overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-100">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
@@ -29,30 +32,38 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-                @forelse($blocks as $block)
+                @foreach($blocks as $block)
                 <tr>
-                    <td class="px-4 py-3 text-sm">{{ $block->room->name }}</td>
+                    <td class="px-4 py-3 text-sm font-medium text-gray-800">{{ $block->room->name }}</td>
                     <td class="px-4 py-3 text-sm">{{ $block->start_date->format('d/m/Y') }}</td>
                     <td class="px-4 py-3 text-sm">{{ $block->end_date->format('d/m/Y') }}</td>
                     <td class="px-4 py-3 text-sm">{{ $block->reason_type }}</td>
-                    <td class="px-4 py-3 text-sm">{{ $block->reason }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ $block->reason }}</td>
                     <td class="px-4 py-3 text-sm">{{ $block->createdBy?->name ?? '-' }}</td>
                     <td class="px-4 py-3 text-sm">
-                        <form method="POST" action="{{ route('admin.room-blocks.destroy', $block) }}" onsubmit="return confirm('Hapus block ini?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-800">Hapus</button>
-                        </form>
+                        <button type="button"
+                                @click="$dispatch('open-confirm', { id: 'delete-block-{{ $block->id }}' })"
+                                class="text-red-600 hover:text-red-800 text-sm font-medium">
+                            Hapus
+                        </button>
+                        <x-confirm-modal
+                            id="delete-block-{{ $block->id }}"
+                            title="Hapus Block Kamar?"
+                            message="Block kamar {{ $block->room->name }} ({{ $block->start_date->format('d/m/Y') }} - {{ $block->end_date->format('d/m/Y') }}) akan dihapus."
+                            confirm-text="Ya, Hapus"
+                            cancel-text="Batal"
+                            variant="danger"
+                            :form-action="route('admin.room-blocks.destroy', $block)"
+                            method="DELETE"
+                        />
                     </td>
                 </tr>
-                @empty
-                <tr>
-                    <td colspan="7" class="px-4 py-8 text-center text-gray-500">Belum ada block kamar.</td>
-                </tr>
-                @endforelse
+                @endforeach
             </tbody>
         </table>
     </div>
 
     {{ $blocks->links() }}
+    @endif
 </div>
 @endsection

@@ -16,26 +16,21 @@
         <div class="lg:col-span-2 space-y-6">
             {{-- Image Gallery --}}
             @if($roomType->images->isNotEmpty())
-            <div x-data="{ activeImage: 0 }" class="space-y-3">
+            @php $imagePaths = $roomType->images->pluck('path')->toArray(); @endphp
+            <div x-data="{ activeImage: 0, images: {{ json_encode($imagePaths) }} }" class="space-y-3">
                 <div class="rounded-lg overflow-hidden">
                     <img :src="'{{ asset('storage') }}/' + images[activeImage]" alt="{{ $roomType->name }}" class="w-full h-72 md:h-96 object-cover">
                 </div>
                 @if($roomType->images->count() > 1)
                 <div class="flex gap-2 overflow-x-auto">
                     @foreach($roomType->images as $index => $image)
-                    <button @click="activeImage = {{ $index }}" class="flex-shrink-0 rounded-lg overflow-hidden border-2" :class="activeImage === {{ $index }} ? 'border-primary-500' : 'border-transparent'">
+                    <button @click="activeImage = {{ $index }}" class="flex-shrink-0 rounded-lg overflow-hidden border-2 transition" :class="activeImage === {{ $index }} ? 'border-primary-500' : 'border-transparent hover:border-gray-300'">
                         <img src="{{ asset('storage/' . $image->path) }}" alt="" class="w-20 h-14 object-cover">
                     </button>
                     @endforeach
                 </div>
                 @endif
             </div>
-            <script>
-                document.addEventListener('alpine:init', () => {
-                    Alpine.data('gallery', () => ({}));
-                });
-                var images = @json($roomType->images->pluck('path')->toArray());
-            </script>
             @else
             <div class="w-full h-72 bg-gray-200 rounded-lg flex items-center justify-center">
                 <span class="text-gray-400">Belum ada gambar</span>
@@ -87,9 +82,28 @@
                     <p class="text-2xl font-bold text-primary-600">Rp {{ number_format($roomType->base_price, 0, ',', '.') }}</p>
                 </div>
 
-                <a href="#" class="block w-full text-center px-4 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition">
-                    Pesan Sekarang
-                </a>
+                {{-- Booking Form --}}
+                <form action="{{ route('availability.search') }}" method="GET" class="space-y-3 border-t pt-4">
+                    <input type="hidden" name="room_type" value="{{ $roomType->slug }}">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Check-in</label>
+                        <input type="date" name="check_in" min="{{ date('Y-m-d') }}" required
+                               class="w-full border-gray-300 rounded-lg text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Check-out</label>
+                        <input type="date" name="check_out" min="{{ date('Y-m-d', strtotime('+1 day')) }}" required
+                               class="w-full border-gray-300 rounded-lg text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Tamu</label>
+                        <input type="number" name="guest_count" min="1" max="{{ $roomType->capacity }}" value="2"
+                               class="w-full border-gray-300 rounded-lg text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
+                    </div>
+                    <button type="submit" class="w-full px-4 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition">
+                        Cek Ketersediaan
+                    </button>
+                </form>
             </div>
         </div>
     </div>

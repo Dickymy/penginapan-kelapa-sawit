@@ -19,16 +19,16 @@
 
                 {{-- Desktop Nav --}}
                 <nav class="hidden md:flex items-center space-x-6 text-sm">
-                    <a href="{{ route('home') }}" class="text-gray-600 hover:text-primary-600">Beranda</a>
-                    <a href="{{ route('rooms.index') }}" class="text-gray-600 hover:text-primary-600">Kamar</a>
-                    <a href="{{ route('about') }}" class="text-gray-600 hover:text-primary-600">Tentang</a>
-                    <a href="{{ route('location') }}" class="text-gray-600 hover:text-primary-600">Lokasi</a>
-                    <a href="{{ route('policy') }}" class="text-gray-600 hover:text-primary-600">Kebijakan</a>
-                    <a href="#" class="text-gray-600 hover:text-primary-600">Cek Booking</a>
+                    <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'text-primary-600 font-medium' : 'text-gray-600 hover:text-primary-600' }}">Beranda</a>
+                    <a href="{{ route('rooms.index') }}" class="{{ request()->routeIs('rooms.*') ? 'text-primary-600 font-medium' : 'text-gray-600 hover:text-primary-600' }}">Kamar</a>
+                    <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'text-primary-600 font-medium' : 'text-gray-600 hover:text-primary-600' }}">Tentang</a>
+                    <a href="{{ route('location') }}" class="{{ request()->routeIs('location') ? 'text-primary-600 font-medium' : 'text-gray-600 hover:text-primary-600' }}">Lokasi</a>
+                    <a href="{{ route('policy') }}" class="{{ request()->routeIs('policy') ? 'text-primary-600 font-medium' : 'text-gray-600 hover:text-primary-600' }}">Kebijakan</a>
+                    <a href="{{ route('booking.verify.form') }}" class="{{ request()->routeIs('booking.verify*') ? 'text-primary-600 font-medium' : 'text-gray-600 hover:text-primary-600' }}">Cek Booking</a>
                     @auth
                         <a href="{{ route('member.dashboard') }}" class="text-primary-600 font-medium">Dashboard</a>
                     @else
-                        <a href="{{ route('login') }}" class="text-primary-600 font-medium">Masuk</a>
+                        <a href="{{ route('login') }}" class="px-3 py-1.5 bg-primary-600 text-white rounded-md font-medium hover:bg-primary-700 transition">Masuk</a>
                     @endauth
                 </nav>
 
@@ -50,7 +50,7 @@
                 <a href="{{ route('about') }}" class="block text-gray-600 hover:text-primary-600">Tentang</a>
                 <a href="{{ route('location') }}" class="block text-gray-600 hover:text-primary-600">Lokasi</a>
                 <a href="{{ route('policy') }}" class="block text-gray-600 hover:text-primary-600">Kebijakan</a>
-                <a href="#" class="block text-gray-600 hover:text-primary-600">Cek Booking</a>
+                <a href="{{ route('booking.verify.form') }}" class="block text-gray-600 hover:text-primary-600">Cek Booking</a>
                 @auth
                     <a href="{{ route('member.dashboard') }}" class="block text-primary-600 font-medium">Dashboard</a>
                 @else
@@ -60,16 +60,68 @@
         </div>
     </header>
 
+    {{-- Toast Component --}}
+    <x-toast />
+
     {{-- Content --}}
     <main>
+        {{-- Flash Alerts --}}
+        @if (session('success'))
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+                <x-alert type="success" :message="session('success')" />
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+                <x-alert type="error" :message="session('error')" />
+            </div>
+        @endif
+        @if (session('warning'))
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+                <x-alert type="warning" :message="session('warning')" />
+            </div>
+        @endif
+        @if (session('info'))
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+                <x-alert type="info" :message="session('info')" />
+            </div>
+        @endif
+
         @yield('content')
     </main>
 
     {{-- Footer --}}
-    <footer class="bg-gray-50 border-t border-gray-100 mt-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="text-center text-sm text-gray-500">
-                &copy; {{ date('Y') }} Penginapan Kelapa Sawit. Kota Bangun, Kalimantan Timur.
+    <footer class="bg-gray-800 text-gray-300 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-white font-bold text-lg mb-3">Penginapan Kelapa Sawit</h3>
+                    <p class="text-sm text-gray-400">Kota Bangun, Kalimantan Timur</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-medium text-sm mb-3">Navigasi</h4>
+                    <nav class="space-y-2 text-sm">
+                        <a href="{{ route('rooms.index') }}" class="block text-gray-400 hover:text-white transition">Kamar</a>
+                        <a href="{{ route('about') }}" class="block text-gray-400 hover:text-white transition">Tentang</a>
+                        <a href="{{ route('policy') }}" class="block text-gray-400 hover:text-white transition">Kebijakan</a>
+                        <a href="{{ route('booking.verify.form') }}" class="block text-gray-400 hover:text-white transition">Cek Booking</a>
+                    </nav>
+                </div>
+                <div>
+                    <h4 class="text-white font-medium text-sm mb-3">Akun</h4>
+                    <nav class="space-y-2 text-sm">
+                        @auth
+                            <a href="{{ route('member.dashboard') }}" class="block text-gray-400 hover:text-white transition">Dashboard</a>
+                            <a href="{{ route('member.bookings.index') }}" class="block text-gray-400 hover:text-white transition">Booking Saya</a>
+                        @else
+                            <a href="{{ route('login') }}" class="block text-gray-400 hover:text-white transition">Masuk</a>
+                            <a href="{{ route('register') }}" class="block text-gray-400 hover:text-white transition">Daftar</a>
+                        @endauth
+                    </nav>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-gray-700 text-center text-xs text-gray-500">
+                &copy; {{ date('Y') }} Penginapan Kelapa Sawit. Seluruh hak dilindungi.
             </div>
         </div>
     </footer>

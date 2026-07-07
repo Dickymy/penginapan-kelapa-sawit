@@ -14,31 +14,7 @@
                 <p class="text-xl font-bold text-gray-900">{{ $booking->booking_code }}</p>
             </div>
             <div class="mt-2 sm:mt-0">
-                @php
-                    $statusColor = match($booking->status->value) {
-                        'pending_payment' => 'yellow',
-                        'confirmed' => 'blue',
-                        'checked_in' => 'blue',
-                        'checked_out' => 'green',
-                        'completed' => 'green',
-                        'cancelled' => 'red',
-                        'expired' => 'red',
-                        'no_show' => 'red',
-                        default => 'gray',
-                    };
-                    $statusLabel = match($booking->status->value) {
-                        'pending_payment' => 'Menunggu Pembayaran',
-                        'confirmed' => 'Dikonfirmasi',
-                        'checked_in' => 'Checked In',
-                        'checked_out' => 'Checked Out',
-                        'completed' => 'Selesai',
-                        'cancelled' => 'Dibatalkan',
-                        'expired' => 'Kedaluwarsa',
-                        'no_show' => 'No Show',
-                        default => $booking->status->value,
-                    };
-                @endphp
-                <x-badge :color="$statusColor">{{ $statusLabel }}</x-badge>
+                <x-status-badge :status="$booking->status" />
             </div>
         </div>
 
@@ -77,31 +53,24 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
                 <span class="text-gray-500">Status Pembayaran</span>
-                @php
-                    $paymentColor = match($booking->payment_status->value) {
-                        'unpaid' => 'yellow',
-                        'paid' => 'green',
-                        'refunded' => 'blue',
-                        'partial_refund' => 'blue',
-                        default => 'gray',
-                    };
-                    $paymentLabel = match($booking->payment_status->value) {
-                        'unpaid' => 'Belum Dibayar',
-                        'paid' => 'Sudah Dibayar',
-                        'refunded' => 'Dikembalikan',
-                        'partial_refund' => 'Sebagian Dikembalikan',
-                        default => $booking->payment_status->value,
-                    };
-                @endphp
-                <p class="mt-1"><x-badge :color="$paymentColor">{{ $paymentLabel }}</x-badge></p>
+                <p class="mt-1"><x-status-badge :status="$booking->payment_status" /></p>
             </div>
-            @if($booking->payment_expires_at && $booking->status->value === 'pending_payment')
+            @if($booking->payment_expires_at && $booking->status === \App\Enums\BookingStatus::PendingPayment)
                 <div>
                     <span class="text-gray-500">Batas Pembayaran</span>
                     <p class="font-medium text-gray-900">{{ $booking->payment_expires_at->format('d M Y H:i') }} WITA</p>
                 </div>
             @endif
         </div>
+
+        @if($booking->status === \App\Enums\BookingStatus::PendingPayment && $booking->is_hold_active)
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <a href="{{ route('booking.pay', $booking->booking_code) }}"
+                   class="inline-flex items-center px-5 py-2.5 bg-primary-600 text-white font-medium text-sm rounded-lg hover:bg-primary-700 transition">
+                    Bayar Sekarang
+                </a>
+            </div>
+        @endif
     </div>
 
     {{-- Status Timeline --}}
