@@ -107,11 +107,23 @@
                             <button type="submit" class="bg-blue-500 text-white text-xs px-1 rounded hover:bg-blue-600" title="Jadikan Cover">★</button>
                         </form>
                     @endif
-                    <form action="{{ route('admin.room-images.destroy', $image) }}" method="POST" onsubmit="return confirm('Hapus gambar ini?')">
+                    <form action="{{ route('admin.room-images.destroy', $image) }}" method="POST"
+                          x-data
+                          @submit.prevent="$dispatch('open-confirm', { id: 'delete-image-{{ $image->id }}' })">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="bg-red-500 text-white text-xs px-1 rounded hover:bg-red-600">&times;</button>
                     </form>
+                    <x-confirm-modal
+                        id="delete-image-{{ $image->id }}"
+                        title="Hapus gambar?"
+                        message="Gambar ini akan dihapus secara permanen."
+                        confirm-text="Ya, Hapus"
+                        cancel-text="Batal"
+                        variant="danger"
+                        :form-action="route('admin.room-images.destroy', $image)"
+                        method="DELETE"
+                    />
                 </div>
             </div>
             @endforeach

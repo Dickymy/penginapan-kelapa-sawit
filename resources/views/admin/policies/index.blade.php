@@ -33,9 +33,9 @@
                 <td class="px-4 py-3 font-medium text-gray-800">{{ $policy->title }}</td>
                 <td class="px-4 py-3">
                     @if($policy->is_current)
-                        <x-badge type="success">Current</x-badge>
+                        <x-badge type="success">Aktif</x-badge>
                     @else
-                        <x-badge type="secondary">Draft</x-badge>
+                        <x-badge type="secondary">Draf</x-badge>
                     @endif
                 </td>
                 <td class="px-4 py-3 text-gray-500">{{ $policy->created_at->format('d/m/Y') }}</td>
@@ -43,11 +43,20 @@
                     <div class="flex items-center space-x-2">
                         <a href="{{ route('admin.policies.show', $policy) }}" class="text-primary-600 hover:text-primary-800 text-xs font-medium">Lihat</a>
                         @if(!$policy->is_current)
-                        <form action="{{ route('admin.policies.publish', $policy) }}" method="POST" class="inline" onsubmit="return confirm('Publikasikan versi ini?')">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" class="text-green-600 hover:text-green-800 text-xs font-medium">Publikasikan</button>
-                        </form>
+                        <button type="button"
+                                x-data
+                                @click="$dispatch('open-confirm', { id: 'publish-policy-{{ $policy->id }}' })"
+                                class="text-green-600 hover:text-green-800 text-xs font-medium">Publikasikan</button>
+                        <x-confirm-modal
+                            id="publish-policy-{{ $policy->id }}"
+                            title="Publikasikan kebijakan ini?"
+                            message="Versi ini akan menjadi kebijakan aktif yang ditampilkan kepada publik."
+                            confirm-text="Ya, Publikasikan"
+                            cancel-text="Batal"
+                            variant="primary"
+                            :form-action="route('admin.policies.publish', $policy)"
+                            method="PATCH"
+                        />
                         @endif
                     </div>
                 </td>

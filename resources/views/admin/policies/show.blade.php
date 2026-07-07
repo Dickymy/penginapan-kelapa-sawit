@@ -14,9 +14,9 @@
             <span>Key: <span class="font-mono">{{ $policy->policy_key }}</span></span>
             <span>Versi: {{ $policy->version }}</span>
             @if($policy->is_current)
-                <x-badge type="success">Current</x-badge>
+                <x-badge type="success">Aktif</x-badge>
             @else
-                <x-badge type="secondary">Draft</x-badge>
+                <x-badge type="secondary">Draf</x-badge>
             @endif
         </div>
         @if($policy->published_at)
@@ -30,11 +30,22 @@
 
     @if(!$policy->is_current)
     <div class="mt-6 pt-4 border-t">
-        <form action="{{ route('admin.policies.publish', $policy) }}" method="POST" onsubmit="return confirm('Publikasikan versi ini?')">
-            @csrf
-            @method('PATCH')
-            <x-button type="submit">Publikasikan</x-button>
-        </form>
+        <button type="button"
+                x-data
+                @click="$dispatch('open-confirm', { id: 'publish-policy' })"
+                class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition bg-primary-600 hover:bg-primary-700 text-white focus:ring-primary-500">
+            Publikasikan
+        </button>
+        <x-confirm-modal
+            id="publish-policy"
+            title="Publikasikan kebijakan ini?"
+            message="Versi ini akan menjadi kebijakan aktif yang ditampilkan kepada publik."
+            confirm-text="Ya, Publikasikan"
+            cancel-text="Batal"
+            variant="primary"
+            :form-action="route('admin.policies.publish', $policy)"
+            method="PATCH"
+        />
     </div>
     @endif
 </div>

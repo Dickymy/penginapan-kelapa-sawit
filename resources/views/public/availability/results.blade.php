@@ -31,13 +31,14 @@
 
     {{-- Results --}}
     @if($results->isEmpty())
-        <div class="text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        <div class="text-center py-12 bg-white border border-gray-200 rounded-xl">
+            <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <p class="mt-4 text-gray-600 text-lg">Tidak ada kamar tersedia untuk tanggal yang dipilih.</p>
-            <a href="{{ route('home') }}" class="mt-6 inline-block bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition">
-                Kembali ke Beranda
+            <p class="mt-4 text-gray-700 text-lg font-medium">Kamar tidak tersedia untuk tanggal tersebut.</p>
+            <p class="mt-1 text-gray-500 text-sm">Coba pilih tanggal lain atau kurangi jumlah tamu.</p>
+            <a href="{{ route('home') }}" class="mt-6 inline-flex items-center px-5 py-2.5 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition">
+                Ubah Tanggal
             </a>
         </div>
     @else
@@ -70,7 +71,7 @@
                                 </span>
                                 <span class="flex items-center gap-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                                    {{ $item['room_type']->bed_count }} {{ $item['room_type']->bed_type }}
+                                    {{ $item['room_type']->bed_count }} tempat tidur {{ $item['room_type']->bed_type ?? '' }}
                                 </span>
                             </div>
                             <p class="mt-2 text-sm text-green-700 font-medium">

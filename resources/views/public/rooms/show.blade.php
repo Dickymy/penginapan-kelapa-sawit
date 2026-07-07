@@ -73,7 +73,7 @@
                     </div>
                     <div class="flex justify-between">
                         <span>Tempat Tidur</span>
-                        <span class="font-medium text-gray-800">{{ $roomType->bed_count }} {{ $roomType->bed_type ?? 'bed' }}</span>
+                        <span class="font-medium text-gray-800">{{ $roomType->bed_count }} tempat tidur {{ $roomType->bed_type ?? '' }}</span>
                     </div>
                 </div>
 

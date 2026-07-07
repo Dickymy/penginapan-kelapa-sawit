@@ -30,15 +30,7 @@
         <div class="bg-white rounded-lg shadow p-4">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-sm font-mono text-gray-500">{{ $booking->booking_code }}</span>
-                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                    @if($booking->status === \App\Enums\BookingStatus::Confirmed) bg-green-100 text-green-800
-                    @elseif($booking->status === \App\Enums\BookingStatus::PendingPayment) bg-yellow-100 text-yellow-800
-                    @elseif($booking->status === \App\Enums\BookingStatus::Cancelled) bg-red-100 text-red-800
-                    @elseif($booking->status === \App\Enums\BookingStatus::CheckedIn) bg-blue-100 text-blue-800
-                    @else bg-gray-100 text-gray-600
-                    @endif">
-                    {{ $booking->status->label() }}
-                </span>
+                <x-status-badge :status="$booking->status" />
             </div>
             <p class="font-semibold text-gray-800">{{ $booking->room_type_name_snapshot }} — {{ $booking->room_name_snapshot }}</p>
             <p class="text-sm text-gray-600">{{ $booking->check_in->format('d M Y') }} &rarr; {{ $booking->check_out->format('d M Y') }} ({{ $booking->nights }} malam)</p>
@@ -48,7 +40,7 @@
             </div>
         </div>
         @empty
-        <p class="text-center text-gray-500 py-8">Belum ada booking.</p>
+        <x-empty-state message="Belum ada booking pada kategori ini." action="{{ route('rooms.index') }}" action-text="Pesan Kamar" />
         @endforelse
     </div>
 
