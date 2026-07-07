@@ -57,16 +57,7 @@
                     <td class="px-4 py-3 text-sm">{{ $booking->room?->name ?? $booking->room_name_snapshot }}</td>
                     <td class="px-4 py-3 text-sm">{{ $booking->check_in->format('d/m/Y') }} - {{ $booking->check_out->format('d/m/Y') }}</td>
                     <td class="px-4 py-3">
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                            @if($booking->status === \App\Enums\BookingStatus::Confirmed) bg-green-100 text-green-800
-                            @elseif($booking->status === \App\Enums\BookingStatus::PendingPayment) bg-yellow-100 text-yellow-800
-                            @elseif($booking->status === \App\Enums\BookingStatus::Cancelled) bg-red-100 text-red-800
-                            @elseif($booking->status === \App\Enums\BookingStatus::CheckedIn) bg-blue-100 text-blue-800
-                            @elseif($booking->status === \App\Enums\BookingStatus::Completed) bg-gray-100 text-gray-800
-                            @else bg-gray-100 text-gray-600
-                            @endif">
-                            {{ $booking->status->label() }}
-                        </span>
+                        <x-status-badge :status="$booking->status" />
                     </td>
                     <td class="px-4 py-3 text-sm">{{ $booking->source->label() }}</td>
                     <td class="px-4 py-3 text-sm">{{ $booking->formatted_total }}</td>

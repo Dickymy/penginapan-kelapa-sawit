@@ -13,13 +13,14 @@
 
     <div class="flex h-screen overflow-hidden">
         {{-- Sidebar --}}
-        <aside class="fixed inset-y-0 left-0 z-30 w-64 bg-primary-800 text-white transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0"
-               :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
-            <div class="p-4 border-b border-primary-700">
+        <aside class="fixed inset-y-0 left-0 z-30 w-64 bg-primary-800 text-white transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0 flex flex-col"
+               :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+               x-effect="document.body.style.overflow = (sidebarOpen && window.innerWidth < 768) ? 'hidden' : ''">
+            <div class="p-4 border-b border-primary-700 flex-shrink-0">
                 <h1 class="text-lg font-bold">Admin Panel</h1>
                 <p class="text-xs text-primary-200">Penginapan Kelapa Sawit</p>
             </div>
-            <nav class="p-4 space-y-1 text-sm overflow-y-auto">
+            <nav class="flex-1 p-4 space-y-1 text-sm overflow-y-auto">
                 <a href="{{ route('admin.dashboard') }}" class="block px-3 py-2 rounded {{ request()->routeIs('admin.dashboard') ? 'bg-primary-900 text-white font-medium' : 'hover:bg-primary-700' }}">Dashboard</a>
                 <a href="{{ route('admin.bookings.index') }}" class="block px-3 py-2 rounded {{ request()->routeIs('admin.bookings.*') ? 'bg-primary-900 text-white font-medium' : 'hover:bg-primary-700' }}">Reservasi</a>
                 <a href="{{ route('admin.room-blocks.index') }}" class="block px-3 py-2 rounded {{ request()->routeIs('admin.room-blocks.*') ? 'bg-primary-900 text-white font-medium' : 'hover:bg-primary-700' }}">Room Block</a>

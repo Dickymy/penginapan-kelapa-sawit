@@ -21,10 +21,12 @@ class PageController extends Controller
     {
         $address = Setting::get('contact', 'address', '');
         $mapUrl = Setting::get('contact', 'map_url', '');
+        $mapEmbedUrl = Setting::get('contact', 'map_embed_url', '');
+        $mapLink = Setting::get('contact', 'map_link', '');
         $whatsapp = Setting::get('contact', 'whatsapp', '');
         $email = Setting::get('contact', 'email', '');
 
-        return view('public.location', compact('address', 'mapUrl', 'whatsapp', 'email'));
+        return view('public.location', compact('address', 'mapUrl', 'mapEmbedUrl', 'mapLink', 'whatsapp', 'email'));
     }
 
     public function policy(): View

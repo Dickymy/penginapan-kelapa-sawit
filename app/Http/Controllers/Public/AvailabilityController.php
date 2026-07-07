@@ -22,6 +22,13 @@ class AvailabilityController extends Controller
             'check_in' => ['required', 'date', 'after_or_equal:today'],
             'check_out' => ['required', 'date', 'after:check_in'],
             'guest_count' => ['required', 'integer', 'min:1'],
+        ], [
+            'check_in.required' => 'Tanggal check-in wajib diisi.',
+            'check_in.after_or_equal' => 'Tanggal check-in tidak boleh tanggal yang sudah lewat.',
+            'check_out.required' => 'Tanggal check-out wajib diisi.',
+            'check_out.after' => 'Tanggal check-out harus setelah tanggal check-in.',
+            'guest_count.required' => 'Jumlah tamu wajib diisi.',
+            'guest_count.min' => 'Jumlah tamu minimal 1 orang.',
         ]);
 
         $checkIn = Carbon::parse($validated['check_in']);
