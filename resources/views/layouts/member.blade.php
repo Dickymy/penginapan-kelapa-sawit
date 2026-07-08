@@ -7,7 +7,7 @@
     <title>@yield('title', 'Member - Penginapan Kelapa Sawit')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen flex flex-col bg-gray-50 font-sans">
+<body class="min-h-screen flex flex-col bg-gray-50 font-sans" x-data>
     {{-- Toast --}}
     <x-toast />
 

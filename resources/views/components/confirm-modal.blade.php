@@ -59,7 +59,7 @@ $loadingText = match($variant) {
         <div x-show="open"
              x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
              x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-             x-trap.inert.noscroll="open"
+             x-trap.noscroll="open"
              class="relative bg-white rounded-xl shadow-xl max-w-md w-full p-6"
              @click.stop>
             
