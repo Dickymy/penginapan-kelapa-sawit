@@ -68,6 +68,7 @@ Route::middleware(['auth'])->prefix('member')->name('member.')->group(function (
     Route::get('/bookings/{booking}', [\App\Http\Controllers\Member\BookingController::class, 'show'])->name('bookings.show');
     Route::get('/profile', [\App\Http\Controllers\Member\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [\App\Http\Controllers\Member\ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/whatsapp', [\App\Http\Controllers\Member\ProfileController::class, 'updateWhatsapp'])->name('profile.update-whatsapp');
     Route::get('/claim', [\App\Http\Controllers\Member\ClaimController::class, 'index'])->name('claim.index');
     Route::post('/claim/{booking}', [\App\Http\Controllers\Member\ClaimController::class, 'claim'])->name('claim.claim');
     Route::get('/points', [\App\Http\Controllers\Member\PointController::class, 'index'])->name('points.index');

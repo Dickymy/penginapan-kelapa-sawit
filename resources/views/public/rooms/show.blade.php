@@ -19,13 +19,13 @@
             @php $imagePaths = $roomType->images->pluck('path')->toArray(); @endphp
             <div x-data="{ activeImage: 0, images: {{ json_encode($imagePaths) }} }" class="space-y-3">
                 <div class="rounded-lg overflow-hidden">
-                    <img :src="'{{ asset('storage') }}/' + images[activeImage]" alt="{{ $roomType->name }}" class="w-full h-72 md:h-96 object-cover">
+                    <img :src="'{{ Storage::disk('public')->url('') }}' + images[activeImage]" alt="{{ $roomType->name }}" class="w-full h-72 md:h-96 object-cover">
                 </div>
                 @if($roomType->images->count() > 1)
                 <div class="flex gap-2 overflow-x-auto">
                     @foreach($roomType->images as $index => $image)
                     <button @click="activeImage = {{ $index }}" class="flex-shrink-0 rounded-lg overflow-hidden border-2 transition" :class="activeImage === {{ $index }} ? 'border-primary-500' : 'border-transparent hover:border-gray-300'">
-                        <img src="{{ asset('storage/' . $image->path) }}" alt="" class="w-20 h-14 object-cover">
+                        <img src="{{ Storage::disk('public')->url($image->path) }}" alt="" class="w-20 h-14 object-cover">
                     </button>
                     @endforeach
                 </div>

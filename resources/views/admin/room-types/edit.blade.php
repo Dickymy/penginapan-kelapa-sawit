@@ -96,7 +96,7 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             @foreach($roomType->images as $image)
             <div class="relative border rounded-lg overflow-hidden">
-                <img src="{{ asset('storage/' . $image->path) }}" alt="Room image" class="w-full h-24 object-cover">
+                <img src="{{ Storage::disk('public')->url($image->path) }}" alt="Room image" class="w-full h-24 object-cover">
                 <div class="absolute top-1 right-1 flex space-x-1">
                     @if($image->is_cover)
                         <span class="bg-green-500 text-white text-xs px-1 rounded">Cover</span>

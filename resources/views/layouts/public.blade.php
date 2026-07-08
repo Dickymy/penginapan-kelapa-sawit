@@ -36,10 +36,14 @@
                         <div x-data="{ accountOpen: false }" class="relative">
                             <button @click="accountOpen = !accountOpen" @click.outside="accountOpen = false"
                                     class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 transition">
-                                <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-                                    <span class="text-sm font-bold text-primary-700">{{ substr(auth()->user()->name, 0, 1) }}</span>
-                                </div>
-                                <span class="hidden xl:inline">{{ auth()->user()->name }}</span>
+                                @if(auth()->user()->avatar_url)
+                                    <img src="{{ auth()->user()->avatar_url }}" alt="" class="w-8 h-8 rounded-full object-cover">
+                                @else
+                                    <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
+                                        <span class="text-sm font-bold text-primary-700">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
+                                    </div>
+                                @endif
+                                <span class="hidden xl:inline max-w-[120px] truncate">{{ auth()->user()->name }}</span>
                                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </button>
                             <div x-show="accountOpen" x-cloak
@@ -141,7 +145,20 @@
                 {{-- Drawer Footer (Account) --}}
                 <div class="border-t border-gray-100 px-4 py-4 space-y-2">
                     @auth
-                        <p class="px-3 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Akun</p>
+                        {{-- User Identity --}}
+                        <div class="flex items-center gap-3 px-3 py-2 mb-2">
+                            @if(auth()->user()->avatar_url)
+                                <img src="{{ auth()->user()->avatar_url }}" alt="" class="w-9 h-9 rounded-full object-cover">
+                            @else
+                                <div class="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center">
+                                    <span class="text-sm font-bold text-primary-700">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
+                                </div>
+                            @endif
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate">{{ auth()->user()->name }}</p>
+                                <p class="text-xs text-gray-500 truncate">{{ auth()->user()->email }}</p>
+                            </div>
+                        </div>
                         <a href="{{ route('member.dashboard') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Dashboard</a>
                         <a href="{{ route('member.bookings.index') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Booking Saya</a>
                         <a href="{{ route('member.points.index') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Poin Saya</a>

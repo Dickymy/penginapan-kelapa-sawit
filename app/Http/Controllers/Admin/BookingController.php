@@ -30,6 +30,18 @@ class BookingController extends Controller
         if ($request->filled('source')) {
             $query->where('source', $request->source);
         }
+        if ($request->filled('check_in')) {
+            $query->where('check_in', $request->check_in);
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('booking_code', 'like', "%{$search}%")
+                  ->orWhere('guest_name', 'like', "%{$search}%")
+                  ->orWhere('guest_whatsapp', 'like', "%{$search}%")
+                  ->orWhere('guest_email', 'like', "%{$search}%");
+            });
+        }
 
         $bookings = $query->paginate(20);
         return view('admin.bookings.index', compact('bookings'));
@@ -39,7 +51,14 @@ class BookingController extends Controller
     {
         $rooms = Room::with('roomType')->where('is_active', true)->orderBy('sort_order')->get();
         $sources = BookingSource::cases();
-        return view('admin.bookings.create', compact('rooms', 'sources'));
+        $roomsJson = $rooms->map(fn($r) => [
+            'id' => $r->id,
+            'name' => $r->name,
+            'type_name' => $r->roomType->name,
+            'base_price' => $r->roomType->base_price,
+            'capacity' => $r->roomType->capacity,
+        ])->values();
+        return view('admin.bookings.create', compact('rooms', 'sources', 'roomsJson'));
     }
 
     public function store(Request $request): RedirectResponse

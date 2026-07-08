@@ -1,13 +1,56 @@
 @extends('layouts.member')
 
-@section('title', 'Edit Profil')
+@section('title', 'Profil & Akun')
 
 @section('content')
-<div class="max-w-lg space-y-8">
-    <h1 class="text-2xl font-bold text-gray-800">Edit Profil</h1>
+<div class="max-w-lg mx-auto space-y-6">
+
+    {{-- Mobile Account Header --}}
+    <div class="lg:hidden bg-white rounded-xl border border-gray-100 p-5">
+        <div class="flex items-center gap-4">
+            @if($user->avatar_url)
+                <img src="{{ $user->avatar_url }}" alt="" class="w-14 h-14 rounded-full object-cover">
+            @else
+                <div class="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center">
+                    <span class="text-xl font-bold text-primary-700">{{ mb_substr($user->name, 0, 1) }}</span>
+                </div>
+            @endif
+            <div class="flex-1 min-w-0">
+                <h1 class="text-lg font-semibold text-gray-900 truncate">{{ $user->name }}</h1>
+                <p class="text-sm text-gray-500 truncate">{{ $user->email }}</p>
+                @if($user->whatsapp)
+                    <p class="text-sm text-gray-500">{{ $user->whatsapp }}</p>
+                @else
+                    <p class="text-xs text-amber-600 font-medium">WhatsApp belum diisi</p>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- Mobile Quick Menu --}}
+    <div class="lg:hidden bg-white rounded-xl border border-gray-100 divide-y divide-gray-100">
+        <a href="{{ route('member.claim.index') }}" class="flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 transition">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span class="text-sm text-gray-700">Klaim Booking</span>
+            <svg class="w-4 h-4 text-gray-300 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+        <a href="{{ route('home') }}" class="flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 transition">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            <span class="text-sm text-gray-700">Kembali ke Website</span>
+            <svg class="w-4 h-4 text-gray-300 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+        <button type="button" @click="$dispatch('open-confirm', { id: 'member-logout' })"
+                class="flex items-center gap-3 px-5 py-3.5 hover:bg-red-50 transition w-full text-left">
+            <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            <span class="text-sm text-red-600 font-medium">Keluar</span>
+        </button>
+    </div>
+
+    {{-- Desktop Title --}}
+    <h1 class="hidden lg:block text-2xl font-bold text-gray-800">Edit Profil</h1>
 
     {{-- Update Profile Form --}}
-    <form method="POST" action="{{ route('member.profile.update') }}" class="space-y-5 bg-white p-6 rounded-lg shadow-sm border border-gray-100" x-data="{ submitting: false }" @submit="submitting = true">
+    <form method="POST" action="{{ route('member.profile.update') }}" class="space-y-5 bg-white p-5 sm:p-6 rounded-xl shadow-sm border border-gray-100" x-data="{ submitting: false }" @submit="submitting = true">
         @csrf
         @method('PUT')
 
@@ -16,6 +59,7 @@
         <div>
             <label for="name" class="block text-sm font-medium text-gray-700">Nama Lengkap <span class="text-red-500">*</span></label>
             <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" required
+                   autocomplete="name"
                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 @error('name') border-red-300 @enderror">
             <x-form-error field="name" />
         </div>
@@ -31,6 +75,7 @@
             <label for="whatsapp" class="block text-sm font-medium text-gray-700">Nomor WhatsApp <span class="text-red-500">*</span></label>
             <input type="tel" name="whatsapp" id="whatsapp" value="{{ old('whatsapp', $user->whatsapp) }}" required
                    inputmode="tel"
+                   autocomplete="tel"
                    placeholder="08xxxxxxxxxx"
                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 @error('whatsapp') border-red-300 @enderror">
             <p class="mt-1 text-xs text-gray-500">Format: 08xx, 628xx, atau +628xx</p>
@@ -52,7 +97,7 @@
     </form>
 
     {{-- Update Password Form --}}
-    <form method="POST" action="{{ route('user-password.update') }}" class="space-y-5 bg-white p-6 rounded-lg shadow-sm border border-gray-100" x-data="{ submitting: false, password: '', confirmation: '' }" @submit="submitting = true">
+    <form method="POST" action="{{ route('user-password.update') }}" class="space-y-5 bg-white p-5 sm:p-6 rounded-xl shadow-sm border border-gray-100" x-data="{ submitting: false, password: '', confirmation: '' }" @submit="submitting = true">
         @csrf
         @method('PUT')
 

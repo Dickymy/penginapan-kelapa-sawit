@@ -9,6 +9,6 @@ class LogoutResponse implements LogoutResponseContract
     public function toResponse($request)
     {
         return redirect('/')
-            ->with('success', 'Anda berhasil keluar dari akun.');
+            ->with('toast_success', 'Anda berhasil keluar dari akun.');
     }
 }

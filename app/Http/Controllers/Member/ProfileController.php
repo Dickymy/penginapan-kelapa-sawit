@@ -29,4 +29,21 @@ class ProfileController extends Controller
 
         return back()->with('success', 'Profil berhasil diperbarui.');
     }
+
+    /**
+     * Quick WhatsApp update from onboarding card.
+     */
+    public function updateWhatsapp(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'whatsapp' => ['required', 'string', 'max:32'],
+        ]);
+
+        auth()->user()->update([
+            'whatsapp' => PhoneNormalizer::normalize($validated['whatsapp']),
+        ]);
+
+        return redirect()->route('member.dashboard')
+            ->with('toast_success', 'Nomor WhatsApp berhasil disimpan.');
+    }
 }

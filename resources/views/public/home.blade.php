@@ -112,7 +112,7 @@
             @php $cover = $type->images->where('is_cover', true)->first() ?? $type->images->first(); @endphp
             @if($cover)
                 <div class="aspect-[4/3] overflow-hidden">
-                    <img src="{{ asset('storage/' . $cover->path) }}" alt="{{ $type->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    <img src="{{ Storage::disk('public')->url($cover->path) }}" alt="{{ $type->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                 </div>
             @else
                 <div class="aspect-[4/3] bg-gray-100 flex flex-col items-center justify-center">

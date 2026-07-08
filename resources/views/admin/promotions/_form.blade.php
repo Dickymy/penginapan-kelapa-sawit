@@ -19,15 +19,21 @@
 <div class="grid md:grid-cols-2 gap-4">
     <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Tipe</label>
-        <select name="type" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500">
+        <select name="type" id="promo_type" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
+                x-data x-on:change="$dispatch('promo-type-changed', { value: $el.value })">
             <option value="percentage" {{ old('type', ($promotion->type->value ?? '') ) === 'percentage' ? 'selected' : '' }}>Persentase (%)</option>
             <option value="fixed" {{ old('type', ($promotion->type->value ?? '') ) === 'fixed' ? 'selected' : '' }}>Nominal Tetap (Rp)</option>
         </select>
         @error('type') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
     </div>
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Nilai</label>
-        <input type="number" name="value" value="{{ old('value', $promotion->value ?? '') }}" required min="1" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500" placeholder="10">
+    <div x-data="{ type: '{{ old('type', ($promotion->type->value ?? 'percentage')) }}' }" x-on:promo-type-changed.window="type = $event.detail.value">
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+            Nilai <span class="text-gray-400 font-normal" x-text="type === 'percentage' ? '(%)' : '(Rupiah)'"></span>
+        </label>
+        <input type="number" name="value" value="{{ old('value', $promotion->value ?? '') }}" required min="1" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
+               :placeholder="type === 'percentage' ? '10' : '50000'">
+        <p class="text-xs text-gray-400 mt-1" x-show="type === 'percentage'" x-cloak>Masukkan angka persen, misal: 10 untuk diskon 10%</p>
+        <p class="text-xs text-gray-400 mt-1" x-show="type === 'fixed'" x-cloak>Masukkan jumlah Rupiah, misal: 50000 untuk diskon Rp50.000</p>
         @error('value') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
     </div>
 </div>

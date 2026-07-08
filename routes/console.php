@@ -2,6 +2,6 @@
 
 use Illuminate\Support\Facades\Schedule;
 
-Schedule::command('booking:expire-pending')->everyMinute();
-Schedule::command('payment:reconcile')->everyFiveMinutes();
-Schedule::command('loyalty:expire-points')->daily();
+Schedule::command('booking:expire-pending')->everyMinute()->withoutOverlapping();
+Schedule::command('payment:reconcile')->everyFiveMinutes()->withoutOverlapping();
+Schedule::command('loyalty:expire-points')->daily()->withoutOverlapping();
