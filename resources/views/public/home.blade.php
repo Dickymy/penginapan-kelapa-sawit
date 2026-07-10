@@ -175,42 +175,6 @@
 </section>
 @endif
 
-{{-- Why Choose Us --}}
-<section class="bg-gray-50 py-12">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-xl font-bold text-gray-800 text-center mb-8">Kenapa Menginap di Sini</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div class="text-center">
-                <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-primary-100 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                </div>
-                <h3 class="font-medium text-gray-800 text-sm">Lokasi di Kota Bangun</h3>
-                <p class="text-xs text-gray-500 mt-1">Akses mudah ke pusat kota</p>
-            </div>
-            <div class="text-center">
-                <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-primary-100 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </div>
-                <h3 class="font-medium text-gray-800 text-sm">Pemesanan Mudah</h3>
-                <p class="text-xs text-gray-500 mt-1">Pesan langsung tanpa akun</p>
-            </div>
-            <div class="text-center">
-                <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-primary-100 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </div>
-                <h3 class="font-medium text-gray-800 text-sm">Informasi Kamar Jelas</h3>
-                <p class="text-xs text-gray-500 mt-1">Foto, fasilitas, dan harga transparan</p>
-            </div>
-            <div class="text-center">
-                <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-primary-100 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-primary-600" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
-                </div>
-                <h3 class="font-medium text-gray-800 text-sm">Kontak WhatsApp</h3>
-                <p class="text-xs text-gray-500 mt-1">Tanya langsung kapan saja</p>
-            </div>
-        </div>
-    </div>
-</section>
 
 {{-- Property Info --}}
 <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

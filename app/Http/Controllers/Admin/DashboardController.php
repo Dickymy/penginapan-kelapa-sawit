@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\BookingStatus;
+use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Room;
@@ -44,7 +45,7 @@ class DashboardController extends Controller
 
         // Monthly revenue
         $startOfMonth = $today->copy()->startOfMonth();
-        $monthlyRevenue = Booking::where('payment_status', 'paid')
+        $monthlyRevenue = Booking::where('payment_status', PaymentStatus::Paid->value)
             ->whereBetween('created_at', [$startOfMonth, now()])
             ->sum('total_amount');
 

@@ -120,11 +120,11 @@ class BookingController extends Controller
                 'actor_id' => Auth::guard('admin')->id(),
                 'created_at' => now(),
             ]);
-        });
 
-        $booking->refresh();
-        app(\App\Services\PromotionService::class)->releaseForBooking($booking);
-        app(\App\Services\LoyaltyPointService::class)->reverseRedemptionForBooking($booking);
+            // Release promotion and reverse loyalty inside the same transaction
+            app(\App\Services\PromotionService::class)->releaseForBooking($booking);
+            app(\App\Services\LoyaltyPointService::class)->reverseRedemptionForBooking($booking);
+        });
 
         return back()->with('success', 'Booking berhasil dibatalkan.');
     }
