@@ -16,16 +16,23 @@
         <div class="lg:col-span-2 space-y-6">
             {{-- Image Gallery --}}
             @if($roomType->images->isNotEmpty())
-            @php $imagePaths = $roomType->images->pluck('path')->toArray(); @endphp
-            <div x-data="{ activeImage: 0, images: {{ json_encode($imagePaths) }} }" class="space-y-3">
-                <div class="rounded-lg overflow-hidden">
-                    <img :src="'{{ Storage::disk('public')->url('') }}' + images[activeImage]" alt="{{ $roomType->name }}" class="w-full h-72 md:h-96 object-cover">
+            <div x-data="{ activeImage: 0 }" class="space-y-3">
+                <div class="rounded-lg overflow-hidden bg-gray-100">
+                    @foreach($roomType->images as $index => $image)
+                    <img x-show="activeImage === {{ $index }}"
+                         src="{{ $image->large_url }}"
+                         alt="{{ $image->alt_text ?? $roomType->name }}"
+                         {{ $index === 0 ? '' : 'loading=lazy' }}
+                         decoding="{{ $index === 0 ? 'sync' : 'async' }}"
+                         width="1920" height="1440"
+                         class="w-full h-72 md:h-96 object-cover">
+                    @endforeach
                 </div>
                 @if($roomType->images->count() > 1)
-                <div class="flex gap-2 overflow-x-auto">
+                <div class="flex gap-2 overflow-x-auto pb-1">
                     @foreach($roomType->images as $index => $image)
                     <button @click="activeImage = {{ $index }}" class="flex-shrink-0 rounded-lg overflow-hidden border-2 transition" :class="activeImage === {{ $index }} ? 'border-primary-500' : 'border-transparent hover:border-gray-300'">
-                        <img src="{{ Storage::disk('public')->url($image->path) }}" alt="" class="w-20 h-14 object-cover">
+                        <img src="{{ $image->thumb_url }}" alt="" loading="lazy" decoding="async" width="80" height="56" class="w-20 h-14 object-cover">
                     </button>
                     @endforeach
                 </div>

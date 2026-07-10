@@ -148,7 +148,14 @@
             @php $cover = $type->images->where('is_cover', true)->first() ?? $type->images->first(); @endphp
             @if($cover)
                 <div class="aspect-[4/3] overflow-hidden">
-                    <img src="{{ Storage::disk('public')->url($cover->path) }}" alt="Kamar {{ $type->name }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    <img src="{{ $cover->medium_url }}"
+                         srcset="{{ $cover->thumb_url }} 480w, {{ $cover->medium_url }} 960w, {{ $cover->large_url }} 1920w"
+                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                         alt="Kamar {{ $type->name }}"
+                         loading="lazy"
+                         decoding="async"
+                         width="960" height="720"
+                         class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                 </div>
             @else
                 <div class="aspect-[4/3] bg-gray-100 flex flex-col items-center justify-center">
@@ -178,6 +185,38 @@
 
 {{-- Property Info --}}
 <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+{{-- Gallery Preview --}}
+@if($galleryPhotos->isNotEmpty())
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+    <div class="text-center mb-6">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Galeri</h2>
+        <p class="text-gray-500 mt-2">Suasana penginapan kami</p>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+        @foreach($galleryPhotos as $photo)
+        <div class="aspect-[4/3] overflow-hidden rounded-xl bg-gray-100">
+            <img src="{{ $photo->medium_url }}"
+                 srcset="{{ $photo->thumb_url }} 480w, {{ $photo->medium_url }} 960w"
+                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                 alt="{{ $photo->alt_text ?? $photo->title ?? 'Foto Penginapan Kelapa Sawit' }}"
+                 loading="lazy"
+                 decoding="async"
+                 width="480" height="360"
+                 class="w-full h-full object-cover hover:scale-105 transition duration-300">
+        </div>
+        @endforeach
+    </div>
+    @if($galleryPhotos->count() >= 8)
+    <div class="text-center mt-6">
+        <a href="{{ route('gallery') }}" class="inline-flex items-center px-5 py-2.5 border border-primary-600 text-primary-600 rounded-lg text-sm font-medium hover:bg-primary-50 transition">
+            Lihat Semua Foto
+            <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+    </div>
+    @endif
+</section>
+@endif
     <div class="bg-white border border-gray-200 rounded-xl p-6 md:p-8">
         <h2 class="text-xl font-bold text-gray-800 mb-3">Tentang Penginapan</h2>
         <p class="text-gray-600 text-sm leading-relaxed">
