@@ -26,8 +26,7 @@
                     <a href="{{ route('home') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('home') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Beranda</a>
                     <a href="{{ route('rooms.index') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('rooms.*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Kamar</a>
                     <a href="{{ route('location') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('location') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Lokasi</a>
-                    <a href="{{ route('policy') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('policy') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Kebijakan</a>
-                    <a href="{{ route('booking.verify.form') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('booking.verify*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Cek Booking</a>
+                    <a href="{{ route('booking.my') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('booking.my') || request()->routeIs('booking.verify*') || request()->routeIs('booking.guest.detail') || request()->routeIs('member.bookings.*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Booking Saya</a>
                     <a href="{{ route('home') }}#cari-kamar" class="ml-2 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition">Cari Kamar</a>
                 </nav>
 
@@ -136,7 +135,7 @@
                     <a href="{{ route('rooms.index') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('rooms.*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Kamar</a>
 
                     <p class="px-3 py-1 pt-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Booking</p>
-                    <a href="{{ route('booking.verify.form') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('booking.verify*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Cek Booking</a>
+                    <a href="{{ route('booking.my') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('booking.my') || request()->routeIs('booking.verify*') || request()->routeIs('booking.guest.detail') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Booking Saya</a>
 
                     <p class="px-3 py-1 pt-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Informasi</p>
                     <a href="{{ route('home') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('home') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Beranda</a>
@@ -220,7 +219,7 @@
                         <a href="{{ route('rooms.index') }}" class="block hover:text-primary-600 transition">Kamar</a>
                         <a href="{{ route('location') }}" class="block hover:text-primary-600 transition">Lokasi</a>
                         <a href="{{ route('policy') }}" class="block hover:text-primary-600 transition">Kebijakan</a>
-                        <a href="{{ route('booking.verify.form') }}" class="block hover:text-primary-600 transition">Cek Booking</a>
+                        <a href="{{ route('booking.my') }}" class="block hover:text-primary-600 transition">Booking Saya</a>
                     </nav>
                 </div>
                 {{-- Contact --}}

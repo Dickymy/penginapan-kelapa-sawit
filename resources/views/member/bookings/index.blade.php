@@ -47,14 +47,14 @@
                 <span class="text-base font-bold text-gray-800">{{ $booking->formatted_total }}</span>
                 <div class="flex items-center gap-2">
                     @if($booking->status->value === 'pending_payment')
-                        <a href="{{ route('member.bookings.show', $booking) }}"
-                           class="inline-flex items-center px-3.5 py-2 text-sm font-medium text-white bg-amber-500 rounded-lg hover:bg-amber-600 transition">
-                            Bayar
+                        <a href="{{ route('booking.pay', $booking->booking_code) }}"
+                           class="inline-flex items-center px-3.5 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition">
+                            Bayar Sekarang
                         </a>
                     @else
                         <a href="{{ route('member.bookings.show', $booking) }}"
                            class="text-sm text-primary-600 hover:text-primary-800 font-medium">
-                            Detail →
+                            Lihat Detail →
                         </a>
                     @endif
                 </div>

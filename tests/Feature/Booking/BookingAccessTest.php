@@ -110,36 +110,37 @@ class BookingAccessTest extends TestCase
 
     public function test_verified_guest_can_access_booking(): void
     {
-        // Verify by email first (grants session access)
+        // Verify by WhatsApp (grants session access and redirects to detail)
         $response = $this->post(route('booking.verify'), [
             'booking_code' => $this->booking->booking_code,
-            'guest_email' => 'guest@example.com',
+            'guest_whatsapp' => '08123456789',
         ]);
 
-        $response->assertStatus(200);
+        $response->assertRedirect(route('booking.guest.detail', $this->booking->booking_code));
 
         // Now they should be able to access payment page with session grant
         $response = $this->get(route('booking.pay', $this->booking->booking_code));
         $this->assertNotEquals(403, $response->status());
     }
 
-    public function test_invalid_token_denied_access(): void
+    public function test_invalid_whatsapp_denied_access(): void
     {
         $response = $this->post(route('booking.verify'), [
             'booking_code' => $this->booking->booking_code,
-            'access_token' => 'invalid-token-xyz',
+            'guest_whatsapp' => '08999999999',
         ]);
 
         $response->assertRedirect();
         $response->assertSessionHas('error');
     }
 
-    public function test_valid_token_grants_access(): void
+    public function test_valid_token_grants_access_via_url(): void
     {
-        $response = $this->post(route('booking.verify'), [
-            'booking_code' => $this->booking->booking_code,
-            'access_token' => 'valid-token-123',
-        ]);
+        // Token-based access via URL query parameter on guest detail page
+        $response = $this->get(route('booking.guest.detail', [
+            'bookingCode' => $this->booking->booking_code,
+            'access' => 'valid-token-123',
+        ]));
 
         $response->assertStatus(200);
     }
@@ -151,17 +152,45 @@ class BookingAccessTest extends TestCase
             'guest_whatsapp' => '08123456789',
         ]);
 
-        $response->assertStatus(200);
+        // Should redirect to detail page (successful verification)
+        $response->assertRedirect(route('booking.guest.detail', $this->booking->booking_code));
     }
 
-    public function test_wrong_email_denied(): void
+    public function test_wrong_whatsapp_denied(): void
     {
         $response = $this->post(route('booking.verify'), [
             'booking_code' => $this->booking->booking_code,
-            'guest_email' => 'wrong@example.com',
+            'guest_whatsapp' => '08111111111',
         ]);
 
         $response->assertRedirect();
         $response->assertSessionHas('error');
+    }
+
+    public function test_wrong_booking_code_denied(): void
+    {
+        $response = $this->post(route('booking.verify'), [
+            'booking_code' => 'BKG-NONEXIST',
+            'guest_whatsapp' => '08123456789',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+    }
+
+    public function test_whatsapp_normalization_works(): void
+    {
+        // The booking has guest_whatsapp '628123456789'
+        // All these formats should match:
+        $formats = ['08123456789', '628123456789', '+628123456789', '0812 345 6789', '0812-345-6789'];
+
+        foreach ($formats as $format) {
+            $response = $this->post(route('booking.verify'), [
+                'booking_code' => $this->booking->booking_code,
+                'guest_whatsapp' => $format,
+            ]);
+
+            $response->assertRedirect(route('booking.guest.detail', $this->booking->booking_code));
+        }
     }
 }

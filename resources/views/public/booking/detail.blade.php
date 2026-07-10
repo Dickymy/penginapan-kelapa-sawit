@@ -1,6 +1,10 @@
-@extends('layouts.member')
+@extends('layouts.public')
 
-@section('title', 'Detail Booking')
+@section('title', 'Detail Booking ' . $booking->booking_code . ' - Penginapan Kelapa Sawit')
+
+@section('meta')
+<meta name="robots" content="noindex, nofollow">
+@endsection
 
 @section('content')
 @php
@@ -65,24 +69,24 @@
     };
 
     $colorClasses = match($statusConfig['color']) {
-        'yellow' => ['bg' => 'bg-amber-50', 'border' => 'border-amber-200', 'text' => 'text-amber-800', 'icon' => 'text-amber-600'],
-        'green' => ['bg' => 'bg-green-50', 'border' => 'border-green-200', 'text' => 'text-green-800', 'icon' => 'text-green-600'],
-        'blue' => ['bg' => 'bg-blue-50', 'border' => 'border-blue-200', 'text' => 'text-blue-800', 'icon' => 'text-blue-600'],
-        'indigo' => ['bg' => 'bg-indigo-50', 'border' => 'border-indigo-200', 'text' => 'text-indigo-800', 'icon' => 'text-indigo-600'],
-        'red' => ['bg' => 'bg-red-50', 'border' => 'border-red-200', 'text' => 'text-red-800', 'icon' => 'text-red-600'],
-        default => ['bg' => 'bg-gray-50', 'border' => 'border-gray-200', 'text' => 'text-gray-800', 'icon' => 'text-gray-600'],
+        'yellow' => ['bg' => 'bg-amber-50', 'border' => 'border-amber-200', 'text' => 'text-amber-800', 'icon' => 'text-amber-600', 'badge' => 'bg-amber-100 text-amber-800'],
+        'green' => ['bg' => 'bg-green-50', 'border' => 'border-green-200', 'text' => 'text-green-800', 'icon' => 'text-green-600', 'badge' => 'bg-green-100 text-green-800'],
+        'blue' => ['bg' => 'bg-blue-50', 'border' => 'border-blue-200', 'text' => 'text-blue-800', 'icon' => 'text-blue-600', 'badge' => 'bg-blue-100 text-blue-800'],
+        'indigo' => ['bg' => 'bg-indigo-50', 'border' => 'border-indigo-200', 'text' => 'text-indigo-800', 'icon' => 'text-indigo-600', 'badge' => 'bg-indigo-100 text-indigo-800'],
+        'red' => ['bg' => 'bg-red-50', 'border' => 'border-red-200', 'text' => 'text-red-800', 'icon' => 'text-red-600', 'badge' => 'bg-red-100 text-red-800'],
+        default => ['bg' => 'bg-gray-50', 'border' => 'border-gray-200', 'text' => 'text-gray-800', 'icon' => 'text-gray-600', 'badge' => 'bg-gray-100 text-gray-800'],
     };
 @endphp
 
-<div class="max-w-2xl space-y-6">
-    {{-- Back --}}
-    <a href="{{ route('member.bookings.index') }}" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 transition">
+<div class="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+    {{-- Back Link --}}
+    <a href="{{ route('booking.my') }}" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-5 transition">
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         Booking Saya
     </a>
 
     {{-- Status Header --}}
-    <div class="rounded-2xl {{ $colorClasses['bg'] }} {{ $colorClasses['border'] }} border p-5 sm:p-6">
+    <div class="rounded-2xl {{ $colorClasses['bg'] }} {{ $colorClasses['border'] }} border p-5 sm:p-6 mb-6">
         <div class="flex items-start gap-4">
             <div class="flex-shrink-0 w-12 h-12 rounded-full {{ $colorClasses['bg'] }} flex items-center justify-center">
                 <svg class="w-6 h-6 {{ $colorClasses['icon'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">{!! $statusConfig['icon'] !!}</svg>
@@ -94,6 +98,7 @@
             </div>
         </div>
 
+        {{-- Countdown for pending --}}
         @if($booking->status === BookingStatus::PendingPayment && $booking->is_hold_active)
             <div class="mt-4 pt-4 border-t {{ $colorClasses['border'] }}">
                 <div class="flex items-center justify-between flex-wrap gap-2">
@@ -110,9 +115,9 @@
         @endif
     </div>
 
-    {{-- CTAs for different statuses --}}
+    {{-- Primary CTA for different statuses --}}
     @if($booking->status === BookingStatus::Confirmed)
-        <div class="flex flex-col sm:flex-row gap-3">
+        <div class="flex flex-col sm:flex-row gap-3 mb-6">
             @if($booking->invoice_number)
                 <a href="{{ route('booking.invoice', $booking->booking_code) }}"
                    class="flex-1 inline-flex items-center justify-center px-5 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition text-sm">
@@ -127,25 +132,35 @@
             </a>
         </div>
     @elseif($booking->status === BookingStatus::Expired || $booking->status === BookingStatus::Cancelled)
-        <a href="{{ route('home') }}#cari-kamar"
-           class="w-full inline-flex items-center justify-center px-5 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition text-sm">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            Cari Kamar Lagi
-        </a>
-    @elseif(($booking->status === BookingStatus::Completed || $booking->payment_status === PaymentStatus::Paid) && $booking->invoice_number)
-        <a href="{{ route('booking.invoice', $booking->booking_code) }}"
-           class="w-full inline-flex items-center justify-center px-5 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition text-sm">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            Download Invoice
-        </a>
+        <div class="mb-6">
+            <a href="{{ route('home') }}#cari-kamar"
+               class="w-full inline-flex items-center justify-center px-5 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition text-sm">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                Cari Kamar Lagi
+            </a>
+        </div>
+    @elseif($booking->status === BookingStatus::Completed && $booking->invoice_number)
+        <div class="mb-6">
+            <a href="{{ route('booking.invoice', $booking->booking_code) }}"
+               class="w-full inline-flex items-center justify-center px-5 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition text-sm">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Download Invoice
+            </a>
+        </div>
     @endif
 
     {{-- Booking Info Card --}}
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
         <div class="px-5 sm:px-6 py-4 border-b border-gray-100">
             <h2 class="font-semibold text-gray-900">Detail Booking</h2>
         </div>
         <div class="px-5 sm:px-6 py-5 space-y-4">
+            {{-- Guest Info --}}
+            <div>
+                <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Tamu</p>
+                <p class="font-semibold text-gray-900">{{ $booking->guest_name }}</p>
+            </div>
+
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Check-in</p>
@@ -158,7 +173,6 @@
                 <div>
                     <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Tipe Kamar</p>
                     <p class="font-semibold text-gray-900 text-sm">{{ $booking->room_type_name_snapshot }}</p>
-                    <p class="text-xs text-gray-500">{{ $booking->room_name_snapshot }}</p>
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Durasi</p>
@@ -168,16 +182,18 @@
                     <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Jumlah Tamu</p>
                     <p class="font-semibold text-gray-900 text-sm">{{ $booking->guest_count }} orang</p>
                 </div>
+                @if($booking->arrival_estimate)
                 <div>
-                    <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Dibuat</p>
-                    <p class="font-semibold text-gray-900 text-sm">{{ $booking->created_at->translatedFormat('d M Y') }}</p>
+                    <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Estimasi Tiba</p>
+                    <p class="font-semibold text-gray-900 text-sm">{{ $booking->arrival_estimate }}</p>
                 </div>
+                @endif
             </div>
         </div>
     </div>
 
     {{-- Pricing Card --}}
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
         <div class="px-5 sm:px-6 py-4 border-b border-gray-100">
             <h2 class="font-semibold text-gray-900">Rincian Biaya</h2>
         </div>
@@ -206,6 +222,8 @@
                 <span class="font-bold text-gray-900">Total</span>
                 <span class="font-bold text-lg text-primary-600">{{ $booking->formatted_total }}</span>
             </div>
+
+            {{-- Payment Status --}}
             <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                 <span class="text-sm text-gray-600">Status Pembayaran</span>
                 <x-status-badge :status="$booking->payment_status" />
@@ -213,49 +231,38 @@
         </div>
     </div>
 
-    {{-- Invoice --}}
-    @if(($booking->status === BookingStatus::Completed || $booking->payment_status === PaymentStatus::Paid) && $booking->invoice_number)
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-            </div>
+    {{-- Share / Access Link --}}
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6" x-data="{ copied: false }">
+        <div class="px-5 sm:px-6 py-4 flex items-center justify-between">
             <div>
-                <p class="text-sm font-medium text-gray-900">Invoice</p>
-                <p class="text-xs text-gray-500">{{ $booking->invoice_number }}</p>
+                <p class="text-sm font-medium text-gray-900">Link Akses Booking</p>
+                <p class="text-xs text-gray-500 mt-0.5">Simpan link ini untuk mengakses booking kapan saja.</p>
             </div>
+            <button type="button"
+                    @click="
+                        navigator.clipboard.writeText('{{ url()->current() }}');
+                        copied = true;
+                        setTimeout(() => copied = false, 2000);
+                        $dispatch('toast', { type: 'success', message: 'Link berhasil disalin' });
+                    "
+                    class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg transition"
+                    :class="copied ? 'text-green-700 bg-green-50' : 'text-primary-600 bg-primary-50 hover:bg-primary-100'">
+                <svg x-show="!copied" class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                <svg x-show="copied" x-cloak class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <span x-text="copied ? 'Tersalin' : 'Salin Link'"></span>
+            </button>
         </div>
-        <a href="{{ route('booking.invoice', $booking->booking_code) }}"
-           class="text-sm text-primary-600 font-medium hover:text-primary-800 transition">
-            Unduh PDF →
-        </a>
     </div>
-    @endif
 
-    {{-- Status History --}}
-    @if($booking->statusHistories->count())
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="px-5 sm:px-6 py-4 border-b border-gray-100">
-            <h2 class="font-semibold text-gray-900">Riwayat Status</h2>
-        </div>
-        <div class="px-5 sm:px-6 py-5">
-            <div class="space-y-4">
-                @foreach($booking->statusHistories as $history)
-                <div class="flex items-start gap-3">
-                    <div class="flex-shrink-0 w-2 h-2 rounded-full bg-primary-400 mt-2"></div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900">{{ $history->to_status }}</p>
-                        @if($history->reason)
-                            <p class="text-xs text-gray-600 mt-0.5">{{ $history->reason }}</p>
-                        @endif
-                        <p class="text-xs text-gray-400 mt-0.5">{{ $history->created_at->translatedFormat('d M Y, H:i') }}</p>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
+    {{-- Contact CTA --}}
+    @php $waUrl = \App\Support\WhatsApp::url(\App\Models\Setting::get('contact', 'whatsapp', ''), 'Halo, saya ingin bertanya tentang booking ' . $booking->booking_code); @endphp
+    @if($waUrl)
+    <div class="text-center">
+        <a href="{{ $waUrl }}" target="_blank" rel="noopener"
+           class="inline-flex items-center text-sm text-gray-600 hover:text-green-700 transition">
+            <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.614-1.46A11.93 11.93 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-2.115 0-4.107-.57-5.82-1.563l-.418-.248-4.327 1.37 1.394-4.212-.273-.433A9.708 9.708 0 012.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75z"/></svg>
+            Hubungi Penginapan via WhatsApp
+        </a>
     </div>
     @endif
 </div>
