@@ -7,7 +7,7 @@
 <section class="bg-primary-700 text-white py-12">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h1 class="text-3xl font-bold">Tentang {{ $propertyName }}</h1>
-        <p class="mt-2 text-primary-100">Kota Bangun, Kalimantan Timur</p>
+        <p class="mt-2 text-primary-100">Kota Bangun II, Kutai Kartanegara, Kalimantan Timur</p>
     </div>
 </section>
 
@@ -22,14 +22,14 @@
             <div class="bg-white border border-gray-200 rounded-xl p-6">
                 <h2 class="text-xl font-semibold text-gray-800 mb-3">{{ $propertyName }}</h2>
                 <p class="text-gray-600 leading-relaxed">
-                    {{ $propertyName }} berlokasi di Kota Bangun, Kalimantan Timur. Kami menyediakan akomodasi yang nyaman untuk tamu yang berkunjung ke wilayah ini.
+                    {{ $propertyName }} adalah penginapan satu lantai yang berlokasi di Kota Bangun II, Kecamatan Kota Bangun, Kabupaten Kutai Kartanegara, Kalimantan Timur. Kami menyediakan akomodasi yang nyaman untuk tamu yang berkunjung ke wilayah ini.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-gray-50 rounded-xl p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-2">Lokasi</h3>
-                    <p class="text-gray-600 text-sm">Kota Bangun, Kalimantan Timur, Indonesia</p>
+                    <p class="text-gray-600 text-sm">Kota Bangun II, Kecamatan Kota Bangun, Kabupaten Kutai Kartanegara, Kalimantan Timur</p>
                 </div>
                 <div class="bg-gray-50 rounded-xl p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-2">Pemesanan</h3>

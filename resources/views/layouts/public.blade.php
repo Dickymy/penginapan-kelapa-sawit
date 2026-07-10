@@ -4,8 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Penginapan Kelapa Sawit')</title>
+    <title>@yield('title', 'Penginapan Kelapa Sawit — Penginapan di Kota Bangun II')</title>
     @yield('meta')
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen flex flex-col bg-white text-gray-800 font-sans">
@@ -24,10 +25,10 @@
                 <nav class="hidden lg:flex items-center space-x-1 text-sm">
                     <a href="{{ route('home') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('home') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Beranda</a>
                     <a href="{{ route('rooms.index') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('rooms.*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Kamar</a>
-                    <a href="{{ route('about') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('about') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Tentang</a>
                     <a href="{{ route('location') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('location') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Lokasi</a>
                     <a href="{{ route('policy') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('policy') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Kebijakan</a>
                     <a href="{{ route('booking.verify.form') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('booking.verify*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Cek Booking</a>
+                    <a href="{{ route('home') }}#cari-kamar" class="ml-2 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition">Cari Kamar</a>
                 </nav>
 
                 {{-- Desktop Account --}}
@@ -130,16 +131,18 @@
 
                 {{-- Drawer Navigation --}}
                 <nav class="flex-1 overflow-y-auto px-4 py-4 space-y-1">
-                    <p class="px-3 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Utama</p>
-                    <a href="{{ route('home') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('home') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Beranda</a>
+                    <p class="px-3 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Pesan</p>
+                    <a href="{{ route('home') }}#cari-kamar" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm text-primary-700 bg-primary-50 font-medium">Cari Kamar</a>
                     <a href="{{ route('rooms.index') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('rooms.*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Kamar</a>
-                    <a href="{{ route('home') }}#cari-kamar" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('availability.*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Cek Ketersediaan</a>
+
+                    <p class="px-3 py-1 pt-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Booking</p>
+                    <a href="{{ route('booking.verify.form') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('booking.verify*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Cek Booking</a>
 
                     <p class="px-3 py-1 pt-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Informasi</p>
-                    <a href="{{ route('about') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('about') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Tentang</a>
+                    <a href="{{ route('home') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('home') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Beranda</a>
                     <a href="{{ route('location') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('location') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Lokasi</a>
+                    <a href="{{ route('about') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('about') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Tentang</a>
                     <a href="{{ route('policy') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('policy') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Kebijakan</a>
-                    <a href="{{ route('booking.verify.form') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('booking.verify*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Cek Booking</a>
                 </nav>
 
                 {{-- Drawer Footer (Account) --}}
@@ -168,6 +171,7 @@
                             Keluar
                         </button>
                     @else
+                        <p class="text-xs text-gray-500 px-3 mb-1">Simpan booking dan kumpulkan poin.</p>
                         <a href="{{ route('login') }}" @click="open = false" class="block w-full px-4 py-2.5 text-center text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition">
                             Masuk
                         </a>
@@ -201,38 +205,50 @@
     </main>
 
     {{-- Footer --}}
-    <footer class="bg-gray-800 text-gray-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+    <footer class="bg-gray-50 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm">
+                {{-- Property --}}
                 <div>
-                    <h3 class="text-white font-bold text-lg mb-3">Penginapan Kelapa Sawit</h3>
-                    <p class="text-sm text-gray-400">Kota Bangun, Kalimantan Timur</p>
+                    <p class="font-semibold text-gray-800">Penginapan Kelapa Sawit</p>
+                    <p class="text-gray-500 mt-1">Kota Bangun II, Kutai Kartanegara, Kalimantan Timur</p>
                 </div>
+                {{-- Quick Links --}}
                 <div>
-                    <h4 class="text-white font-medium text-sm mb-3">Navigasi</h4>
-                    <nav class="space-y-2 text-sm">
-                        <a href="{{ route('rooms.index') }}" class="block text-gray-400 hover:text-white transition">Kamar</a>
-                        <a href="{{ route('about') }}" class="block text-gray-400 hover:text-white transition">Tentang</a>
-                        <a href="{{ route('location') }}" class="block text-gray-400 hover:text-white transition">Lokasi</a>
-                        <a href="{{ route('policy') }}" class="block text-gray-400 hover:text-white transition">Kebijakan</a>
-                        <a href="{{ route('booking.verify.form') }}" class="block text-gray-400 hover:text-white transition">Cek Booking</a>
+                    <p class="font-medium text-gray-700 mb-2">Tautan Cepat</p>
+                    <nav class="space-y-1 text-gray-500">
+                        <a href="{{ route('rooms.index') }}" class="block hover:text-primary-600 transition">Kamar</a>
+                        <a href="{{ route('location') }}" class="block hover:text-primary-600 transition">Lokasi</a>
+                        <a href="{{ route('policy') }}" class="block hover:text-primary-600 transition">Kebijakan</a>
+                        <a href="{{ route('booking.verify.form') }}" class="block hover:text-primary-600 transition">Cek Booking</a>
                     </nav>
                 </div>
+                {{-- Contact --}}
                 <div>
-                    <h4 class="text-white font-medium text-sm mb-3">Akun</h4>
-                    <nav class="space-y-2 text-sm">
+                    <p class="font-medium text-gray-700 mb-2">Hubungi</p>
+                    <nav class="space-y-1 text-gray-500">
+                        @php $footerWa = \App\Support\WhatsApp::url(\App\Models\Setting::get('contact', 'whatsapp', '')); @endphp
+                        @if($footerWa)
+                        <a href="{{ $footerWa }}" target="_blank" rel="noopener" class="block hover:text-green-600 transition">WhatsApp</a>
+                        @endif
+                        @php $footerEmail = \App\Models\Setting::get('contact', 'email', ''); @endphp
+                        @if($footerEmail)
+                        <a href="mailto:{{ $footerEmail }}" class="block hover:text-primary-600 transition">{{ $footerEmail }}</a>
+                        @endif
+                        @php $footerMapLink = \App\Models\Setting::get('contact', 'map_link', '') ?: \App\Models\Setting::get('contact', 'map_url', ''); @endphp
+                        @if($footerMapLink)
+                        <a href="{{ $footerMapLink }}" target="_blank" rel="noopener" class="block hover:text-primary-600 transition">Google Maps</a>
+                        @endif
                         @auth
-                            <a href="{{ route('member.dashboard') }}" class="block text-gray-400 hover:text-white transition">Dashboard</a>
-                            <a href="{{ route('member.bookings.index') }}" class="block text-gray-400 hover:text-white transition">Booking Saya</a>
+                        <a href="{{ route('member.dashboard') }}" class="block hover:text-primary-600 transition">Akun Saya</a>
                         @else
-                            <a href="{{ route('login') }}" class="block text-gray-400 hover:text-white transition">Masuk</a>
-                            <a href="{{ route('register') }}" class="block text-gray-400 hover:text-white transition">Daftar</a>
+                        <a href="{{ route('login') }}" class="block hover:text-primary-600 transition">Masuk / Daftar</a>
                         @endauth
                     </nav>
                 </div>
             </div>
-            <div class="mt-8 pt-6 border-t border-gray-700 text-center text-xs text-gray-500">
-                &copy; {{ date('Y') }} Penginapan Kelapa Sawit. Seluruh hak dilindungi.
+            <div class="mt-6 pt-4 border-t border-gray-200 text-center text-xs text-gray-400">
+                &copy; {{ date('Y') }} Penginapan Kelapa Sawit
             </div>
         </div>
     </footer>

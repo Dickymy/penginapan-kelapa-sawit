@@ -61,7 +61,12 @@
 
                 {{-- Guest Info --}}
                 <div class="bg-white border border-gray-200 rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Informasi Tamu</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-1">Informasi Tamu</h2>
+                    @guest
+                    <p class="text-sm text-gray-500 mb-4">Tidak perlu akun untuk memesan. <a href="{{ route('login') }}" class="text-primary-600 hover:underline">Masuk</a> agar data terisi otomatis dan booking tersimpan di akun.</p>
+                    @else
+                    <p class="text-sm text-gray-500 mb-4">Data di bawah terisi dari akun Anda.</p>
+                    @endguest
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {{-- Nama --}}
@@ -134,7 +139,7 @@
                                 Permintaan Khusus
                             </label>
                             <textarea name="special_request" id="special_request" rows="3"
-                                      placeholder="Contoh: Kamar di lantai bawah, extra bantal, dll."
+                                      placeholder="Contoh: extra bantal, kedatangan malam, dll."
                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">{{ old('special_request') }}</textarea>
                             <x-form-error field="special_request" />
                         </div>
