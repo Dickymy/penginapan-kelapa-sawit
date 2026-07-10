@@ -66,8 +66,13 @@
                     {{-- Room Image --}}
                     <div class="md:w-72 h-48 md:h-auto flex-shrink-0">
                         @if($item['room_type']->coverImage)
-                            <img src="{{ Storage::disk('public')->url($item['room_type']->coverImage->path) }}"
+                            <img src="{{ $item['room_type']->coverImage->medium_url }}"
+                                 srcset="{{ $item['room_type']->coverImage->thumb_url }} 480w, {{ $item['room_type']->coverImage->medium_url }} 960w"
+                                 sizes="(max-width: 768px) 100vw, 288px"
                                  alt="{{ $item['room_type']->name }}"
+                                 loading="lazy"
+                                 decoding="async"
+                                 width="480" height="360"
                                  class="w-full h-full object-cover">
                         @else
                             <div class="w-full h-full bg-gray-200 flex items-center justify-center">

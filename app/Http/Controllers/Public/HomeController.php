@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\Gallery;
 use App\Models\PolicyVersion;
 use App\Models\Room;
 use App\Models\RoomType;
@@ -35,6 +36,9 @@ class HomeController extends Controller
         // Policy summary for quick display
         $policy = PolicyVersion::current()->first();
 
+        // Gallery preview (first 8 active photos)
+        $galleryPhotos = Gallery::active()->ordered()->take(8)->get();
+
         return view('public.home', compact(
             'roomTypes',
             'cheapestPrice',
@@ -46,7 +50,8 @@ class HomeController extends Controller
             'mapLink',
             'mapUrl',
             'email',
-            'policy'
+            'policy',
+            'galleryPhotos'
         ));
     }
 }
