@@ -22,8 +22,8 @@ class RegistrationTest extends TestCase
             'name' => 'Test User',
             'email' => 'test@example.com',
             'whatsapp' => '08123456789',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123',
+            'password_confirmation' => 'Password123',
         ]);
 
         $this->assertAuthenticated();
@@ -39,8 +39,8 @@ class RegistrationTest extends TestCase
             'name' => '',
             'email' => 'test@example.com',
             'whatsapp' => '08123456789',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123',
+            'password_confirmation' => 'Password123',
         ]);
 
         $response->assertSessionHasErrors('name');
@@ -54,8 +54,8 @@ class RegistrationTest extends TestCase
             'name' => 'Test',
             'email' => 'existing@example.com',
             'whatsapp' => '08123456789',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123',
+            'password_confirmation' => 'Password123',
         ]);
 
         $response->assertSessionHasErrors('email');
@@ -67,8 +67,8 @@ class RegistrationTest extends TestCase
             'name' => 'Test User',
             'email' => 'Test@Example.COM',
             'whatsapp' => '08123456789',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123',
+            'password_confirmation' => 'Password123',
         ]);
 
         $this->assertDatabaseHas('users', [

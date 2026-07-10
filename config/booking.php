@@ -41,5 +41,5 @@ return [
 
     'check_in_time' => env('BOOKING_CHECK_IN_TIME', '14:00'),
     'check_out_time' => env('BOOKING_CHECK_OUT_TIME', '12:00'),
-
+    'latest_arrival_time' => env('BOOKING_LATEST_ARRIVAL_TIME', '23:30'),
 ];

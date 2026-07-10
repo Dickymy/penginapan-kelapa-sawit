@@ -25,8 +25,15 @@ class UpdateUserPassword implements UpdatesUserPasswords
             'current_password' => ['required', 'string', 'current_password:web'],
             'password' => $this->passwordRules(),
         ], [
-            'current_password.current_password' => __('The provided password does not match your current password.'),
+            'current_password.current_password' => 'Kata sandi saat ini tidak sesuai.',
         ])->validateWithBag('updatePassword');
+
+        // Pastikan kata sandi baru berbeda dari yang lama
+        if (Hash::check($input['password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'password' => 'Kata sandi baru tidak boleh sama dengan kata sandi saat ini.',
+            ])->errorBag('updatePassword');
+        }
 
         $user->forceFill([
             'password' => Hash::make($input['password']),

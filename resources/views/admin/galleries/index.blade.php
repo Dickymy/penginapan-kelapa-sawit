@@ -33,7 +33,7 @@
 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
     @foreach($galleries as $gallery)
     <div class="relative group border rounded-lg overflow-hidden bg-white shadow-sm">
-        <img src="{{ asset('storage/' . $gallery->path) }}" alt="{{ $gallery->title ?? 'Gallery' }}" class="w-full h-40 object-cover">
+        <img src="{{ Storage::disk('public')->url($gallery->path) }}" alt="{{ $gallery->title ?? 'Gallery' }}" class="w-full h-40 object-cover">
         @if($gallery->title)
             <p class="text-xs text-gray-600 p-2 truncate">{{ $gallery->title }}</p>
         @endif

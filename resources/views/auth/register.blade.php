@@ -38,11 +38,12 @@
 
             <div>
                 <label for="whatsapp" class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp <span class="text-red-500">*</span></label>
-                <input type="text" name="whatsapp" id="whatsapp" value="{{ old('whatsapp') }}" required
+                <input type="tel" name="whatsapp" id="whatsapp" value="{{ old('whatsapp') }}" required
                        autocomplete="tel"
+                       inputmode="tel"
                        placeholder="08xxxxxxxxxx"
                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 @error('whatsapp') border-red-300 @enderror">
-                <p class="mt-1 text-xs text-gray-500">Format: 08xxxxxxxxxx (tanpa spasi atau tanda baca)</p>
+                <p class="mt-1 text-xs text-gray-500">Format: 08xx, 628xx, atau +628xx</p>
                 <x-form-error field="whatsapp" />
             </div>
 
@@ -51,8 +52,36 @@
             </div>
 
             <div x-data="{ confirmVal: '' }">
-                <x-password-input name="password_confirmation" label="Konfirmasi kata sandi" :required="true" autocomplete="new-password" />
+                <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">
+                    Konfirmasi kata sandi <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <input :type="show ? 'text' : 'password'"
+                           name="password_confirmation"
+                           id="password_confirmation"
+                           required
+                           x-model="confirmVal"
+                           autocomplete="new-password"
+                           class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 pr-10">
+                </div>
+                <div class="mt-1.5" x-show="confirmVal.length > 0" x-cloak>
+                    <p class="text-xs flex items-center gap-1.5"
+                       :class="confirmVal === password ? 'text-green-600' : 'text-red-500'">
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"
+                             x-show="confirmVal === password">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"
+                             x-show="confirmVal !== password" x-cloak>
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                        <span x-text="confirmVal === password ? 'Kata sandi cocok' : 'Konfirmasi kata sandi belum sama'"></span>
+                    </p>
+                </div>
+                <x-form-error field="password_confirmation" />
             </div>
+
+            <p class="text-xs text-gray-400">Contoh pola: <code class="bg-gray-100 px-1 py-0.5 rounded">SawitAman2026!</code> — jangan gunakan contoh ini secara langsung.</p>
 
             <button type="submit"
                     :disabled="submitting"

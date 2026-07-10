@@ -30,6 +30,18 @@ class BookingController extends Controller
         if ($request->filled('source')) {
             $query->where('source', $request->source);
         }
+        if ($request->filled('check_in')) {
+            $query->where('check_in', $request->check_in);
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('booking_code', 'like', "%{$search}%")
+                  ->orWhere('guest_name', 'like', "%{$search}%")
+                  ->orWhere('guest_whatsapp', 'like', "%{$search}%")
+                  ->orWhere('guest_email', 'like', "%{$search}%");
+            });
+        }
 
         $bookings = $query->paginate(20);
         return view('admin.bookings.index', compact('bookings'));
@@ -39,7 +51,14 @@ class BookingController extends Controller
     {
         $rooms = Room::with('roomType')->where('is_active', true)->orderBy('sort_order')->get();
         $sources = BookingSource::cases();
-        return view('admin.bookings.create', compact('rooms', 'sources'));
+        $roomsJson = $rooms->map(fn($r) => [
+            'id' => $r->id,
+            'name' => $r->name,
+            'type_name' => $r->roomType->name,
+            'base_price' => $r->roomType->base_price,
+            'capacity' => $r->roomType->capacity,
+        ])->values();
+        return view('admin.bookings.create', compact('rooms', 'sources', 'roomsJson'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -52,10 +71,11 @@ class BookingController extends Controller
             'guest_name' => ['required', 'string', 'max:150'],
             'guest_email' => ['nullable', 'email'],
             'guest_whatsapp' => ['required', 'string', 'max:32'],
-            'source' => ['required', 'string'],
+            'source' => ['required', 'string', \Illuminate\Validation\Rule::in(array_column(BookingSource::cases(), 'value'))],
             'price_per_night' => ['required', 'integer', 'min:0'],
-            'payment_status' => ['required', 'string'],
+            'payment_status' => ['required', 'string', \Illuminate\Validation\Rule::in(array_column(PaymentStatus::cases(), 'value'))],
             'internal_notes' => ['nullable', 'string'],
+            'hold_minutes' => ['nullable', 'integer', 'min:1', 'max:10080'],
         ]);
 
         $admin = Auth::guard('admin')->user();
@@ -80,15 +100,20 @@ class BookingController extends Controller
             if (!$booking->status->canTransitionTo(BookingStatus::Cancelled)) {
                 abort(422, 'Booking tidak dapat dibatalkan dari status saat ini.');
             }
+
+            // Capture fromStatus BEFORE update
+            $fromStatus = $booking->status->value;
+
             $booking->update([
                 'status' => BookingStatus::Cancelled->value,
                 'cancelled_at' => now(),
                 'cancellation_reason' => $request->reason,
                 'cancelled_by_admin_id' => Auth::guard('admin')->id(),
             ]);
+
             BookingStatusHistory::create([
                 'booking_id' => $booking->id,
-                'from_status' => $booking->getOriginal('status'),
+                'from_status' => $fromStatus,
                 'to_status' => BookingStatus::Cancelled->value,
                 'reason' => $request->reason,
                 'actor_type' => 'admin',

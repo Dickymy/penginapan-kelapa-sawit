@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\RoomType;
 use App\Services\AvailabilityService;
+use App\Services\BookingAccessService;
 use App\Services\BookingService;
 use App\Services\PricingService;
 use Carbon\Carbon;
@@ -21,6 +22,7 @@ class BookingController extends Controller
         private BookingService $bookingService,
         private AvailabilityService $availability,
         private PricingService $pricing,
+        private BookingAccessService $accessService,
     ) {}
 
     /**
@@ -75,7 +77,7 @@ class BookingController extends Controller
             'guest_name' => ['required', 'string', 'max:150'],
             'guest_email' => ['required', 'email', 'max:191'],
             'guest_whatsapp' => ['required', 'string', 'max:32'],
-            'arrival_estimate' => ['nullable', 'string', 'max:100'],
+            'arrival_estimate' => ['nullable', 'string', \Illuminate\Validation\Rule::in(\App\Support\ArrivalTimeSlots::validValues())],
             'special_request' => ['nullable', 'string', 'max:1000'],
             'policy_accepted' => ['accepted'],
             'idempotency_key' => ['required', 'string'],
@@ -96,6 +98,9 @@ class BookingController extends Controller
             // Clear idempotency key from session
             $request->session()->forget('booking_idempotency_key');
 
+            // Grant session access to the booking for confirmation/payment
+            $this->accessService->grantCreationAccess($request, $booking);
+
             // Store token temporarily in session for confirmation page
             if ($rawToken) {
                 $request->session()->flash('booking_raw_token', $rawToken);
@@ -114,6 +119,12 @@ class BookingController extends Controller
     public function confirmation(Request $request, string $bookingCode): View
     {
         $booking = Booking::where('booking_code', $bookingCode)->firstOrFail();
+
+        // Verify access (session grant from just-created or verified)
+        if (!$this->accessService->hasAccess($request, $booking)) {
+            abort(403, 'Anda tidak memiliki akses ke halaman ini.');
+        }
+
         $rawToken = $request->session()->get('booking_raw_token', '');
 
         return view('public.booking.confirmation', compact('booking', 'rawToken'));
@@ -145,24 +156,27 @@ class BookingController extends Controller
             return back()->with('error', 'Booking tidak ditemukan. Periksa kembali kode booking Anda.');
         }
 
+        $verified = false;
+
         // Verify via token
         if (! empty($validated['access_token'])) {
-            $inputHash = hash('sha256', $validated['access_token']);
-            if (hash_equals($booking->guest_access_token_hash ?? '', $inputHash)) {
-                return view('public.booking.status', compact('booking'));
-            }
+            $verified = $this->accessService->verifyByToken($booking, $validated['access_token']);
         }
 
-        // Verify via email/whatsapp
-        if (! empty($validated['guest_email']) && strtolower($validated['guest_email']) === strtolower($booking->guest_email)) {
+        // Verify via email
+        if (! $verified && ! empty($validated['guest_email'])) {
+            $verified = $this->accessService->verifyByEmail($booking, $validated['guest_email']);
+        }
+
+        // Verify via WhatsApp
+        if (! $verified && ! empty($validated['guest_whatsapp'])) {
+            $verified = $this->accessService->verifyByWhatsApp($booking, $validated['guest_whatsapp']);
+        }
+
+        if ($verified) {
+            // Grant session access for subsequent pages (payment, invoice)
+            $this->accessService->grantAccess($request, $booking);
             return view('public.booking.status', compact('booking'));
-        }
-
-        if (! empty($validated['guest_whatsapp'])) {
-            $normalized = \App\Support\Phone\PhoneNormalizer::normalize($validated['guest_whatsapp']);
-            if ($normalized === $booking->guest_whatsapp) {
-                return view('public.booking.status', compact('booking'));
-            }
         }
 
         return back()->with('error', 'Verifikasi gagal. Pastikan data yang Anda masukkan benar.');

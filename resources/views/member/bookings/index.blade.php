@@ -3,44 +3,88 @@
 @section('title', 'Booking Saya')
 
 @section('content')
-<div class="space-y-6">
-    <h1 class="text-2xl font-bold text-gray-800">Booking Saya</h1>
+<div class="space-y-5">
+    <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Booking Saya</h1>
 
     {{-- Tabs --}}
-    <div class="border-b border-gray-200">
-        <nav class="flex gap-4">
+    <div class="border-b border-gray-200 overflow-x-auto">
+        <nav class="flex gap-4 min-w-max">
             <a href="{{ route('member.bookings.index', ['tab' => 'active']) }}"
-               class="pb-2 border-b-2 text-sm font-medium {{ $tab === 'active' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+               class="pb-2 border-b-2 text-sm font-medium whitespace-nowrap {{ $tab === 'active' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 Aktif
             </a>
             <a href="{{ route('member.bookings.index', ['tab' => 'completed']) }}"
-               class="pb-2 border-b-2 text-sm font-medium {{ $tab === 'completed' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+               class="pb-2 border-b-2 text-sm font-medium whitespace-nowrap {{ $tab === 'completed' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 Selesai
             </a>
             <a href="{{ route('member.bookings.index', ['tab' => 'cancelled']) }}"
-               class="pb-2 border-b-2 text-sm font-medium {{ $tab === 'cancelled' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
-                Batal
+               class="pb-2 border-b-2 text-sm font-medium whitespace-nowrap {{ $tab === 'cancelled' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                Batal / Expired
             </a>
         </nav>
     </div>
 
     {{-- Booking Cards --}}
-    <div class="space-y-4">
+    <div class="space-y-3">
         @forelse($bookings as $booking)
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-mono text-gray-500">{{ $booking->booking_code }}</span>
-                <x-status-badge :status="$booking->status" />
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5">
+            <div class="flex items-start justify-between gap-2 mb-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <x-status-badge :status="$booking->status" />
+                    <span class="text-xs font-mono text-gray-400">{{ $booking->booking_code }}</span>
+                </div>
             </div>
-            <p class="font-semibold text-gray-800">{{ $booking->room_type_name_snapshot }} — {{ $booking->room_name_snapshot }}</p>
-            <p class="text-sm text-gray-600">{{ $booking->check_in->format('d M Y') }} &rarr; {{ $booking->check_out->format('d M Y') }} ({{ $booking->nights }} malam)</p>
-            <div class="flex items-center justify-between mt-3">
-                <span class="text-lg font-bold text-gray-800">{{ $booking->formatted_total }}</span>
-                <a href="{{ route('member.bookings.show', $booking) }}" class="text-sm text-primary-600 hover:text-primary-800">Lihat Detail &rarr;</a>
+            <p class="font-semibold text-gray-800">{{ $booking->room_type_name_snapshot }}</p>
+            @if($booking->room_name_snapshot)
+                <p class="text-xs text-gray-500">{{ $booking->room_name_snapshot }}</p>
+            @endif
+            <p class="text-sm text-gray-600 mt-1">
+                <svg class="inline w-4 h-4 text-gray-400 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                {{ $booking->check_in->format('d M Y') }} → {{ $booking->check_out->format('d M Y') }} ({{ $booking->nights }} malam)
+            </p>
+
+            <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
+                <span class="text-base font-bold text-gray-800">{{ $booking->formatted_total }}</span>
+                <div class="flex items-center gap-2">
+                    @if($booking->status->value === 'pending_payment')
+                        <a href="{{ route('member.bookings.show', $booking) }}"
+                           class="inline-flex items-center px-3.5 py-2 text-sm font-medium text-white bg-amber-500 rounded-lg hover:bg-amber-600 transition">
+                            Bayar
+                        </a>
+                    @else
+                        <a href="{{ route('member.bookings.show', $booking) }}"
+                           class="text-sm text-primary-600 hover:text-primary-800 font-medium">
+                            Detail →
+                        </a>
+                    @endif
+                </div>
             </div>
         </div>
         @empty
-        <x-empty-state message="Belum ada booking pada kategori ini." action="{{ route('rooms.index') }}" action-text="Pesan Kamar" />
+        {{-- Enhanced Empty State --}}
+        <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            @if($tab === 'active')
+                <p class="mt-4 text-sm text-gray-600 font-medium">Belum ada booking aktif</p>
+                <p class="mt-1 text-xs text-gray-500">Cari kamar sesuai tanggal perjalanan Anda. Booking yang dibuat menggunakan akun ini akan muncul di sini.</p>
+                <div class="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <a href="{{ route('home') }}#cari-kamar" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        Cari Kamar
+                    </a>
+                    <a href="{{ route('member.claim.index') }}" class="text-sm text-gray-600 hover:text-primary-600">
+                        Punya kode booking? Klaim di sini
+                    </a>
+                </div>
+            @elseif($tab === 'completed')
+                <p class="mt-4 text-sm text-gray-600">Belum ada booking yang selesai.</p>
+                <p class="mt-1 text-xs text-gray-500">Booking yang telah Anda selesaikan akan muncul di sini.</p>
+            @else
+                <p class="mt-4 text-sm text-gray-600">Tidak ada booking yang dibatalkan.</p>
+            @endif
+        </div>
         @endforelse
     </div>
 

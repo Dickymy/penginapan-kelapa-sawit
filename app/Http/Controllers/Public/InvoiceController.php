@@ -4,25 +4,26 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Services\BookingAccessService;
 use App\Services\InvoiceService;
 use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
-    public function __construct(private InvoiceService $invoiceService) {}
+    public function __construct(
+        private InvoiceService $invoiceService,
+        private BookingAccessService $accessService,
+    ) {}
 
     public function download(Request $request, string $bookingCode)
     {
         $booking = Booking::where('booking_code', $bookingCode)->firstOrFail();
 
-        // Auth check: admin, member owner, or guest with token
-        $user = auth()->user();
-        $admin = auth('admin')->user();
-
-        if (!$admin && (!$user || $user->id !== $booking->user_id)) {
-            // Guest access via token
+        // Check access via BookingAccessService (covers admin, member owner, session grant)
+        if (!$this->accessService->hasAccess($request, $booking)) {
+            // Fallback: check URL token for legacy/direct links
             $token = $request->query('token');
-            if (!$token || hash('sha256', $token) !== $booking->guest_access_token_hash) {
+            if (!$token || !$this->accessService->verifyByToken($booking, $token)) {
                 abort(403, 'Akses tidak diizinkan.');
             }
         }

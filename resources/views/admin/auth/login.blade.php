@@ -8,6 +8,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-gray-100 flex items-center justify-center font-sans">
+    <x-toast />
     <div class="w-full max-w-sm px-4">
         <div class="bg-white rounded-xl shadow-lg p-8">
             <div class="text-center mb-6">

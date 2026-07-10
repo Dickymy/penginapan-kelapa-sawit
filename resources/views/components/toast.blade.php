@@ -105,6 +105,12 @@ aria-label="Notifikasi"
 </div>
 
 {{-- Auto-dispatch flash messages as toasts --}}
+@if(session('success'))
+<script>document.addEventListener('alpine:init', () => { setTimeout(() => window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', message: @json(session('success')) }})), 100) })</script>
+@endif
+@if(session('info'))
+<script>document.addEventListener('alpine:init', () => { setTimeout(() => window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'info', message: @json(session('info')) }})), 100) })</script>
+@endif
 @if(session('toast_success'))
 <script>document.addEventListener('alpine:init', () => { setTimeout(() => window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', message: @json(session('toast_success')) }})), 100) })</script>
 @endif
