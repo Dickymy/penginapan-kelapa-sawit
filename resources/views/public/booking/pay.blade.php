@@ -10,6 +10,20 @@
 <div class="max-w-2xl mx-auto px-4 py-8" x-data="paymentPage()">
     <h1 class="text-2xl font-bold text-gray-900 mb-6">Pembayaran</h1>
 
+    {{-- Sandbox Indicator --}}
+    @if(!config('midtrans.is_production'))
+    <div class="bg-orange-50 border border-orange-300 rounded-lg p-4 mb-6">
+        <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+            <p class="text-sm font-medium text-orange-800">
+                Mode Uji Coba — Jangan gunakan uang asli.
+            </p>
+        </div>
+    </div>
+    @endif
+
     {{-- Countdown --}}
     @if($booking->payment_expires_at && $booking->payment_expires_at->isFuture())
     <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">

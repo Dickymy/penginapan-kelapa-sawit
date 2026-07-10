@@ -103,7 +103,7 @@ class MidtransPaymentService
         ];
 
         try {
-            $snapToken = Snap::getSnapToken($params);
+            $snapToken = $this->getSnapTokenFromProvider($params);
         } catch (\Exception $e) {
             Log::error('Midtrans Snap API error', [
                 'booking_code' => $booking->booking_code,
@@ -119,6 +119,14 @@ class MidtransPaymentService
             'client_key' => config('midtrans.client_key'),
             'payment' => $payment,
         ];
+    }
+
+    /**
+     * Call Midtrans Snap API. Extracted for testability.
+     */
+    public function getSnapTokenFromProvider(array $params): string
+    {
+        return Snap::getSnapToken($params);
     }
 
     /**
@@ -149,10 +157,10 @@ class MidtransPaymentService
         // Find payment
         $payment = Payment::where('provider_order_id', $orderId)->first();
 
-        // Verify amount
+        // Verify amount (Midtrans sends "500000.00" as string)
         $amountValid = false;
         if ($payment) {
-            $amountValid = (int) $grossAmount == $payment->gross_amount;
+            $amountValid = (int) round((float) $grossAmount) === $payment->gross_amount;
         }
 
         // Save webhook event
