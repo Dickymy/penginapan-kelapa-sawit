@@ -1,66 +1,204 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Penginapan Kelapa Sawit
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Website resmi **Penginapan Kelapa Sawit** — penginapan di Kota Bangun II, Kutai Kartanegara, Kalimantan Timur.
 
-## About Laravel
+## Fitur
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Publik
+- Beranda dengan pencarian ketersediaan kamar
+- Daftar kamar dan detail tipe kamar
+- Booking tanpa login (guest booking)
+- Pembayaran online via Midtrans Snap
+- Cek status booking dengan verifikasi identitas
+- Invoice PDF
+- Halaman informasi: lokasi, tentang, kebijakan
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Member
+- Login/Register (email + Google OAuth)
+- Dashboard booking dan histori
+- Loyalty points (earn & redeem)
+- Claim guest booking ke akun member
+- Profil dan pengaturan WhatsApp
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Admin
+- Guard terpisah (`admin`)
+- Dashboard operasional (check-in/out hari ini, pending payment, okupansi)
+- Manajemen reservasi (manual booking, status transitions)
+- Manajemen kamar (tipe, kamar fisik, foto, fasilitas)
+- Blokir kamar (maintenance/renovasi)
+- Promosi dan loyalty points
+- Pengeluaran dan laporan (pendapatan, okupansi, laba, sumber booking)
+- Kebijakan dan pengaturan properti
+- Galeri foto
 
-## Learning Laravel
+## Stack Teknologi
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Layer | Teknologi |
+|-------|-----------|
+| Backend | Laravel 12.x, PHP 8.2+ |
+| Database | MySQL 8.0 |
+| Frontend | Blade, Tailwind CSS 4, Alpine.js 3 |
+| Build | Vite |
+| Auth | Laravel Fortify + Socialite (Google OAuth) |
+| Payment | Midtrans Snap (`midtrans/midtrans-php`) |
+| PDF | `barryvdh/laravel-dompdf` |
+| Testing | PHPUnit 11 |
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Requirement
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP 8.2+
+- MySQL 8.0+
+- Composer 2.x
+- Node.js 18+ & npm
+- Ekstensi PHP: BCMath, Ctype, Fileinfo, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML, GD/Imagick
 
-## Laravel Sponsors
+## Instalasi
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+# Clone repository
+git clone <repository-url>
+cd penginapan-kelapa-sawit
 
-### Premium Partners
+# Install dependencies
+composer install
+npm install
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+# Copy environment
+cp .env.example .env
+php artisan key:generate
 
-## Contributing
+# Konfigurasi .env (lihat bagian Konfigurasi di bawah)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Database
+php artisan migrate
+php artisan db:seed  # (jika tersedia seeder)
 
-## Code of Conduct
+# Storage link untuk foto
+php artisan storage:link
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Build frontend
+npm run build
+```
 
-## Security Vulnerabilities
+## Konfigurasi Environment
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Variabel penting di `.env`:
 
-## License
+```env
+APP_ENV=production
+APP_DEBUG=false
+APP_TIMEZONE=Asia/Makassar
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=penginapan_kelapa_sawit
+DB_USERNAME=
+DB_PASSWORD=
+
+# Midtrans
+MIDTRANS_SERVER_KEY=
+MIDTRANS_CLIENT_KEY=
+MIDTRANS_IS_PRODUCTION=false
+
+# Google OAuth
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=
+
+# Booking
+BOOKING_HOLD_MINUTES=30
+BOOKING_CHECK_IN_TIME=14:00
+BOOKING_CHECK_OUT_TIME=12:00
+
+# Loyalty
+LOYALTY_EARN_DIVISOR=1000
+LOYALTY_POINT_VALUE=50
+LOYALTY_MIN_REDEEM=100
+LOYALTY_MAX_REDEMPTION_PERCENT=20
+LOYALTY_EXPIRY_MONTHS=18
+```
+
+## Google OAuth
+
+1. Buat project di [Google Cloud Console](https://console.cloud.google.com/)
+2. Aktifkan Google+ API
+3. Buat OAuth 2.0 Client ID (Web application)
+4. Set redirect URI: `https://domain.com/auth/google/callback`
+5. Masukkan Client ID dan Secret ke `.env`
+
+## Midtrans
+
+1. Daftar di [Midtrans Dashboard](https://dashboard.midtrans.com/)
+2. Gunakan mode Sandbox untuk testing
+3. Salin Server Key dan Client Key ke `.env`
+4. Konfigurasi webhook URL: `https://domain.com/webhook/midtrans`
+5. Untuk production: set `MIDTRANS_IS_PRODUCTION=true`
+
+## Scheduler
+
+Tambahkan cron job untuk menjalankan Laravel scheduler:
+
+```
+* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Scheduled tasks:
+- `booking:expire-pending` — Expire booking yang melewati batas waktu pembayaran
+- `loyalty:expire-points` — Expire poin loyalitas yang kedaluwarsa
+
+## Testing
+
+```bash
+# Jalankan semua test
+php artisan test
+
+# Dengan coverage
+php artisan test --coverage
+```
+
+## Build Production
+
+```bash
+npm run build
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan event:cache
+```
+
+## Deployment Checklist
+
+- [ ] `APP_ENV=production`
+- [ ] `APP_DEBUG=false`
+- [ ] `APP_TIMEZONE=Asia/Makassar`
+- [ ] Semua secret terisi di `.env`
+- [ ] `MIDTRANS_IS_PRODUCTION=true` (jika live)
+- [ ] Webhook URL terdaftar di Midtrans Dashboard
+- [ ] Google OAuth redirect URI sesuai domain production
+- [ ] `php artisan migrate` berhasil
+- [ ] `php artisan storage:link`
+- [ ] `npm run build`
+- [ ] Config/route/view cached
+- [ ] Cron scheduler aktif
+- [ ] HTTPS aktif
+- [ ] File `.env` tidak accessible dari web
+
+## Arsitektur
+
+```
+app/
+├── Enums/          # PHP backed string enums (BookingStatus, PaymentStatus, dll)
+├── Http/Controllers/
+│   ├── Public/     # Guest booking, availability, payment
+│   ├── Member/     # Dashboard, booking history, points, profile
+│   ├── Admin/      # Reservasi, kamar, keuangan, laporan
+│   └── Webhook/    # Midtrans webhook
+├── Services/       # Domain logic (Booking, Availability, Pricing, Midtrans, Loyalty)
+├── Models/         # Eloquent models
+└── Console/Commands/  # Expire bookings, expire points, reconcile payments
+```
+
+## Lisensi
+
+Hak cipta © Penginapan Kelapa Sawit. Seluruh hak dilindungi.

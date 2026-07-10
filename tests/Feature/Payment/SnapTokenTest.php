@@ -82,7 +82,7 @@ class SnapTokenTest extends TestCase
         $service = app(MidtransPaymentService::class);
 
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Batas waktu pembayaran telah berlewat.');
+        $this->expectExceptionMessage('Batas waktu pembayaran telah berakhir.');
 
         $service->createOrResumePayment($booking);
     }

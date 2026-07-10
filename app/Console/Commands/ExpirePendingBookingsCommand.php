@@ -35,6 +35,12 @@ class ExpirePendingBookingsCommand extends Command
                 }
 
                 $bookingService->expirePendingBooking($locked);
+
+                // Release reserved promotion quota
+                app(\App\Services\PromotionService::class)->releaseForBooking($locked);
+
+                // Reverse any redeemed loyalty points
+                app(\App\Services\LoyaltyPointService::class)->reverseRedemptionForBooking($locked);
             });
 
             $count++;

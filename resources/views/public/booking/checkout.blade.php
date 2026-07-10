@@ -49,7 +49,9 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {{-- Form --}}
         <div class="lg:col-span-2">
-            <form action="{{ route('booking.store') }}" method="POST" class="space-y-6">
+            <form action="{{ route('booking.store') }}" method="POST" class="space-y-6"
+                  x-data
+                  @submit="$store.checkoutForm.submitting = true">
                 @csrf
 
                 {{-- Hidden Fields --}}
@@ -163,37 +165,35 @@
                 </div>
 
                 {{-- Submit --}}
-                <div x-data="{ submitting: false }" class="hidden md:block">
+                <div class="hidden md:block">
                     <button type="submit"
-                            x-on:click="setTimeout(() => submitting = true, 50)"
-                            :disabled="submitting"
+                            :disabled="$store.checkoutForm.submitting"
                             class="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 transition text-center disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center">
-                        <svg x-show="submitting" x-cloak class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                        <svg x-show="$store.checkoutForm.submitting" x-cloak class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span x-show="!submitting">Pesan Sekarang</span>
-                        <span x-show="submitting" x-cloak>Membuat booking...</span>
+                        <span x-show="!$store.checkoutForm.submitting">Pesan Sekarang</span>
+                        <span x-show="$store.checkoutForm.submitting" x-cloak>Membuat booking...</span>
                     </button>
                 </div>
 
                 {{-- Mobile Sticky Footer --}}
-                <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:hidden z-30 safe-area-bottom" x-data="{ submitting: false }">
+                <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:hidden z-30 safe-area-bottom">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-xs text-gray-500">Total</p>
                             <p class="text-lg font-bold text-primary-600">Rp{{ number_format($quote['total_amount'], 0, ',', '.') }}</p>
                         </div>
                         <button type="submit"
-                                x-on:click="setTimeout(() => submitting = true, 50)"
-                                :disabled="submitting"
+                                :disabled="$store.checkoutForm.submitting"
                                 class="bg-primary-600 text-white py-2.5 px-6 rounded-lg font-semibold hover:bg-primary-700 transition disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center">
-                            <svg x-show="submitting" x-cloak class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <svg x-show="$store.checkoutForm.submitting" x-cloak class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <span x-show="!submitting">Pesan Sekarang</span>
-                            <span x-show="submitting" x-cloak>Memproses...</span>
+                            <span x-show="!$store.checkoutForm.submitting">Pesan Sekarang</span>
+                            <span x-show="$store.checkoutForm.submitting" x-cloak>Memproses...</span>
                         </button>
                     </div>
                 </div>

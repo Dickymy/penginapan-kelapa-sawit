@@ -8,6 +8,7 @@ use App\Models\Booking;
 use App\Models\BookingStatusHistory;
 use App\Models\Payment;
 use App\Models\PaymentWebhookEvent;
+use App\Services\PromotionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Midtrans\Config as MidtransConfig;
@@ -37,7 +38,7 @@ class MidtransPaymentService
         }
 
         if ($booking->payment_expires_at && $booking->payment_expires_at->isPast()) {
-            throw new \RuntimeException('Batas waktu pembayaran telah berlewat.');
+            throw new \RuntimeException('Batas waktu pembayaran telah berakhir.');
         }
 
         // Find existing usable payment attempt
@@ -342,6 +343,9 @@ class MidtransPaymentService
                 'actor_type' => 'system',
                 'created_at' => now(),
             ]);
+
+            // Consume promotion reservation (reserved → consumed)
+            app(PromotionService::class)->consumeForBooking($booking);
         } elseif ($booking->status === BookingStatus::Expired) {
             // Late payment: don't auto-confirm, flag for admin
             $booking->update([
