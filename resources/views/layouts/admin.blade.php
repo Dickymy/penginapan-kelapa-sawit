@@ -11,7 +11,9 @@
     {{-- Toast --}}
     <x-toast />
 
-    <div class="flex h-screen overflow-hidden">
+    {{-- Desktop: fixed sidebar layout --}}
+    {{-- Mobile: normal document flow (body scrolls naturally) --}}
+    <div class="md:flex md:h-screen md:overflow-hidden">
         {{-- Desktop Sidebar --}}
         <aside class="hidden md:flex md:flex-shrink-0">
             <div class="w-60 bg-white border-r border-gray-200 flex flex-col h-full">
@@ -56,9 +58,9 @@
         </aside>
 
         {{-- Main Content Area --}}
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="flex-1 flex flex-col md:overflow-hidden">
             {{-- Topbar --}}
-            <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0">
+            <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0 sticky top-0 z-20 md:static">
                 <div class="flex items-center gap-3">
                     <button @click="sidebarOpen = !sidebarOpen" class="md:hidden p-1.5 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -97,7 +99,8 @@
             </header>
 
             {{-- Page Content --}}
-            <main class="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6">
+            {{-- Mobile: normal flow (body scrolls), Desktop: overflow-y-auto on main --}}
+            <main class="flex-1 md:overflow-y-auto p-4 md:p-6 pb-20 md:pb-6">
                 @yield('content')
             </main>
         </div>

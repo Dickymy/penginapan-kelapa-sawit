@@ -36,9 +36,9 @@
     </div>
 
     <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <a href="{{ route('booking.verify.form') }}"
+        <a href="{{ route('booking.guest.detail', $booking->booking_code) }}"
            class="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition">
-            Cek Status Booking
+            Lihat Detail Booking
         </a>
         <a href="{{ route('home') }}"
            class="inline-block bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition">

@@ -84,7 +84,19 @@
 
                 {{-- Booking Form --}}
                 <form action="{{ route('availability.search') }}" method="GET" class="space-y-3 border-t pt-4"
-                      x-data="{ submitting: false, checkIn: '', checkOut: '', error: '' }"
+                      x-data="{
+                          submitting: false,
+                          checkIn: '{{ request('check_in', date('Y-m-d')) }}',
+                          checkOut: '{{ request('check_out', date('Y-m-d', strtotime('+1 day'))) }}',
+                          error: '',
+                          adjustCheckOut() {
+                              if (this.checkOut <= this.checkIn) {
+                                  const next = new Date(this.checkIn);
+                                  next.setDate(next.getDate() + 1);
+                                  this.checkOut = next.toISOString().split('T')[0];
+                              }
+                          }
+                      }"
                       @submit.prevent="
                           error = '';
                           if (!checkIn) { error = 'Pilih tanggal check-in'; return; }
@@ -108,14 +120,13 @@
                         <label class="block text-xs font-medium text-gray-600 mb-1">Tanggal check-in <span class="text-red-500">*</span></label>
                         <input type="date" name="check_in" min="{{ date('Y-m-d') }}" required
                                x-model="checkIn"
-                               value="{{ request('check_in') }}"
+                               @change="adjustCheckOut()"
                                class="w-full border-gray-300 rounded-lg text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-600 mb-1">Tanggal check-out <span class="text-red-500">*</span></label>
                         <input type="date" name="check_out" :min="checkIn || '{{ date('Y-m-d', strtotime('+1 day')) }}'" required
                                x-model="checkOut"
-                               value="{{ request('check_out') }}"
                                class="w-full border-gray-300 rounded-lg text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
                     </div>
                     <div>

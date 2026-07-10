@@ -115,6 +115,7 @@ class BookingController extends Controller
 
     /**
      * Show booking confirmation page.
+     * After booking is created, guest is shown a success page with booking details.
      */
     public function confirmation(Request $request, string $bookingCode): View
     {
@@ -126,59 +127,100 @@ class BookingController extends Controller
         }
 
         $rawToken = $request->session()->get('booking_raw_token', '');
+        $booking->load(['room.roomType', 'statusHistories']);
 
         return view('public.booking.confirmation', compact('booking', 'rawToken'));
     }
 
     /**
-     * Show form to verify booking access.
+     * Smart "Booking Saya" route.
+     * - Guest: show search form
+     * - Member: redirect to member bookings
      */
-    public function verifyForm(): View
+    public function myBooking(): View|RedirectResponse
     {
-        return view('public.booking.verify');
+        if (auth()->check()) {
+            return redirect()->route('member.bookings.index');
+        }
+
+        return view('public.booking.my-booking');
+    }
+
+    /**
+     * Show form to verify booking access (legacy route kept for compatibility).
+     */
+    public function verifyForm(): View|RedirectResponse
+    {
+        if (auth()->check()) {
+            return redirect()->route('member.bookings.index');
+        }
+
+        return view('public.booking.my-booking');
     }
 
     /**
      * Verify and show booking status.
+     * Simplified: only booking_code + guest_whatsapp required for guest.
+     * Also supports token-based access via query param.
      */
     public function verifyAccess(Request $request): View|RedirectResponse
     {
         $validated = $request->validate([
-            'booking_code' => ['required', 'string'],
-            'access_token' => ['nullable', 'string'],
-            'guest_email' => ['nullable', 'email'],
-            'guest_whatsapp' => ['nullable', 'string'],
+            'booking_code' => ['required', 'string', 'max:50'],
+            'guest_whatsapp' => ['required', 'string', 'max:32'],
         ]);
 
-        $booking = Booking::where('booking_code', $validated['booking_code'])->first();
+        $booking = Booking::where('booking_code', trim($validated['booking_code']))->first();
 
         if (! $booking) {
-            return back()->with('error', 'Booking tidak ditemukan. Periksa kembali kode booking Anda.');
+            return back()
+                ->withInput()
+                ->with('error', 'Booking tidak ditemukan. Periksa kembali kode booking dan nomor WhatsApp Anda.');
         }
 
-        $verified = false;
-
-        // Verify via token
-        if (! empty($validated['access_token'])) {
-            $verified = $this->accessService->verifyByToken($booking, $validated['access_token']);
-        }
-
-        // Verify via email
-        if (! $verified && ! empty($validated['guest_email'])) {
-            $verified = $this->accessService->verifyByEmail($booking, $validated['guest_email']);
-        }
-
-        // Verify via WhatsApp
-        if (! $verified && ! empty($validated['guest_whatsapp'])) {
-            $verified = $this->accessService->verifyByWhatsApp($booking, $validated['guest_whatsapp']);
-        }
+        // Verify via WhatsApp (with normalization)
+        $verified = $this->accessService->verifyByWhatsApp($booking, $validated['guest_whatsapp']);
 
         if ($verified) {
             // Grant session access for subsequent pages (payment, invoice)
             $this->accessService->grantAccess($request, $booking);
-            return view('public.booking.status', compact('booking'));
+            return redirect()->route('booking.guest.detail', $booking->booking_code);
         }
 
-        return back()->with('error', 'Verifikasi gagal. Pastikan data yang Anda masukkan benar.');
+        // Generic error - don't reveal which field was wrong
+        return back()
+            ->withInput()
+            ->with('error', 'Booking tidak ditemukan. Periksa kembali kode booking dan nomor WhatsApp Anda.');
+    }
+
+    /**
+     * Guest booking detail page (requires session access or token).
+     */
+    public function guestDetail(Request $request, string $bookingCode): View|RedirectResponse
+    {
+        $booking = Booking::where('booking_code', $bookingCode)->first();
+
+        if (! $booking) {
+            return redirect()->route('booking.my')
+                ->with('error', 'Booking tidak ditemukan.');
+        }
+
+        // Check token-based access from URL query param
+        if ($request->has('access') && !$this->accessService->hasAccess($request, $booking)) {
+            $tokenVerified = $this->accessService->verifyByToken($booking, $request->query('access'));
+            if ($tokenVerified) {
+                $this->accessService->grantAccess($request, $booking);
+            }
+        }
+
+        // Verify access (session grant from verification/creation or token)
+        if (!$this->accessService->hasAccess($request, $booking)) {
+            return redirect()->route('booking.my')
+                ->with('error', 'Anda tidak memiliki akses ke booking ini. Silakan verifikasi terlebih dahulu.');
+        }
+
+        $booking->load(['room.roomType', 'statusHistories']);
+
+        return view('public.booking.detail', compact('booking'));
     }
 }

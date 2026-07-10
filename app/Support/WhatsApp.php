@@ -42,4 +42,13 @@ class WhatsApp
 
         return $length >= 10 && $length <= 15 && str_starts_with($normalized, '62');
     }
+
+    /**
+     * Generate a WhatsApp share URL (wa.me with text only, no specific phone).
+     * Used for "share to WhatsApp" buttons.
+     */
+    public static function shareUrl(string $text): string
+    {
+        return 'https://wa.me/?text=' . rawurlencode($text);
+    }
 }

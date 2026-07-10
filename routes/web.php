@@ -39,6 +39,8 @@ Route::post('/booking', [BookingController::class, 'store'])->name('booking.stor
 Route::get('/booking/{bookingCode}/konfirmasi', [BookingController::class, 'confirmation'])->name('booking.confirmation');
 Route::get('/cek-booking', [BookingController::class, 'verifyForm'])->name('booking.verify.form');
 Route::post('/cek-booking', [BookingController::class, 'verifyAccess'])->name('booking.verify')->middleware('throttle:booking-verify');
+Route::get('/booking-saya', [BookingController::class, 'myBooking'])->name('booking.my');
+Route::get('/booking/{bookingCode}/detail', [BookingController::class, 'guestDetail'])->name('booking.guest.detail');
 
 // Payment
 Route::get('/booking/{bookingCode}/bayar', [PaymentController::class, 'pay'])->name('booking.pay')->middleware('throttle:payment-initiate');
