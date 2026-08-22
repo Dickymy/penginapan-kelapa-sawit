@@ -16,7 +16,20 @@ class HomeController extends Controller
     {
         $roomTypes = RoomType::active()
             ->ordered()
-            ->with('images')
+            ->with(['images' => fn ($q) => $q->where('is_cover', true)->orWhere('sort_order', 0), 'facilities'])
+            ->take(3)
+            ->get();
+
+        $reviews = \App\Models\Review::published()
+            ->with(['user', 'booking.room.roomType'])
+            ->where('rating', '>=', 4)
+            ->inRandomOrder()
+            ->take(3)
+            ->get();
+
+        $faqs = \App\Models\Faq::active()
+            ->ordered()
+            ->take(6)
             ->get();
 
         $cheapestPrice = RoomType::active()
@@ -39,6 +52,8 @@ class HomeController extends Controller
         // Gallery preview (first 8 active photos)
         $galleryPhotos = Gallery::active()->ordered()->take(8)->get();
 
+        $nearbyPlaces = \App\Models\NearbyPlace::active()->ordered()->take(4)->get();
+
         return view('public.home', compact(
             'roomTypes',
             'cheapestPrice',
@@ -51,7 +66,10 @@ class HomeController extends Controller
             'mapUrl',
             'email',
             'policy',
-            'galleryPhotos'
+            'galleryPhotos',
+            'reviews',
+            'faqs',
+            'nearbyPlaces'
         ));
     }
 }

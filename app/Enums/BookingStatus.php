@@ -29,6 +29,20 @@ enum BookingStatus: string
         };
     }
 
+    public function color(): string
+    {
+        return match ($this) {
+            self::PendingPayment => 'bg-yellow-100 text-yellow-800',
+            self::Confirmed => 'bg-blue-100 text-blue-800',
+            self::CheckedIn => 'bg-purple-100 text-purple-800',
+            self::CheckedOut => 'bg-teal-100 text-teal-800',
+            self::Completed => 'bg-green-100 text-green-800',
+            self::Cancelled => 'bg-red-100 text-red-800',
+            self::Expired => 'bg-gray-100 text-gray-800',
+            self::NoShow => 'bg-orange-100 text-orange-800',
+        };
+    }
+
     public function allowedTransitions(): array
     {
         return match ($this) {

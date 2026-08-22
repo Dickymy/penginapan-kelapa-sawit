@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#ffffff">
     <title>@yield('title', 'Member - Penginapan Kelapa Sawit')</title>
+    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         /* Safe area for bottom navigation on mobile */
@@ -24,7 +25,7 @@
             <div class="flex justify-between items-center h-14 sm:h-16">
                 {{-- Left: Logo --}}
                 <a href="{{ route('home') }}" class="text-lg font-bold text-primary-700 flex items-center gap-2">
-                    <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-7 w-auto object-contain">
                     <span class="hidden sm:inline">Penginapan Kelapa Sawit</span>
                     <span class="sm:hidden text-base">Kelapa Sawit</span>
                 </a>
@@ -46,6 +47,10 @@
                     <a href="{{ route('member.profile.edit') }}"
                        class="px-3 py-2 text-sm rounded-md transition {{ request()->routeIs('member.profile.*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">
                         Profil
+                    </a>
+                    <a href="{{ route('home') }}#cari-kamar"
+                       class="ml-2 px-4 py-2 bg-primary-600 text-white text-sm rounded-lg font-medium hover:bg-primary-700 transition">
+                        Cari Kamar
                     </a>
                 </div>
 
@@ -181,13 +186,15 @@
             </a>
 
             {{-- Akun --}}
-            <a href="{{ route('member.profile.edit') }}"
-               class="flex flex-col items-center justify-center gap-0.5 text-xs transition
-                      {{ request()->routeIs('member.profile.*') || request()->routeIs('member.claim.*') ? 'text-primary-600 font-medium' : 'text-gray-500' }}"
-               aria-label="Akun Saya"
-               @if(request()->routeIs('member.profile.*')) aria-current="page" @endif>
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('member.profile.*') ? '2.5' : '2' }}" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                <span>Akun</span>
+            <a href="{{ route('member.profile.edit') }}" class="flex flex-col items-center justify-center w-full h-full {{ request()->routeIs('member.profile.*') ? 'text-primary-600' : 'text-gray-500' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <span class="text-[10px] mt-0.5">Profil</span>
+            </a>
+            
+            {{-- Cari Kamar --}}
+            <a href="{{ route('home') }}#cari-kamar" class="flex flex-col items-center justify-center w-full h-full text-primary-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <span class="text-[10px] mt-0.5 font-bold">Cari Kamar</span>
             </a>
         </div>
     </nav>

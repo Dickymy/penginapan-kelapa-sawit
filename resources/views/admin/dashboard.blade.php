@@ -8,7 +8,7 @@
     {{-- Priority Cards --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         <a href="{{ route('admin.bookings.index', ['status' => 'confirmed', 'check_in' => today()->toDateString()]) }}"
-           class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+           class="bg-white rounded-2xl border border-gray-100 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
             <div class="flex items-center gap-2 mb-1">
                 <span class="w-2 h-2 rounded-full {{ $checkInsToday->count() > 0 ? 'bg-blue-500' : 'bg-gray-300' }}"></span>
                 <span class="text-xs font-medium text-gray-500">Check-in</span>
@@ -17,7 +17,7 @@
             <p class="text-xs text-gray-400">hari ini</p>
         </a>
         <a href="{{ route('admin.bookings.index', ['status' => 'checked_in']) }}"
-           class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+           class="bg-white rounded-2xl border border-gray-100 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
             <div class="flex items-center gap-2 mb-1">
                 <span class="w-2 h-2 rounded-full {{ $checkOutsToday->count() > 0 ? 'bg-indigo-500' : 'bg-gray-300' }}"></span>
                 <span class="text-xs font-medium text-gray-500">Check-out</span>
@@ -26,7 +26,7 @@
             <p class="text-xs text-gray-400">hari ini</p>
         </a>
         <a href="{{ route('admin.bookings.index', ['status' => 'pending_payment']) }}"
-           class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+           class="bg-white rounded-2xl border border-gray-100 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
             <div class="flex items-center gap-2 mb-1">
                 <span class="w-2 h-2 rounded-full {{ $pendingPayment > 0 ? 'bg-yellow-500' : 'bg-gray-300' }}"></span>
                 <span class="text-xs font-medium text-gray-500">Menunggu Bayar</span>
@@ -34,7 +34,7 @@
             <p class="text-2xl font-bold text-gray-800">{{ $pendingPayment }}</p>
             <p class="text-xs text-gray-400">reservasi</p>
         </a>
-        <div class="bg-white rounded-xl border border-gray-200 p-4">
+        <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             <div class="flex items-center gap-2 mb-1">
                 <span class="w-2 h-2 rounded-full bg-green-500"></span>
                 <span class="text-xs font-medium text-gray-500">Kamar Terisi</span>
@@ -46,7 +46,7 @@
 
     {{-- Needs Attention --}}
     @if($needsAttention > 0)
-    <div class="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
+    <div class="bg-red-50/50 border border-red-100 rounded-2xl p-5 flex items-center gap-4 shadow-[0_8px_30px_rgba(239,68,68,0.08)]">
         <span class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
             <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
         </span>
@@ -60,25 +60,25 @@
 
     {{-- Quick Actions --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <a href="{{ route('admin.bookings.create') }}" class="flex items-center gap-3 bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+        <a href="{{ route('admin.bookings.create') }}" class="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
             <span class="w-9 h-9 rounded-lg bg-primary-100 flex items-center justify-center flex-shrink-0">
                 <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
             </span>
             <span class="text-sm font-medium text-gray-700">Booking Manual</span>
         </a>
-        <a href="{{ route('admin.room-blocks.create') }}" class="flex items-center gap-3 bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+        <a href="{{ route('admin.room-blocks.create') }}" class="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
             <span class="w-9 h-9 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
                 <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
             </span>
             <span class="text-sm font-medium text-gray-700">Blokir Kamar</span>
         </a>
-        <a href="{{ route('admin.bookings.index') }}" class="flex items-center gap-3 bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+        <a href="{{ route('admin.bookings.index') }}" class="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
             <span class="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
                 <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
             </span>
             <span class="text-sm font-medium text-gray-700">Semua Reservasi</span>
         </a>
-        <a href="{{ route('admin.reports.revenue') }}" class="flex items-center gap-3 bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+        <a href="{{ route('admin.reports.revenue') }}" class="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
             <span class="w-9 h-9 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
                 <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
             </span>
@@ -89,7 +89,7 @@
     {{-- Today's Schedule --}}
     <div class="grid md:grid-cols-2 gap-4">
         {{-- Check-in Today --}}
-        <div class="bg-white rounded-xl border border-gray-200">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="text-sm font-semibold text-gray-700">Check-in Hari Ini</h3>
                 <span class="text-xs font-medium px-2 py-0.5 rounded-full {{ $checkInsToday->count() > 0 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500' }}">{{ $checkInsToday->count() }}</span>
@@ -112,7 +112,7 @@
         </div>
 
         {{-- Check-out Today --}}
-        <div class="bg-white rounded-xl border border-gray-200">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="text-sm font-semibold text-gray-700">Check-out Hari Ini</h3>
                 <span class="text-xs font-medium px-2 py-0.5 rounded-full {{ $checkOutsToday->count() > 0 ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-500' }}">{{ $checkOutsToday->count() }}</span>
@@ -136,7 +136,7 @@
     </div>
 
     {{-- Revenue --}}
-    <div class="bg-white rounded-xl border border-gray-200 p-4">
+    <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-xs font-medium text-gray-500">Pendapatan Bulan Ini</p>
@@ -148,7 +148,7 @@
 
     {{-- Recent Bookings --}}
     @if($recentBookings->count())
-    <div class="bg-white rounded-xl border border-gray-200">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
         <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
             <h3 class="text-sm font-semibold text-gray-700">Booking Terbaru</h3>
             <a href="{{ route('admin.bookings.index') }}" class="text-xs text-primary-600 hover:underline">Semua</a>
@@ -156,41 +156,44 @@
         {{-- Desktop table --}}
         <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-sm">
-                <thead class="bg-gray-50 text-gray-500 text-xs">
+                <thead class="bg-gray-50/80 text-gray-500 text-[11px] uppercase tracking-wider">
                     <tr>
-                        <th class="px-4 py-2.5 text-left font-medium">Kode</th>
-                        <th class="px-4 py-2.5 text-left font-medium">Tamu</th>
-                        <th class="px-4 py-2.5 text-left font-medium">Kamar</th>
-                        <th class="px-4 py-2.5 text-left font-medium">Tanggal</th>
-                        <th class="px-4 py-2.5 text-left font-medium">Status</th>
-                        <th class="px-4 py-2.5 text-right font-medium">Total</th>
+                        <th class="px-5 py-3.5 text-left font-semibold">Kode</th>
+                        <th class="px-5 py-3.5 text-left font-semibold">Tamu</th>
+                        <th class="px-5 py-3.5 text-left font-semibold">Kamar</th>
+                        <th class="px-5 py-3.5 text-left font-semibold">Tanggal</th>
+                        <th class="px-5 py-3.5 text-left font-semibold">Status</th>
+                        <th class="px-5 py-3.5 text-right font-semibold">Total</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @foreach($recentBookings as $booking)
-                    <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='{{ route('admin.bookings.show', $booking) }}'">
-                        <td class="px-4 py-2.5 font-mono text-xs text-gray-600">{{ $booking->booking_code }}</td>
-                        <td class="px-4 py-2.5 text-gray-800">{{ $booking->guest_name }}</td>
-                        <td class="px-4 py-2.5 text-gray-600">{{ $booking->room_name_snapshot }}</td>
-                        <td class="px-4 py-2.5 text-gray-600">{{ $booking->check_in->format('d/m') }} - {{ $booking->check_out->format('d/m') }}</td>
-                        <td class="px-4 py-2.5"><x-status-badge :status="$booking->status" /></td>
-                        <td class="px-4 py-2.5 text-right text-gray-800">{{ $booking->formatted_total }}</td>
+                    <tr class="hover:bg-primary-50/50 transition-colors cursor-pointer group" onclick="window.location='{{ route('admin.bookings.show', $booking) }}'">
+                        <td class="px-5 py-3.5 font-mono text-xs text-gray-600">{{ $booking->booking_code }}</td>
+                        <td class="px-5 py-3.5 text-gray-800 font-medium">{{ $booking->guest_name }}</td>
+                        <td class="px-5 py-3.5 text-gray-600">{{ $booking->room_name_snapshot }}</td>
+                        <td class="px-5 py-3.5 text-gray-600">{{ $booking->check_in->format('d/m') }} - {{ $booking->check_out->format('d/m') }}</td>
+                        <td class="px-5 py-3.5"><x-status-badge :status="$booking->status" /></td>
+                        <td class="px-5 py-3.5 text-right text-gray-800 font-medium group-hover:text-primary-700">{{ $booking->formatted_total }}</td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
         {{-- Mobile cards --}}
-        <div class="md:hidden divide-y divide-gray-50">
+        <div class="md:hidden divide-y divide-gray-100/50">
             @foreach($recentBookings as $booking)
-            <a href="{{ route('admin.bookings.show', $booking) }}" class="block px-4 py-3 hover:bg-gray-50">
+            <a href="{{ route('admin.bookings.show', $booking) }}" class="block px-5 py-4 hover:bg-primary-50/30 transition-colors">
                 <div class="flex items-center justify-between">
-                    <span class="text-sm font-medium text-gray-800">{{ $booking->guest_name }}</span>
+                    <span class="text-sm font-semibold text-gray-800">{{ $booking->guest_name }}</span>
                     <x-status-badge :status="$booking->status" />
                 </div>
-                <div class="flex items-center justify-between mt-1">
-                    <span class="text-xs text-gray-500">{{ $booking->room_name_snapshot }} · {{ $booking->check_in->format('d/m') }}</span>
-                    <span class="text-xs font-medium text-gray-700">{{ $booking->formatted_total }}</span>
+                <div class="flex items-center justify-between mt-2">
+                    <span class="text-xs text-gray-500 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        {{ $booking->check_in->format('d/m') }} • {{ $booking->room_name_snapshot }}
+                    </span>
+                    <span class="text-xs font-bold text-gray-900">{{ $booking->formatted_total }}</span>
                 </div>
             </a>
             @endforeach

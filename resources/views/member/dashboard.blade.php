@@ -70,12 +70,21 @@
                     </p>
                     @endif
                 </div>
-                <div class="flex flex-col items-stretch sm:items-end gap-2">
+                <div class="mt-4 md:mt-0 flex flex-col items-end gap-2">
                     <span class="text-lg font-bold text-gray-800">{{ $booking->formatted_total }}</span>
-                    <a href="{{ route('member.bookings.show', $booking) }}"
-                       class="inline-flex items-center justify-center px-4 py-2.5 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition">
-                        Bayar Sekarang
-                    </a>
+                    <div class="flex gap-2">
+                        <form action="{{ route('member.bookings.cancel', $booking) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?');">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition">
+                                Batalkan
+                            </button>
+                        </form>
+                        <a href="{{ route('member.bookings.show', $booking) }}"
+                           class="inline-flex items-center justify-center px-4 py-2.5 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition">
+                            Bayar Sekarang
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -134,8 +143,34 @@
     </div>
     @endif
 
-    {{-- PRIORITY 4: No Active Bookings — Show Hero CTA --}}
-    @if($pendingPaymentBookings->isEmpty() && $upcomingBookings->isEmpty() && $checkedInBookings->isEmpty())
+    {{-- PRIORITY 4: Past Bookings ready for review --}}
+    @if(isset($reviewableBookings) && $reviewableBookings->isNotEmpty())
+    <div class="space-y-3">
+        <h2 class="text-sm font-semibold text-purple-700 uppercase tracking-wide flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+            Tulis Ulasan Anda
+        </h2>
+        @foreach($reviewableBookings as $booking)
+        <div class="bg-gradient-to-br from-purple-50 to-white border border-purple-200 rounded-xl p-4 sm:p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                    <p class="text-base font-semibold text-gray-800">{{ $booking->room_type_name_snapshot }}</p>
+                    <p class="text-sm text-gray-600 mt-1">Menginap pada {{ $booking->check_in->format('d M') }} - {{ $booking->check_out->format('d M Y') }}</p>
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="{{ route('member.reviews.create', $booking) }}"
+                       class="inline-flex items-center px-4 py-2.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition">
+                        Tulis Ulasan
+                    </a>
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+    @endif
+
+    {{-- PRIORITY 5: No Active Bookings — Show Hero CTA --}}
+    @if($pendingPaymentBookings->isEmpty() && $upcomingBookings->isEmpty() && $checkedInBookings->isEmpty() && (empty($reviewableBookings) || $reviewableBookings->isEmpty()))
     <div class="bg-white border border-gray-200 rounded-xl p-6 sm:p-8 text-center">
         <div class="max-w-md mx-auto">
             <div class="w-14 h-14 mx-auto rounded-full bg-primary-100 flex items-center justify-center mb-4">

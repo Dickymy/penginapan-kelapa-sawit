@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Enums\PaymentStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payment extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'booking_id', 'provider', 'provider_order_id', 'transaction_id',
         'attempt_no', 'snap_token', 'payment_type', 'gross_amount',

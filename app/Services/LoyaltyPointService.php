@@ -245,7 +245,7 @@ class LoyaltyPointService
                 'description' => $reason,
                 'expires_at' => $points > 0 ? now()->addMonths(config('loyalty.expiry_months', 18)) : null,
                 'created_by_admin_id' => $admin->id,
-                'idempotency_key' => 'adjust:' . $user->id . ':' . now()->timestamp . ':' . $admin->id,
+                'idempotency_key' => 'adjust:' . hash('sha256', $user->id . ':' . $points . ':' . $reason . ':' . $admin->id . ':' . now()->toDateString()),
             ]);
 
             $user->update(['loyalty_balance_cache' => $currentBalance + $points]);

@@ -19,8 +19,23 @@ class DashboardController extends Controller
         $pendingPaymentBookings = $user->bookings()
             ->where('status', BookingStatus::PendingPayment)
             ->orderBy('payment_expires_at', 'asc')
-            ->limit(3)
             ->get();
+
+        $hasExpired = false;
+        foreach ($pendingPaymentBookings as $booking) {
+            if ($booking->payment_expires_at && $booking->payment_expires_at->isPast()) {
+                app(\App\Services\BookingService::class)->expirePendingBooking($booking);
+                app(\App\Services\PromotionService::class)->releaseForBooking($booking);
+                app(\App\Services\LoyaltyPointService::class)->reverseRedemptionForBooking($booking);
+                $hasExpired = true;
+            }
+        }
+
+        if ($hasExpired) {
+            return redirect()->route('member.dashboard');
+        }
+
+        $pendingPaymentBookings = $pendingPaymentBookings->where('status', BookingStatus::PendingPayment)->take(3);
 
         // Priority 2: Upcoming confirmed bookings
         $upcomingBookings = $user->bookings()
@@ -34,6 +49,14 @@ class DashboardController extends Controller
         $checkedInBookings = $user->bookings()
             ->where('status', BookingStatus::CheckedIn)
             ->limit(2)
+            ->get();
+
+        // Priority 4: Past bookings without reviews
+        $reviewableBookings = $user->bookings()
+            ->whereIn('status', [BookingStatus::CheckedOut, BookingStatus::Completed])
+            ->doesntHave('review')
+            ->orderBy('check_out', 'desc')
+            ->limit(3)
             ->get();
 
         $activeBookings = $user->bookings()
@@ -58,6 +81,7 @@ class DashboardController extends Controller
             'pendingPaymentBookings',
             'upcomingBookings',
             'checkedInBookings',
+            'reviewableBookings',
             'showOnboarding',
             'needsWhatsapp',
         ));

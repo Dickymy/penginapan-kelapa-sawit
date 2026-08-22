@@ -198,14 +198,46 @@
             <h2 class="font-semibold text-gray-900">Rincian Biaya</h2>
         </div>
         <div class="px-5 sm:px-6 py-5 space-y-3">
-            <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Harga per malam</span>
-                <span class="text-gray-900">Rp{{ number_format($booking->price_per_night_snapshot, 0, ',', '.') }}</span>
-            </div>
-            <div class="flex justify-between text-sm">
-                <span class="text-gray-600">{{ $booking->nights }} malam × Rp{{ number_format($booking->price_per_night_snapshot, 0, ',', '.') }}</span>
-                <span class="text-gray-900">Rp{{ number_format($booking->subtotal, 0, ',', '.') }}</span>
-            </div>
+            @if($booking->nightPrices->count() > 0)
+                <div class="text-sm font-medium text-gray-700 mb-2">Rincian Harga:</div>
+                <ul class="space-y-1 mb-3">
+                    @foreach($booking->nightPrices as $np)
+                        <li class="flex justify-between text-sm">
+                            <span class="text-gray-500">
+                                {{ $np->date->translatedFormat('d M Y') }}
+                                @if($np->label)
+                                    <span class="text-xs inline-block bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded ml-1">{{ $np->label }}</span>
+                                @endif
+                            </span>
+                            <span class="text-gray-900">Rp{{ number_format($np->price, 0, ',', '.') }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+                <div class="flex justify-between text-sm pt-2 border-t border-gray-50">
+                    <span class="text-gray-600">Subtotal ({{ $booking->nights }} malam)</span>
+                    <span class="text-gray-900">Rp{{ number_format($booking->subtotal, 0, ',', '.') }}</span>
+                </div>
+            @else
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Harga per malam</span>
+                    <span class="text-gray-900">Rp{{ number_format($booking->price_per_night_snapshot, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">{{ $booking->nights }} malam × Rp{{ number_format($booking->price_per_night_snapshot, 0, ',', '.') }}</span>
+                    <span class="text-gray-900">Rp{{ number_format($booking->subtotal, 0, ',', '.') }}</span>
+                </div>
+            @endif
+            @if($booking->addons->count() > 0)
+            <div class="text-sm font-medium text-gray-700 mt-3 mb-2">Layanan Tambahan:</div>
+            <ul class="space-y-1 mb-3 border-b border-gray-50 pb-3">
+                @foreach($booking->addons as $ba)
+                    <li class="flex justify-between text-sm">
+                        <span class="text-gray-600">{{ $ba->addon->name ?? 'Layanan' }} x{{ $ba->quantity }}</span>
+                        <span class="text-gray-900">{{ $ba->formatted_subtotal }}</span>
+                    </li>
+                @endforeach
+            </ul>
+            @endif
             @if($booking->promotion_discount > 0)
             <div class="flex justify-between text-sm text-green-700">
                 <span>Diskon promo{{ $booking->promotion_code_snapshot ? ' ('.$booking->promotion_code_snapshot.')' : '' }}</span>

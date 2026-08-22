@@ -118,7 +118,7 @@ class GoogleController extends Controller
                 ->with('toast_success', $message);
         }
 
-        return redirect()->intended(config('fortify.home', '/member/dashboard'))
+        return redirect()->intended('/')
             ->with('toast_success', 'Selamat datang kembali, ' . $user->name . '.');
     }
 }

@@ -24,27 +24,54 @@ class BookingController extends Controller
     {
         $query = Booking::with(['room.roomType'])->latest();
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-        if ($request->filled('source')) {
-            $query->where('source', $request->source);
-        }
-        if ($request->filled('check_in')) {
-            $query->where('check_in', $request->check_in);
-        }
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('booking_code', 'like', "%{$search}%")
-                  ->orWhere('guest_name', 'like', "%{$search}%")
-                  ->orWhere('guest_whatsapp', 'like', "%{$search}%")
-                  ->orWhere('guest_email', 'like', "%{$search}%");
-            });
-        }
+        $this->applyFilters($query, $request);
 
         $bookings = $query->paginate(20);
         return view('admin.bookings.index', compact('bookings'));
+    }
+
+    public function export(Request $request)
+    {
+        $query = Booking::with(['room.roomType'])->latest();
+
+        $this->applyFilters($query, $request);
+
+        $bookings = $query->get();
+
+        $filename = "Daftar_Booking_" . date('Y-m-d_H-i') . ".csv";
+
+        $headers = [
+            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $callback = function() use($bookings) {
+            $file = fopen('php://output', 'w');
+            fputs($file, "\xEF\xBB\xBF");
+            fputcsv($file, ['Kode Booking', 'Tamu', 'Kamar', 'Check-In', 'Check-Out', 'Malam', 'Status', 'Pembayaran', 'Sumber', 'Total']);
+
+            foreach ($bookings as $booking) {
+                fputcsv($file, [
+                    $booking->booking_code,
+                    $booking->guest_name,
+                    $booking->room_type_name_snapshot . ' - ' . $booking->room_name_snapshot,
+                    $booking->check_in->format('d/m/Y'),
+                    $booking->check_out->format('d/m/Y'),
+                    $booking->nights,
+                    $booking->status->label(),
+                    $booking->payment_status->label(),
+                    $booking->source->label(),
+                    $booking->total_amount,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function create(): View
@@ -87,7 +114,7 @@ class BookingController extends Controller
 
     public function show(Booking $booking): View
     {
-        $booking->load(['room.roomType', 'payments', 'statusHistories']);
+        $booking->load(['room.roomType', 'payments', 'statusHistories', 'nightPrices', 'addons.addon']);
         return view('admin.bookings.show', compact('booking'));
     }
 
@@ -211,5 +238,28 @@ class BookingController extends Controller
             ]);
         });
         return back()->with('success', 'Booking ditandai no-show.');
+    }
+
+    private function applyFilters($query, Request $request): void
+    {
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('source')) {
+            $query->where('source', $request->source);
+        }
+        if ($request->filled('check_in')) {
+            $query->where('check_in', $request->check_in);
+        }
+        if ($request->filled('search')) {
+            // Escape special characters for LIKE clause
+            $search = str_replace(['%', '_'], ['\\%', '\\_'], $request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('booking_code', 'like', "%{$search}%")
+                  ->orWhere('guest_name', 'like', "%{$search}%")
+                  ->orWhere('guest_whatsapp', 'like', "%{$search}%")
+                  ->orWhere('guest_email', 'like', "%{$search}%");
+            });
+        }
     }
 }

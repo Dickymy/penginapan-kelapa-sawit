@@ -39,8 +39,16 @@
                 @endif
             </div>
             @else
-            <div class="w-full h-72 bg-gray-200 rounded-lg flex items-center justify-center">
-                <span class="text-gray-400">Belum ada gambar</span>
+            <div class="w-full h-72 md:h-96 relative flex flex-col items-center justify-center overflow-hidden rounded-2xl bg-gray-50 border border-gray-100">
+                {{-- Elegant Fallback Background --}}
+                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80" 
+                     alt="Placeholder" 
+                     class="absolute inset-0 w-full h-full object-cover opacity-20 grayscale">
+                <div class="absolute inset-0 bg-gradient-to-t from-gray-200/90 to-gray-50/50"></div>
+                <div class="relative z-10 flex flex-col items-center text-gray-400">
+                    <svg class="w-12 h-12 mb-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    <span class="text-sm font-semibold uppercase tracking-wider">Foto Segera Hadir</span>
+                </div>
             </div>
             @endif
 
@@ -66,12 +74,59 @@
                 </div>
             </div>
             @endif
+
+            {{-- Reviews --}}
+            @if($reviews->isNotEmpty())
+            <div id="ulasan" class="pt-8 border-t border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Ulasan Tamu</h2>
+                
+                <div class="space-y-6">
+                    @foreach($reviews as $review)
+                    <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                        <div class="flex items-start justify-between mb-3">
+                            <div>
+                                <div class="font-semibold text-gray-900">{{ $review->user->name }}</div>
+                                <div class="text-xs text-gray-500 mt-0.5">{{ $review->created_at->format('d M Y') }}</div>
+                            </div>
+                            <div class="bg-white px-2 py-1 rounded border border-gray-200">
+                                <x-star-rating :rating="$review->rating" size="4" />
+                            </div>
+                        </div>
+                        @if($review->title)
+                            <div class="font-bold text-gray-800 mb-1">{{ $review->title }}</div>
+                        @endif
+                        <p class="text-sm text-gray-600 italic">"{{ $review->comment }}"</p>
+                        
+                        @if($review->admin_reply)
+                        <div class="mt-4 pl-4 border-l-2 border-primary-500">
+                            <div class="text-xs font-semibold text-primary-700 mb-1">Balasan dari Penginapan:</div>
+                            <p class="text-sm text-gray-700">{{ $review->admin_reply }}</p>
+                        </div>
+                        @endif
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
 
         {{-- Right: Info & CTA --}}
         <div>
-            <div class="bg-white border rounded-lg shadow-sm p-6 sticky top-6 space-y-4">
-                <h1 class="text-2xl font-bold text-gray-800">{{ $roomType->name }}</h1>
+            <div class="bg-white border-gray-100 border rounded-2xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] p-6 sticky top-6 space-y-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">{{ $roomType->name }}</h1>
+                    @if($roomType->review_count > 0)
+                        <div class="flex items-center mt-2 text-sm">
+                            <span class="font-bold text-gray-900 mr-2">{{ number_format($roomType->average_rating, 1) }}</span>
+                            <x-star-rating :rating="$roomType->average_rating" size="5" />
+                            <a href="#ulasan" class="ml-2 text-primary-600 hover:text-primary-800 transition-colors">
+                                ({{ $roomType->review_count }} Ulasan)
+                            </a>
+                        </div>
+                    @else
+                        <div class="mt-2 text-sm text-gray-500">Belum ada ulasan</div>
+                    @endif
+                </div>
 
                 <div class="space-y-2 text-sm text-gray-600">
                     <div class="flex justify-between">
@@ -84,9 +139,13 @@
                     </div>
                 </div>
 
-                <div class="border-t pt-4">
-                    <p class="text-sm text-gray-500">Harga per malam</p>
-                    <p class="text-2xl font-bold text-primary-600">Rp {{ number_format($roomType->base_price, 0, ',', '.') }}</p>
+                <div class="border-t border-gray-100 pt-5 mt-2">
+                    <p class="text-sm text-gray-500 mb-1">Harga per malam</p>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs font-bold text-white bg-red-500 px-1.5 py-0.5 rounded">Hemat 20%</span>
+                        <span class="text-sm text-gray-400 line-through decoration-gray-300">Rp {{ number_format($roomType->base_price * 1.25, 0, ',', '.') }}</span>
+                    </div>
+                    <p class="text-3xl font-extrabold text-primary-600">Rp {{ number_format($roomType->base_price, 0, ',', '.') }}</p>
                 </div>
 
                 {{-- Booking Form --}}
@@ -142,7 +201,7 @@
                                class="w-full border-gray-300 rounded-lg text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
                     </div>
                     <button type="submit" :disabled="submitting"
-                            class="w-full px-4 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center">
+                            class="w-full px-4 py-3.5 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary-600/30 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center">
                         <svg x-show="submitting" x-cloak class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>

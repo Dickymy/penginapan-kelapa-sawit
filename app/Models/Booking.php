@@ -14,25 +14,7 @@ class Booking extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'booking_code', 'invoice_number', 'idempotency_key',
-        'user_id', 'room_id', 'created_by_admin_id',
-        'source', 'status', 'payment_status',
-        'check_in', 'check_out', 'nights', 'guest_count',
-        'guest_name', 'guest_email', 'guest_whatsapp',
-        'arrival_estimate', 'special_request',
-        'room_type_name_snapshot', 'room_name_snapshot',
-        'price_per_night_snapshot', 'subtotal',
-        'promotion_id', 'promotion_code_snapshot', 'promotion_discount',
-        'points_redeemed', 'points_discount',
-        'total_amount', 'currency', 'eligible_loyalty_amount',
-        'payment_expires_at', 'policy_version_id', 'policy_accepted_at',
-        'guest_access_token_hash',
-        'claimed_at', 'claim_method',
-        'checked_in_at', 'checked_out_at', 'completed_at',
-        'cancelled_at', 'cancellation_reason', 'cancellation_notes', 'cancelled_by_admin_id',
-        'needs_attention', 'attention_reason', 'internal_notes',
-    ];
+    protected $guarded = ['id'];
 
     protected function casts(): array
     {
@@ -59,6 +41,11 @@ class Booking extends Model
             'completed_at' => 'datetime',
             'cancelled_at' => 'datetime',
             'needs_attention' => 'boolean',
+            'confirmation_email_sent_at' => 'datetime',
+            'payment_email_sent_at' => 'datetime',
+            'reminder_email_sent_at' => 'datetime',
+            'checkout_email_sent_at' => 'datetime',
+            'cancellation_email_sent_at' => 'datetime',
         ];
     }
 
@@ -89,7 +76,32 @@ class Booking extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function changeRequests(): HasMany
+    {
+        return $this->hasMany(BookingChangeRequest::class);
+    }
+
+    public function review(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Review::class);
+    }
+
+    public function nightPrices()
+    {
+        return $this->hasMany(BookingNightPrice::class)->orderBy('date');
+    }
+
+    public function addons(): HasMany
+    {
+        return $this->hasMany(BookingAddon::class);
+    }
+
     // Accessors
+
+    public function getFormattedSubtotalAttribute(): string
+    {
+        return 'Rp' . number_format($this->subtotal, 0, ',', '.');
+    }
 
     public function getFormattedTotalAttribute(): string
     {

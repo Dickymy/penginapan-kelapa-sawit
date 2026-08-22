@@ -79,6 +79,18 @@ class MidtransPaymentService
             ],
         ];
 
+        // Add addons to item details
+        if ($booking->addons && $booking->addons->count() > 0) {
+            foreach ($booking->addons as $ba) {
+                $itemDetails[] = [
+                    'id' => 'ADDON-' . $ba->addon_id,
+                    'price' => $ba->unit_price,
+                    'quantity' => $ba->quantity,
+                    'name' => substr($ba->addon->name ?? 'Add-on', 0, 50),
+                ];
+            }
+        }
+
         // Add discount as negative item to ensure item_details sum = gross_amount
         $totalDiscount = $booking->promotion_discount + $booking->points_discount;
         if ($totalDiscount > 0) {
@@ -101,6 +113,9 @@ class MidtransPaymentService
                 'phone' => $booking->guest_whatsapp,
             ],
             'item_details' => $itemDetails,
+            'callbacks' => [
+                'finish' => route('booking.finish', $booking->booking_code)
+            ],
         ];
 
         try {
@@ -111,6 +126,61 @@ class MidtransPaymentService
                 'error' => $e->getMessage(),
             ]);
             throw new \RuntimeException('Gagal membuat transaksi pembayaran. Silakan coba lagi.');
+        }
+
+        $payment->update(['snap_token' => $snapToken]);
+
+        return [
+            'snap_token' => $snapToken,
+            'client_key' => config('midtrans.client_key'),
+            'payment' => $payment,
+        ];
+    }
+
+    /**
+     * Generate snap token for a specific existing payment (e.g. for booking change difference).
+     */
+    public function generateSnapTokenForPayment(Payment $payment, Booking $booking, string $itemName = 'Tagihan Tambahan'): array
+    {
+        if ($payment->snap_token) {
+            return [
+                'snap_token' => $payment->snap_token,
+                'client_key' => config('midtrans.client_key'),
+                'payment' => $payment,
+            ];
+        }
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => $payment->provider_order_id,
+                'gross_amount' => $payment->gross_amount,
+            ],
+            'customer_details' => [
+                'first_name' => $booking->guest_name,
+                'email' => $booking->guest_email ?: null,
+                'phone' => $booking->guest_whatsapp,
+            ],
+            'item_details' => [
+                [
+                    'id' => 'CHANGE_REQ',
+                    'price' => $payment->gross_amount,
+                    'quantity' => 1,
+                    'name' => substr($itemName, 0, 50),
+                ],
+            ],
+            'callbacks' => [
+                'finish' => route('booking.finish', $booking->booking_code)
+            ],
+        ];
+
+        try {
+            $snapToken = $this->getSnapTokenFromProvider($params);
+        } catch (\Exception $e) {
+            Log::error('Midtrans Snap API error (Change Request)', [
+                'booking_code' => $booking->booking_code,
+                'error' => $e->getMessage(),
+            ]);
+            throw new \RuntimeException('Gagal membuat transaksi pembayaran selisih. Silakan coba lagi.');
         }
 
         $payment->update(['snap_token' => $snapToken]);
@@ -346,6 +416,10 @@ class MidtransPaymentService
 
             // Consume promotion reservation (reserved → consumed)
             app(PromotionService::class)->consumeForBooking($booking);
+
+            DB::afterCommit(function () use ($booking, $payment) {
+                \App\Events\PaymentConfirmed::dispatch($booking, $payment);
+            });
         } elseif ($booking->status === BookingStatus::Expired) {
             // Late payment: don't auto-confirm, flag for admin
             $booking->update([

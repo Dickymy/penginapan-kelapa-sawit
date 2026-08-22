@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
 use App\Http\Controllers\Public\AvailabilityController;
 use App\Http\Controllers\Public\BookingController;
+use App\Http\Controllers\Public\ContactController;
 use App\Http\Controllers\Public\GalleryController as PublicGalleryController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\PageController;
@@ -32,7 +33,13 @@ Route::get('/kamar/{slug}', [PublicRoomController::class, 'show'])->name('rooms.
 Route::get('/tentang', [PageController::class, 'about'])->name('about');
 Route::get('/lokasi', [PageController::class, 'location'])->name('location');
 Route::get('/kebijakan', [PageController::class, 'policy'])->name('policy');
+
+Route::get('/hubungi', [ContactController::class, 'create'])->name('contact.create');
+Route::post('/hubungi', [ContactController::class, 'store'])->name('contact.store')->middleware('throttle:3,10');
+
 Route::get('/galeri', [PublicGalleryController::class, 'index'])->name('gallery');
+Route::get('/faq', [\App\Http\Controllers\Public\FaqController::class, 'index'])->name('faq');
+Route::get('/sekitar', [\App\Http\Controllers\Public\NearbyPlaceController::class, 'index'])->name('nearby-places');
 
 // Availability & Booking
 Route::get('/ketersediaan', [AvailabilityController::class, 'search'])->name('availability.search');
@@ -58,6 +65,7 @@ Route::get('/auth/google/callback', [\App\Http\Controllers\Auth\GoogleController
 // Webhook (no CSRF)
 Route::post('/webhook/midtrans', [MidtransWebhookController::class, 'handle'])
     ->name('webhook.midtrans')
+    ->middleware('throttle:60,1')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 /*
@@ -70,12 +78,21 @@ Route::middleware(['auth', 'verified'])->prefix('member')->name('member.')->grou
     Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('dashboard');
     Route::get('/bookings', [\App\Http\Controllers\Member\BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/{booking}', [\App\Http\Controllers\Member\BookingController::class, 'show'])->name('bookings.show');
+    Route::patch('/bookings/{booking}/cancel', [\App\Http\Controllers\Member\BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::get('/profile', [\App\Http\Controllers\Member\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [\App\Http\Controllers\Member\ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/whatsapp', [\App\Http\Controllers\Member\ProfileController::class, 'updateWhatsapp'])->name('profile.update-whatsapp');
     Route::get('/claim', [\App\Http\Controllers\Member\ClaimController::class, 'index'])->name('claim.index');
     Route::post('/claim/{booking}', [\App\Http\Controllers\Member\ClaimController::class, 'claim'])->name('claim.claim');
     Route::get('/points', [\App\Http\Controllers\Member\PointController::class, 'index'])->name('points.index');
+    
+    // Reviews
+    Route::get('/reviews/create/{booking}', [\App\Http\Controllers\Member\ReviewController::class, 'create'])->name('reviews.create');
+    Route::post('/reviews', [\App\Http\Controllers\Member\ReviewController::class, 'store'])->name('reviews.store')->middleware('throttle:5,60');
+
+    // Booking Changes
+    Route::get('/bookings/{booking}/change', [\App\Http\Controllers\Member\BookingChangeRequestController::class, 'create'])->name('booking-changes.create');
+    Route::post('/bookings/{booking}/change', [\App\Http\Controllers\Member\BookingChangeRequestController::class, 'store'])->name('booking-changes.store');
 });
 
 /*
@@ -128,7 +145,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('galleries/reorder', [AdminGalleryController::class, 'reorder'])->name('galleries.reorder');
         Route::delete('galleries/{gallery}', [AdminGalleryController::class, 'destroy'])->name('galleries.destroy');
 
+        Route::resource('rate-overrides', \App\Http\Controllers\Admin\RateOverrideController::class)
+            ->only(['index', 'store', 'destroy']);
+
+        // Calendar
+        Route::get('calendar', [\App\Http\Controllers\Admin\CalendarController::class, 'index'])->name('calendar.index');
+        Route::get('calendar/data', [\App\Http\Controllers\Admin\CalendarController::class, 'data'])->name('calendar.data');
+
         // Bookings
+        Route::get('bookings/export', [\App\Http\Controllers\Admin\BookingController::class, 'export'])->name('bookings.export');
         Route::get('bookings', [\App\Http\Controllers\Admin\BookingController::class, 'index'])->name('bookings.index');
         Route::get('bookings/create', [\App\Http\Controllers\Admin\BookingController::class, 'create'])->name('bookings.create');
         Route::post('bookings', [\App\Http\Controllers\Admin\BookingController::class, 'store'])->name('bookings.store');
@@ -138,6 +163,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('bookings/{booking}/check-out', [\App\Http\Controllers\Admin\BookingController::class, 'checkOut'])->name('bookings.check-out');
         Route::patch('bookings/{booking}/complete', [\App\Http\Controllers\Admin\BookingController::class, 'complete'])->name('bookings.complete');
         Route::patch('bookings/{booking}/no-show', [\App\Http\Controllers\Admin\BookingController::class, 'noShow'])->name('bookings.no-show');
+
+        // Booking Change Requests
+        Route::get('booking-changes', [\App\Http\Controllers\Admin\BookingChangeRequestController::class, 'index'])->name('booking-changes.index');
+        Route::get('booking-changes/{bookingChangeRequest}', [\App\Http\Controllers\Admin\BookingChangeRequestController::class, 'show'])->name('booking-changes.show');
+        Route::post('booking-changes/{bookingChangeRequest}/approve', [\App\Http\Controllers\Admin\BookingChangeRequestController::class, 'approve'])->name('booking-changes.approve');
+        Route::post('booking-changes/{bookingChangeRequest}/reject', [\App\Http\Controllers\Admin\BookingChangeRequestController::class, 'reject'])->name('booking-changes.reject');
 
         // Room Blocks
         Route::get('room-blocks', [\App\Http\Controllers\Admin\RoomBlockController::class, 'index'])->name('room-blocks.index');
@@ -153,6 +184,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Promotions
         Route::resource('promotions', \App\Http\Controllers\Admin\PromotionController::class)->except(['show']);
 
+        // Addons
+        Route::resource('addons', \App\Http\Controllers\Admin\AddonController::class)->except(['show']);
+
         // Refunds
         Route::get('bookings/{booking}/refund', [\App\Http\Controllers\Admin\RefundController::class, 'create'])->name('refunds.create');
         Route::post('bookings/{booking}/refund', [\App\Http\Controllers\Admin\RefundController::class, 'store'])->name('refunds.store');
@@ -161,9 +195,28 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('expenses', \App\Http\Controllers\Admin\ExpenseController::class)->except(['show']);
 
         // Reports
+        Route::get('reports/revenue/export', [\App\Http\Controllers\Admin\ReportController::class, 'exportRevenue'])->name('reports.revenue.export');
         Route::get('reports/revenue', [\App\Http\Controllers\Admin\ReportController::class, 'revenue'])->name('reports.revenue');
+        Route::get('reports/occupancy/export', [\App\Http\Controllers\Admin\ReportController::class, 'exportOccupancy'])->name('reports.occupancy.export');
         Route::get('reports/occupancy', [\App\Http\Controllers\Admin\ReportController::class, 'occupancy'])->name('reports.occupancy');
         Route::get('reports/profit', [\App\Http\Controllers\Admin\ReportController::class, 'profit'])->name('reports.profit');
         Route::get('reports/sources', [\App\Http\Controllers\Admin\ReportController::class, 'sources'])->name('reports.sources');
+
+        // Reviews
+        Route::get('reviews', [\App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('reviews.index');
+        Route::patch('reviews/{review}/publish', [\App\Http\Controllers\Admin\ReviewController::class, 'publish'])->name('reviews.publish');
+        Route::post('reviews/{review}/reply', [\App\Http\Controllers\Admin\ReviewController::class, 'reply'])->name('reviews.reply');
+
+        // FAQs
+        Route::resource('faqs', \App\Http\Controllers\Admin\FaqController::class)->except(['show']);
+
+        // Contact Messages
+        Route::get('contact-messages', [\App\Http\Controllers\Admin\ContactMessageController::class, 'index'])->name('contact-messages.index');
+        Route::get('contact-messages/{contactMessage}', [\App\Http\Controllers\Admin\ContactMessageController::class, 'show'])->name('contact-messages.show');
+        Route::patch('contact-messages/{contactMessage}/mark-read', [\App\Http\Controllers\Admin\ContactMessageController::class, 'markRead'])->name('contact-messages.mark-read');
+        Route::delete('contact-messages/{contactMessage}', [\App\Http\Controllers\Admin\ContactMessageController::class, 'destroy'])->name('contact-messages.destroy');
+
+        // Nearby Places
+        Route::resource('nearby-places', \App\Http\Controllers\Admin\NearbyPlaceController::class);
     });
 });

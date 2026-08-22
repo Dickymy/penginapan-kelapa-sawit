@@ -32,7 +32,7 @@ class PromotionService
         // Check quota
         if ($promo->usage_quota !== null) {
             $usedCount = PromotionUsage::where('promotion_id', $promo->id)
-                ->whereIn('status', ['reserved', 'consumed'])->count();
+                ->whereIn('status', [PromotionUsageStatus::Reserved->value, PromotionUsageStatus::Consumed->value])->count();
             if ($usedCount >= $promo->usage_quota) {
                 throw new \RuntimeException('Kuota promo habis.');
             }
@@ -42,7 +42,7 @@ class PromotionService
         if ($user && $promo->max_usage_per_user !== null) {
             $userUsed = PromotionUsage::where('promotion_id', $promo->id)
                 ->where('user_id', $user->id)
-                ->whereIn('status', ['reserved', 'consumed'])->count();
+                ->whereIn('status', [PromotionUsageStatus::Reserved->value, PromotionUsageStatus::Consumed->value])->count();
             if ($userUsed >= $promo->max_usage_per_user) {
                 throw new \RuntimeException('Anda sudah menggunakan promo ini.');
             }
@@ -75,7 +75,7 @@ class PromotionService
 
             if ($promo->usage_quota !== null) {
                 $usedCount = PromotionUsage::where('promotion_id', $promo->id)
-                    ->whereIn('status', ['reserved', 'consumed'])->count();
+                    ->whereIn('status', [PromotionUsageStatus::Reserved->value, PromotionUsageStatus::Consumed->value])->count();
                 if ($usedCount >= $promo->usage_quota) {
                     throw new \RuntimeException('Kuota promo habis.');
                 }

@@ -20,6 +20,14 @@ return Application::configure(basePath: dirname(__DIR__))
 
             return route('login');
         });
+
+        $middleware->redirectUsersTo(function ($request) {
+            if ($request->is('admin/*') || $request->routeIs('admin.*')) {
+                return route('admin.dashboard');
+            }
+
+            return route('member.dashboard');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

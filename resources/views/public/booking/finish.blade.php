@@ -14,7 +14,7 @@
         Pembayaran Anda sedang diproses. Status booking akan diperbarui secara otomatis setelah pembayaran diverifikasi.
     </p>
 
-    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6 text-left">
+    <div class="bg-white border border-gray-100 rounded-2xl p-6 mb-6 text-left shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         <div class="grid grid-cols-2 gap-4 text-sm">
             <div>
                 <span class="text-gray-500">Kode Booking</span>
@@ -37,11 +37,11 @@
 
     <div class="flex flex-col sm:flex-row gap-3 justify-center">
         <a href="{{ route('booking.guest.detail', $booking->booking_code) }}"
-           class="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition">
+           class="inline-block bg-primary-600 text-white px-6 py-3.5 rounded-xl font-bold hover:bg-primary-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary-600/30 transition-all duration-300">
             Lihat Detail Booking
         </a>
         <a href="{{ route('home') }}"
-           class="inline-block bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition">
+           class="inline-block bg-white border border-gray-200 text-gray-700 px-6 py-3.5 rounded-xl font-bold hover:bg-gray-50 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
             Kembali ke Beranda
         </a>
     </div>

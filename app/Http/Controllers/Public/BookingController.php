@@ -58,9 +58,10 @@ class BookingController extends Controller
         $request->session()->put('booking_idempotency_key', $idempotencyKey);
 
         $user = auth()->user();
+        $addons = \App\Models\Addon::active()->ordered()->get();
 
         return view('public.booking.checkout', compact(
-            'roomType', 'checkIn', 'checkOut', 'guestCount', 'quote', 'idempotencyKey', 'user'
+            'roomType', 'checkIn', 'checkOut', 'guestCount', 'quote', 'idempotencyKey', 'user', 'addons'
         ));
     }
 
@@ -81,6 +82,10 @@ class BookingController extends Controller
             'special_request' => ['nullable', 'string', 'max:1000'],
             'policy_accepted' => ['accepted'],
             'idempotency_key' => ['required', 'string'],
+            'addons' => ['nullable', 'array'],
+            'addons.*.addon_id' => ['required_with:addons', 'exists:addons,id'],
+            'addons.*.quantity' => ['required_with:addons', 'integer', 'min:1'],
+            'use_points' => ['nullable', 'boolean'],
         ]);
 
         try {
@@ -127,7 +132,7 @@ class BookingController extends Controller
         }
 
         $rawToken = $request->session()->get('booking_raw_token', '');
-        $booking->load(['room.roomType', 'statusHistories']);
+        $booking->load(['room.roomType', 'statusHistories', 'nightPrices', 'addons.addon']);
 
         return view('public.booking.confirmation', compact('booking', 'rawToken'));
     }
@@ -219,7 +224,7 @@ class BookingController extends Controller
                 ->with('error', 'Anda tidak memiliki akses ke booking ini. Silakan verifikasi terlebih dahulu.');
         }
 
-        $booking->load(['room.roomType', 'statusHistories']);
+        $booking->load(['room.roomType', 'statusHistories', 'nightPrices', 'addons.addon']);
 
         return view('public.booking.detail', compact('booking'));
     }

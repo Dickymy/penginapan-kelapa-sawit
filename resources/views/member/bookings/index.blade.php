@@ -43,10 +43,17 @@
                 {{ $booking->check_in->format('d M Y') }} → {{ $booking->check_out->format('d M Y') }} ({{ $booking->nights }} malam)
             </p>
 
-            <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
+            <div class="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <span class="text-base font-bold text-gray-800">{{ $booking->formatted_total }}</span>
                 <div class="flex items-center gap-2">
                     @if($booking->status->value === 'pending_payment')
+                        <form action="{{ route('member.bookings.cancel', $booking) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?');">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="inline-flex items-center px-3.5 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition">
+                                Batalkan
+                            </button>
+                        </form>
                         <a href="{{ route('booking.pay', $booking->booking_code) }}"
                            class="inline-flex items-center px-3.5 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition">
                             Bayar Sekarang
@@ -54,7 +61,7 @@
                     @else
                         <a href="{{ route('member.bookings.show', $booking) }}"
                            class="text-sm text-primary-600 hover:text-primary-800 font-medium">
-                            Lihat Detail →
+                            Lihat Detail &rarr;
                         </a>
                     @endif
                 </div>

@@ -8,11 +8,17 @@
     {{-- Header --}}
     <div class="flex items-center justify-between">
         <h1 class="text-xl font-bold text-gray-800">Reservasi</h1>
-        <a href="{{ route('admin.bookings.create') }}" class="inline-flex items-center gap-1.5 px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm font-medium transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            <span class="hidden sm:inline">Booking Manual</span>
-            <span class="sm:hidden">Tambah</span>
-        </a>
+        <div class="flex gap-2">
+            <a href="{{ route('admin.bookings.export', request()->query()) }}" class="inline-flex items-center gap-1.5 px-3 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                <span class="hidden sm:inline">Unduh CSV</span>
+            </a>
+            <a href="{{ route('admin.bookings.create') }}" class="inline-flex items-center gap-1.5 px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm font-medium transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span class="hidden sm:inline">Booking Manual</span>
+                <span class="sm:hidden">Tambah</span>
+            </a>
+        </div>
     </div>
 
     {{-- Quick Filters (horizontal chips) --}}
@@ -68,31 +74,31 @@
     </form>
 
     {{-- Desktop Table --}}
-    <div class="hidden md:block bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="hidden md:block bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200 text-sm">
-            <thead class="bg-gray-50">
+            <thead class="bg-gray-50/80">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kode</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tamu</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kamar</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reservasi</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pembayaran</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sumber</th>
-                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
+                    <th class="px-5 py-3.5 text-left text-[11px] font-semibold tracking-wider text-gray-500 uppercase">Kode</th>
+                    <th class="px-5 py-3.5 text-left text-[11px] font-semibold tracking-wider text-gray-500 uppercase">Tamu</th>
+                    <th class="px-5 py-3.5 text-left text-[11px] font-semibold tracking-wider text-gray-500 uppercase">Kamar</th>
+                    <th class="px-5 py-3.5 text-left text-[11px] font-semibold tracking-wider text-gray-500 uppercase">Tanggal</th>
+                    <th class="px-5 py-3.5 text-left text-[11px] font-semibold tracking-wider text-gray-500 uppercase">Reservasi</th>
+                    <th class="px-5 py-3.5 text-left text-[11px] font-semibold tracking-wider text-gray-500 uppercase">Pembayaran</th>
+                    <th class="px-5 py-3.5 text-left text-[11px] font-semibold tracking-wider text-gray-500 uppercase">Sumber</th>
+                    <th class="px-5 py-3.5 text-right text-[11px] font-semibold tracking-wider text-gray-500 uppercase">Total</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
                 @forelse($bookings as $booking)
-                <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='{{ route('admin.bookings.show', $booking) }}'">
-                    <td class="px-4 py-3 font-mono text-xs text-gray-600">{{ $booking->booking_code }}</td>
-                    <td class="px-4 py-3 text-gray-800 font-medium">{{ $booking->guest_name }}</td>
-                    <td class="px-4 py-3 text-gray-600">{{ $booking->room_name_snapshot }}</td>
-                    <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ $booking->check_in->format('d/m/Y') }} → {{ $booking->check_out->format('d/m/Y') }}</td>
-                    <td class="px-4 py-3"><x-status-badge :status="$booking->status" /></td>
-                    <td class="px-4 py-3"><x-status-badge :status="$booking->payment_status" /></td>
-                    <td class="px-4 py-3 text-xs text-gray-500">{{ $booking->source->label() }}</td>
-                    <td class="px-4 py-3 text-right font-medium text-gray-800">{{ $booking->formatted_total }}</td>
+                <tr class="hover:bg-primary-50/50 transition-colors cursor-pointer group" onclick="window.location='{{ route('admin.bookings.show', $booking) }}'">
+                    <td class="px-5 py-3.5 font-mono text-xs text-gray-600">{{ $booking->booking_code }}</td>
+                    <td class="px-5 py-3.5 text-gray-800 font-medium">{{ $booking->guest_name }}</td>
+                    <td class="px-5 py-3.5 text-gray-600">{{ $booking->room_name_snapshot }}</td>
+                    <td class="px-5 py-3.5 text-gray-600 whitespace-nowrap">{{ $booking->check_in->format('d/m/Y') }} → {{ $booking->check_out->format('d/m/Y') }}</td>
+                    <td class="px-5 py-3.5"><x-status-badge :status="$booking->status" /></td>
+                    <td class="px-5 py-3.5"><x-status-badge :status="$booking->payment_status" /></td>
+                    <td class="px-5 py-3.5 text-xs text-gray-500">{{ $booking->source->label() }}</td>
+                    <td class="px-5 py-3.5 text-right font-medium text-gray-800 group-hover:text-primary-700">{{ $booking->formatted_total }}</td>
                 </tr>
                 @empty
                 <tr>
@@ -108,7 +114,7 @@
     {{-- Mobile Cards --}}
     <div class="md:hidden space-y-3">
         @forelse($bookings as $booking)
-        <a href="{{ route('admin.bookings.show', $booking) }}" class="block bg-white rounded-xl border border-gray-200 p-4 hover:shadow-sm transition">
+        <a href="{{ route('admin.bookings.show', $booking) }}" class="block bg-white rounded-2xl border border-gray-100 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
             <div class="flex items-start justify-between">
                 <div class="min-w-0 flex-1">
                     <p class="text-sm font-semibold text-gray-800 truncate">{{ $booking->guest_name }}</p>
