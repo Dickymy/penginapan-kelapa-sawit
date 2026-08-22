@@ -22,3 +22,5 @@ yarn-error.log
 /.vscode
 /.zed
 penginapan_kelapa_sawit
+*.rar
+*.zip

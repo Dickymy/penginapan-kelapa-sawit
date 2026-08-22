@@ -11,7 +11,7 @@ class LoginResponse implements LoginResponseContract
         $user = auth()->user();
         $name = explode(' ', $user->name)[0]; // First name only
 
-        return redirect()->intended(config('fortify.home', '/member/dashboard'))
+        return redirect()->intended('/')
             ->with('toast_success', 'Selamat datang kembali, ' . $name . '.');
     }
 }

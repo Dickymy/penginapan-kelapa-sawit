@@ -94,7 +94,50 @@
             </div>
         </div>
 
-        @if($booking->status === BookingStatus::PendingPayment && $booking->is_hold_active)
+        @if($booking->status === \App\Enums\BookingStatus::Confirmed)
+            <div class="mt-6 flex gap-4">
+                <a href="{{ route('member.booking-changes.create', $booking) }}" class="inline-flex items-center gap-2 px-6 py-2.5 border border-primary-600 text-primary-600 rounded-xl hover:bg-primary-50 transition-all font-medium">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Ajukan Perubahan
+                </a>
+            </div>
+            
+            @if($booking->changeRequests->isNotEmpty())
+            <div class="mt-6 border border-slate-200 rounded-xl overflow-hidden">
+                <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 font-semibold text-slate-700">Riwayat Pengajuan Perubahan</div>
+                <div class="divide-y divide-slate-100">
+                    @foreach($booking->changeRequests as $req)
+                    <div class="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white">
+                        <div>
+                            <div class="font-medium text-slate-800">{{ ucfirst(str_replace('_', ' ', $req->type)) }}</div>
+                            <div class="text-sm text-slate-500 mt-1">Diajukan: {{ $req->created_at->format('d M Y, H:i') }}</div>
+                            @if($req->admin_notes)
+                                <div class="text-sm text-slate-600 mt-2 bg-slate-50 p-2 rounded border border-slate-200">
+                                    <span class="font-semibold text-slate-700">Catatan Admin:</span> {{ $req->admin_notes }}
+                                </div>
+                            @endif
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium 
+                                @if($req->status === 'approved') bg-emerald-100 text-emerald-700
+                                @elseif($req->status === 'rejected') bg-red-100 text-red-700
+                                @elseif($req->status === 'cancelled') bg-slate-100 text-slate-700
+                                @else bg-amber-100 text-amber-700
+                                @endif
+                            ">
+                                {{ ucfirst($req->status) }}
+                            </span>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+        @endif
+
+        @if($booking->status === \App\Enums\BookingStatus::PendingPayment && $booking->is_hold_active)
             <div class="mt-4 pt-4 border-t {{ $colorClasses['border'] }}">
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <div>
@@ -182,14 +225,46 @@
             <h2 class="font-semibold text-gray-900">Rincian Biaya</h2>
         </div>
         <div class="px-5 sm:px-6 py-5 space-y-3">
-            <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Harga per malam</span>
-                <span class="text-gray-900">Rp{{ number_format($booking->price_per_night_snapshot, 0, ',', '.') }}</span>
-            </div>
-            <div class="flex justify-between text-sm">
-                <span class="text-gray-600">{{ $booking->nights }} malam × Rp{{ number_format($booking->price_per_night_snapshot, 0, ',', '.') }}</span>
-                <span class="text-gray-900">Rp{{ number_format($booking->subtotal, 0, ',', '.') }}</span>
-            </div>
+            @if($booking->nightPrices->count() > 0)
+                <div class="text-sm font-medium text-gray-700 mb-2">Rincian Harga:</div>
+                <ul class="space-y-1 mb-3">
+                    @foreach($booking->nightPrices as $np)
+                        <li class="flex justify-between text-sm">
+                            <span class="text-gray-500">
+                                {{ $np->date->translatedFormat('d M Y') }}
+                                @if($np->label)
+                                    <span class="text-xs inline-block bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded ml-1">{{ $np->label }}</span>
+                                @endif
+                            </span>
+                            <span class="text-gray-900">Rp{{ number_format($np->price, 0, ',', '.') }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+                <div class="flex justify-between text-sm pt-2 border-t border-gray-50">
+                    <span class="text-gray-600">Subtotal ({{ $booking->nights }} malam)</span>
+                    <span class="text-gray-900">Rp{{ number_format($booking->subtotal, 0, ',', '.') }}</span>
+                </div>
+            @else
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Harga per malam</span>
+                    <span class="text-gray-900">Rp{{ number_format($booking->price_per_night_snapshot, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">{{ $booking->nights }} malam × Rp{{ number_format($booking->price_per_night_snapshot, 0, ',', '.') }}</span>
+                    <span class="text-gray-900">Rp{{ number_format($booking->subtotal, 0, ',', '.') }}</span>
+                </div>
+            @endif
+            @if($booking->addons->count() > 0)
+            <div class="text-sm font-medium text-gray-700 mt-3 mb-2">Layanan Tambahan:</div>
+            <ul class="space-y-1 mb-3 border-b border-gray-50 pb-3">
+                @foreach($booking->addons as $ba)
+                    <li class="flex justify-between text-sm">
+                        <span class="text-gray-600">{{ $ba->addon->name ?? 'Layanan' }} x{{ $ba->quantity }}</span>
+                        <span class="text-gray-900">{{ $ba->formatted_subtotal }}</span>
+                    </li>
+                @endforeach
+            </ul>
+            @endif
             @if($booking->promotion_discount > 0)
             <div class="flex justify-between text-sm text-green-700">
                 <span>Diskon promo{{ $booking->promotion_code_snapshot ? ' ('.$booking->promotion_code_snapshot.')' : '' }}</span>

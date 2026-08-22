@@ -9,8 +9,8 @@ use Carbon\Carbon;
 class PricingService
 {
     public function __construct(
-        private ?PromotionService $promotionService = null,
-        private ?LoyaltyPointService $loyaltyService = null,
+        private PromotionService $promotionService,
+        private LoyaltyPointService $loyaltyService,
     ) {}
 
     /**
@@ -21,18 +21,39 @@ class PricingService
         return (int) $checkIn->diffInDays($checkOut);
     }
 
-    /**
-     * Calculate full price quote for a booking (no promo/points).
-     */
     public function calculateQuote(RoomType $roomType, Carbon $checkIn, Carbon $checkOut): array
     {
         $nights = $this->calculateNights($checkIn, $checkOut);
-        $pricePerNight = $roomType->base_price;
-        $subtotal = $nights * $pricePerNight;
+        $basePrice = $roomType->base_price;
+
+        // Ambil semua rate_overrides untuk room_type + rentang tanggal
+        $overridesData = \App\Models\RateOverride::where('room_type_id', $roomType->id)
+            ->whereBetween('date', [$checkIn->format('Y-m-d'), $checkOut->copy()->subDay()->format('Y-m-d')])
+            ->get()
+            ->keyBy(fn ($override) => $override->date->format('Y-m-d'));
+
+        $nightPrices = [];
+        $subtotal = 0;
+
+        for ($i = 0; $i < $nights; $i++) {
+            $date = $checkIn->copy()->addDays($i);
+            $dateKey = $date->format('Y-m-d');
+            $override = $overridesData->get($dateKey);
+            $price = $override ? $override->price : $basePrice;
+            $label = $override ? $override->label : null;
+
+            $nightPrices[] = [
+                'date' => $dateKey,
+                'price' => $price,
+                'label' => $override ? ($label ?? 'Override') : null
+            ];
+            $subtotal += $price;
+        }
 
         return [
             'nights' => $nights,
-            'price_per_night' => $pricePerNight,
+            'price_per_night' => $basePrice, // base price untuk backward compat
+            'night_prices' => $nightPrices,  // breakdown per malam
             'subtotal' => $subtotal,
             'promotion_discount' => 0,
             'points_discount' => 0,
@@ -41,6 +62,34 @@ class PricingService
             'eligible_loyalty_amount' => $subtotal,
             'promotion' => null,
         ];
+    }
+
+    /**
+     * Calculate quote with addons.
+     */
+    public function calculateQuoteWithAddons(array $baseQuote, array $selectedAddons): array
+    {
+        $addonTotal = 0;
+        $addonDetails = [];
+        foreach ($selectedAddons as $item) {
+            $addon = \App\Models\Addon::active()->findOrFail($item['addon_id']);
+            $subtotal = $addon->price * $item['quantity'];
+            $addonTotal += $subtotal;
+            $addonDetails[] = [
+                'addon_id' => $addon->id,
+                'name' => $addon->name,
+                'quantity' => $item['quantity'],
+                'unit_price' => $addon->price,
+                'subtotal' => $subtotal,
+            ];
+        }
+
+        $baseQuote['addon_total'] = $addonTotal;
+        $baseQuote['addon_details'] = $addonDetails;
+        $baseQuote['total_amount'] += $addonTotal;
+        $baseQuote['eligible_loyalty_amount'] += $addonTotal;
+        
+        return $baseQuote;
     }
 
     /**

@@ -22,6 +22,7 @@ class BookingService
         private AvailabilityService $availability,
         private PricingService $pricing,
         private DocumentSequenceService $sequence,
+        private LoyaltyPointService $loyaltyService,
     ) {}
 
     /**
@@ -63,6 +64,8 @@ class BookingService
             'actor_type' => 'system',
             'created_at' => now(),
         ]);
+
+        \App\Events\BookingCancelled::dispatch($booking);
     }
 
     /**
@@ -129,7 +132,16 @@ class BookingService
             }
 
             // Calculate price server-side
-            $quote = $this->pricing->calculateQuote($roomType, $checkIn, $checkOut);
+            if (!empty($data['use_points']) && $data['use_points'] && $user) {
+                $availablePoints = $this->loyaltyService->getBalance($user);
+                $quote = $this->pricing->calculateQuoteWithPoints($roomType, $checkIn, $checkOut, $availablePoints, $user);
+            } else {
+                $quote = $this->pricing->calculateQuote($roomType, $checkIn, $checkOut);
+            }
+
+            if (!empty($data['addons'])) {
+                $quote = $this->pricing->calculateQuoteWithAddons($quote, $data['addons']);
+            }
 
             // Generate booking code
             $bookingCode = $this->sequence->generateBookingCode();
@@ -170,6 +182,41 @@ class BookingService
                 'guest_access_token_hash' => $tokenHash,
             ]);
 
+            // Insert night prices snapshot
+            $nightPricesData = [];
+            foreach ($quote['night_prices'] as $np) {
+                $nightPricesData[] = [
+                    'booking_id' => $booking->id,
+                    'date' => $np['date'],
+                    'price' => $np['price'],
+                    'label' => $np['label'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+            \App\Models\BookingNightPrice::insert($nightPricesData);
+
+            if (!empty($quote['addon_details'])) {
+                $addonData = [];
+                foreach ($quote['addon_details'] as $addon) {
+                    $addonData[] = [
+                        'booking_id' => $booking->id,
+                        'addon_id' => $addon['addon_id'],
+                        'quantity' => $addon['quantity'],
+                        'unit_price' => $addon['unit_price'],
+                        'subtotal' => $addon['subtotal'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+                \App\Models\BookingAddon::insert($addonData);
+            }
+
+            // Redeem points if any were applied in the quote
+            if ($quote['points_redeemed'] > 0 && $user) {
+                $this->loyaltyService->redeemForBooking($user, $booking, $quote['points_redeemed']);
+            }
+
             // Write status history
             BookingStatusHistory::create([
                 'booking_id' => $booking->id,
@@ -183,6 +230,10 @@ class BookingService
 
             return $booking;
         });
+
+        if ($booking->wasRecentlyCreated) {
+            \App\Events\BookingCreated::dispatch($booking);
+        }
 
         return ['booking' => $booking, 'raw_token' => $rawToken];
     }
@@ -212,6 +263,23 @@ class BookingService
             $nights = $this->pricing->calculateNights($checkIn, $checkOut);
             $subtotal = $nights * $pricePerNight;
             $totalAmount = $subtotal;
+
+            $addonTotal = 0;
+            $addonDetails = [];
+            if (!empty($data['addons'])) {
+                foreach ($data['addons'] as $item) {
+                    $addon = \App\Models\Addon::active()->findOrFail($item['addon_id']);
+                    $addonSubtotal = $addon->price * $item['quantity'];
+                    $addonTotal += $addonSubtotal;
+                    $addonDetails[] = [
+                        'addon_id' => $addon->id,
+                        'quantity' => $item['quantity'],
+                        'unit_price' => $addon->price,
+                        'subtotal' => $addonSubtotal,
+                    ];
+                }
+            }
+            $totalAmount += $addonTotal;
 
             $bookingCode = $this->sequence->generateBookingCode();
 
@@ -248,6 +316,36 @@ class BookingService
                 'payment_expires_at' => $paymentExpiresAt,
             ]);
 
+            // Insert night prices snapshot for manual booking
+            $nightPricesData = [];
+            for ($i = 0; $i < $nights; $i++) {
+                $nightPricesData[] = [
+                    'booking_id' => $booking->id,
+                    'date' => $checkIn->copy()->addDays($i)->format('Y-m-d'),
+                    'price' => $pricePerNight,
+                    'label' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+            \App\Models\BookingNightPrice::insert($nightPricesData);
+
+            if (!empty($addonDetails)) {
+                $addonData = [];
+                foreach ($addonDetails as $addon) {
+                    $addonData[] = [
+                        'booking_id' => $booking->id,
+                        'addon_id' => $addon['addon_id'],
+                        'quantity' => $addon['quantity'],
+                        'unit_price' => $addon['unit_price'],
+                        'subtotal' => $addon['subtotal'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+                \App\Models\BookingAddon::insert($addonData);
+            }
+
             BookingStatusHistory::create([
                 'booking_id' => $booking->id,
                 'from_status' => null,
@@ -260,6 +358,10 @@ class BookingService
 
             return $booking;
         });
+
+        if ($booking->wasRecentlyCreated) {
+            \App\Events\BookingCreated::dispatch($booking);
+        }
 
         return $booking;
     }
@@ -337,8 +439,7 @@ class BookingService
     private function findAndLockRoom(int $roomTypeId, Carbon $checkIn, Carbon $checkOut): Room
     {
         $candidateRooms = Room::where('room_type_id', $roomTypeId)
-            ->where('is_active', true)
-            ->where('status', 'active')
+            ->sellable()
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();

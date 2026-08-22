@@ -7,7 +7,7 @@
     <h1 class="text-2xl font-bold text-gray-900 mb-6">Status Booking</h1>
 
     {{-- Booking Card --}}
-    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+    <div class="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 mb-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
             <div>
                 <p class="text-sm text-gray-500">Kode Booking</p>
@@ -47,7 +47,7 @@
     </div>
 
     {{-- Payment Info --}}
-    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+    <div class="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 mb-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">Informasi Pembayaran</h2>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
@@ -66,7 +66,7 @@
         @if($booking->status === \App\Enums\BookingStatus::PendingPayment && $booking->is_hold_active)
             <div class="mt-4 pt-4 border-t border-gray-100">
                 <a href="{{ route('booking.pay', $booking->booking_code) }}"
-                   class="inline-flex items-center px-5 py-2.5 bg-primary-600 text-white font-medium text-sm rounded-lg hover:bg-primary-700 transition">
+                   class="inline-flex items-center px-6 py-3 bg-primary-600 text-white font-bold text-sm rounded-xl hover:bg-primary-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary-600/30 transition-all duration-300">
                     Bayar Sekarang
                 </a>
             </div>
@@ -75,7 +75,7 @@
 
     {{-- Status Timeline --}}
     @if($booking->statusHistories->isNotEmpty())
-        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+        <div class="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 mb-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Riwayat Status</h2>
 
             <div class="relative">

@@ -17,15 +17,21 @@ class ReportController extends Controller
         $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
         $endDate = $request->input('end_date', now()->toDateString());
 
-        $bookings = Booking::where('payment_status', 'paid')
-            ->whereBetween('created_at', [$startDate, Carbon::parse($endDate)->endOfDay()])
-            ->get();
+        $baseQuery = Booking::where('payment_status', 'paid')
+            ->whereBetween('created_at', [$startDate, Carbon::parse($endDate)->endOfDay()]);
 
-        $totalRevenue = $bookings->sum('total_amount');
-        $bySource = $bookings->groupBy('source')->map(fn($group) => [
-            'count' => $group->count(),
-            'total' => $group->sum('total_amount'),
-        ]);
+        $totalRevenue = (int) $baseQuery->sum('total_amount');
+        
+        $bySource = (clone $baseQuery)
+            ->selectRaw('source, count(*) as count, sum(total_amount) as total')
+            ->groupBy('source')
+            ->get()
+            ->mapWithKeys(fn($item) => [
+                $item->source->value => [
+                    'count' => $item->count,
+                    'total' => $item->total,
+                ]
+            ]);
 
         return view('admin.reports.revenue', compact('totalRevenue', 'bySource', 'startDate', 'endDate'));
     }
@@ -76,14 +82,105 @@ class ReportController extends Controller
 
         $data = Booking::where('payment_status', 'paid')
             ->whereBetween('created_at', [$startDate, Carbon::parse($endDate)->endOfDay()])
-            ->get()
+            ->selectRaw('source, count(*) as count, sum(total_amount) as revenue')
             ->groupBy('source')
-            ->map(fn($group) => [
-                'count' => $group->count(),
-                'revenue' => $group->sum('total_amount'),
-                'average' => $group->count() > 0 ? (int) ($group->sum('total_amount') / $group->count()) : 0,
+            ->get()
+            ->mapWithKeys(fn($item) => [
+                $item->source->value => [
+                    'count' => $item->count,
+                    'revenue' => $item->revenue,
+                    'average' => $item->count > 0 ? (int) ($item->revenue / $item->count) : 0,
+                ]
             ]);
 
         return view('admin.reports.sources', compact('data', 'startDate', 'endDate'));
+    }
+
+    public function exportRevenue(Request $request)
+    {
+        $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
+        $endDate = $request->input('end_date', now()->toDateString());
+
+        $bookings = Booking::where('payment_status', 'paid')
+            ->whereBetween('created_at', [$startDate, Carbon::parse($endDate)->endOfDay()])
+            ->orderBy('created_at')
+            ->get();
+
+        $filename = "Laporan_Pendapatan_{$startDate}_sampai_{$endDate}.csv";
+
+        $headers = [
+            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $callback = function() use($bookings) {
+            $file = fopen('php://output', 'w');
+            fputs($file, "\xEF\xBB\xBF"); // BOM for UTF-8
+            fputcsv($file, ['Tanggal Booking', 'Kode Booking', 'Sumber', 'Status', 'Total Pendapatan']);
+
+            foreach ($bookings as $booking) {
+                fputcsv($file, [
+                    $booking->created_at->format('d/m/Y H:i'),
+                    $booking->booking_code,
+                    $booking->source->label(),
+                    $booking->status->label(),
+                    $booking->total_amount,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportOccupancy(Request $request)
+    {
+        $startDate = Carbon::parse($request->input('start_date', now()->startOfMonth()->toDateString()));
+        $endDate = Carbon::parse($request->input('end_date', now()->toDateString()));
+
+        $bookings = Booking::whereIn('status', ['confirmed', 'checked_in', 'checked_out', 'completed'])
+            ->where('check_in', '<', $endDate->copy()->addDay())
+            ->where('check_out', '>', $startDate)
+            ->orderBy('check_in')
+            ->get();
+
+        $filename = "Laporan_Okupansi_{$startDate->toDateString()}_sampai_{$endDate->toDateString()}.csv";
+
+        $headers = [
+            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $callback = function() use($bookings, $startDate, $endDate) {
+            $file = fopen('php://output', 'w');
+            fputs($file, "\xEF\xBB\xBF");
+            fputcsv($file, ['Kode Booking', 'Tamu', 'Kamar', 'Check-In', 'Check-Out', 'Malam Aktif']);
+
+            foreach ($bookings as $booking) {
+                $bStart = max($booking->check_in, $startDate);
+                $bEnd = min($booking->check_out, $endDate->copy()->addDay());
+                $activeNights = $bStart->diffInDays($bEnd);
+
+                fputcsv($file, [
+                    $booking->booking_code,
+                    $booking->guest_name,
+                    $booking->room_type_name_snapshot . ' - ' . $booking->room_name_snapshot,
+                    $booking->check_in->format('d/m/Y'),
+                    $booking->check_out->format('d/m/Y'),
+                    $activeNights,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

@@ -11,8 +11,8 @@ class InvoiceService
 {
     public function isEligible(Booking $booking): bool
     {
-        return in_array($booking->payment_status->value, ['paid', 'refunded', 'partial_refund'])
-            && in_array($booking->status->value, ['confirmed', 'checked_in', 'checked_out', 'completed']);
+        return in_array($booking->payment_status->value, [\App\Enums\PaymentStatus::Paid->value, \App\Enums\PaymentStatus::Refunded->value, \App\Enums\PaymentStatus::PartialRefund->value])
+            && in_array($booking->status->value, [\App\Enums\BookingStatus::Confirmed->value, \App\Enums\BookingStatus::CheckedIn->value, \App\Enums\BookingStatus::CheckedOut->value, \App\Enums\BookingStatus::Completed->value]);
     }
 
     public function generateInvoiceNumber(Booking $booking): string
@@ -39,7 +39,7 @@ class InvoiceService
     public function generatePdf(Booking $booking)
     {
         $invoiceNumber = $this->generateInvoiceNumber($booking);
-        $booking->load('payments');
+        $booking->load(['payments', 'nightPrices', 'addons.addon']);
         $paidPayment = $booking->payments->firstWhere('status', 'paid');
 
         $data = [

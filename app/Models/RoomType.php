@@ -77,4 +77,18 @@ class RoomType extends Model
     {
         return 'Rp' . number_format($this->base_price, 0, ',', '.');
     }
+
+    public function getAverageRatingAttribute(): ?float
+    {
+        return Review::published()
+            ->whereHas('booking.room', fn($q) => $q->where('room_type_id', $this->id))
+            ->avg('rating');
+    }
+
+    public function getReviewCountAttribute(): int
+    {
+        return Review::published()
+            ->whereHas('booking.room', fn($q) => $q->where('room_type_id', $this->id))
+            ->count();
+    }
 }

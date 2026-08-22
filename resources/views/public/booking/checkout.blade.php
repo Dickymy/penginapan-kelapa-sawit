@@ -50,7 +50,34 @@
         {{-- Form --}}
         <div class="lg:col-span-2">
             <form action="{{ route('booking.store') }}" method="POST" class="space-y-6"
-                  x-data
+                  x-data="{
+                      baseTotal: {{ $quote['total_amount'] }},
+                      addonTotal: 0,
+                      usePoints: false,
+                      pointBalance: {{ $user ? app(\App\Services\LoyaltyPointService::class)->getBalance($user) : 0 }},
+                      pointValue: {{ config('loyalty.point_value', 50) }},
+                      get pointDiscount() {
+                          if (!this.usePoints || this.pointBalance <= 0) return 0;
+                          return Math.min(this.baseTotal, this.pointBalance * this.pointValue);
+                      },
+                      get finalTotal() {
+                          return Math.max(0, this.baseTotal - this.pointDiscount) + this.addonTotal;
+                      },
+                      updateAddonTotal() {
+                          let total = 0;
+                          document.querySelectorAll('.addon-item').forEach(item => {
+                              if (item.querySelector('.addon-checkbox').checked) {
+                                  let price = parseInt(item.dataset.price);
+                                  let qty = parseInt(item.querySelector('.addon-qty').value) || 1;
+                                  total += price * qty;
+                              }
+                          });
+                          this.addonTotal = total;
+                      },
+                      formatPrice(val) {
+                          return new Intl.NumberFormat('id-ID').format(val);
+                      }
+                  }"
                   @submit="$store.checkoutForm.submitting = true">
                 @csrf
 
@@ -62,7 +89,7 @@
                 <input type="hidden" name="idempotency_key" value="{{ $idempotencyKey }}">
 
                 {{-- Guest Info --}}
-                <div class="bg-white border border-gray-200 rounded-xl p-6">
+                <div class="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                     <h2 class="text-lg font-semibold text-gray-900 mb-1">Informasi Tamu</h2>
                     @guest
                     <p class="text-sm text-gray-500 mb-4">Tidak perlu akun untuk memesan. <a href="{{ route('login') }}" class="text-primary-600 hover:underline">Masuk</a> agar data terisi otomatis dan booking tersimpan di akun.</p>
@@ -113,8 +140,61 @@
                     </div>
                 </div>
 
+                {{-- Add-ons --}}
+                @if(isset($addons) && $addons->isNotEmpty())
+                <div class="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Layanan Tambahan (Opsional)</h2>
+                    <div class="space-y-4">
+                        @foreach($addons as $index => $addon)
+                        <div class="addon-item flex items-start justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0"
+                             data-price="{{ $addon->price }}"
+                             x-data="{ selected: false, qty: 1 }">
+                            <div class="flex items-start gap-3">
+                                <input type="checkbox" name="addons[{{ $index }}][addon_id]" value="{{ $addon->id }}"
+                                       x-model="selected"
+                                       @change="updateAddonTotal()"
+                                       class="addon-checkbox mt-1 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ $addon->name }}</p>
+                                    @if($addon->description)
+                                    <p class="text-xs text-gray-500 mt-0.5">{{ $addon->description }}</p>
+                                    @endif
+                                    <p class="text-sm text-primary-600 font-medium mt-1">{{ $addon->formatted_price }} <span class="text-xs text-gray-400 font-normal">/ unit</span></p>
+                                </div>
+                            </div>
+                            
+                            <div x-show="selected" x-cloak>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" @click="if(qty > 1) { qty--; updateAddonTotal(); }" class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200">-</button>
+                                    <input type="number" name="addons[{{ $index }}][quantity]" x-model="qty" min="1" @input="updateAddonTotal()" :disabled="!selected" class="addon-qty w-12 text-center border-transparent focus:border-transparent focus:ring-0 p-0 text-sm font-medium" readonly>
+                                    <button type="button" @click="qty++; updateAddonTotal();" class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                {{-- Poin Loyalti --}}
+                @auth
+                <div x-show="pointBalance > 0" class="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-900 mb-1">Gunakan Poin Loyalti</h2>
+                            <p class="text-sm text-gray-500">Anda memiliki <span class="font-bold text-primary-600" x-text="formatPrice(pointBalance)"></span> poin (setara Rp<span x-text="formatPrice(pointBalance * pointValue)"></span>).</p>
+                        </div>
+                        <div class="flex items-center h-5 mt-1">
+                            <input type="checkbox" name="use_points" id="use_points" value="1"
+                                   x-model="usePoints"
+                                   class="focus:ring-primary-500 h-5 w-5 text-primary-600 border-gray-300 rounded">
+                        </div>
+                    </div>
+                </div>
+                @endauth
+
                 {{-- Additional Info --}}
-                <div class="bg-white border border-gray-200 rounded-xl p-6">
+                <div class="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4">Informasi Tambahan</h2>
 
                     <div class="space-y-4">
@@ -149,7 +229,7 @@
                 </div>
 
                 {{-- Policy Acceptance --}}
-                <div class="bg-white border border-gray-200 rounded-xl p-6">
+                <div class="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                     <div class="flex items-start gap-3">
                         <input type="checkbox" name="policy_accepted" id="policy_accepted" value="1"
                                {{ old('policy_accepted') ? 'checked' : '' }}
@@ -168,7 +248,7 @@
                 <div class="hidden md:block">
                     <button type="submit"
                             :disabled="$store.checkoutForm.submitting"
-                            class="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 transition text-center disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center">
+                            class="w-full bg-primary-600 text-white py-3.5 px-6 rounded-xl font-bold hover:bg-primary-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary-600/30 transition-all duration-300 text-center disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center">
                         <svg x-show="$store.checkoutForm.submitting" x-cloak class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -183,7 +263,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-xs text-gray-500">Total</p>
-                            <p class="text-lg font-bold text-primary-600">Rp{{ number_format($quote['total_amount'], 0, ',', '.') }}</p>
+                            <p class="text-lg font-bold text-primary-600">Rp<span x-text="formatPrice(finalTotal)">{{ number_format($quote['total_amount'], 0, ',', '.') }}</span></p>
                         </div>
                         <button type="submit"
                                 :disabled="$store.checkoutForm.submitting"
@@ -204,7 +284,7 @@
 
         {{-- Booking Summary Sidebar --}}
         <div class="lg:col-span-1">
-            <div class="bg-white border border-gray-200 rounded-xl p-6 sticky top-24">
+            <div class="bg-white border-gray-100 border rounded-2xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] p-6 md:p-8 sticky top-24">
                 <h2 class="text-lg font-semibold text-gray-900 mb-4">Ringkasan Booking</h2>
 
                 <div class="space-y-3 text-sm">
@@ -231,16 +311,43 @@
 
                     <hr class="border-gray-200">
 
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Harga per malam</span>
-                        <span class="font-medium text-gray-900">Rp{{ number_format($quote['price_per_night'], 0, ',', '.') }}</span>
+                    @if(isset($quote['night_prices']) && count($quote['night_prices']) > 0)
+                        <div class="mt-4 mb-2 font-medium text-gray-700">Rincian Harga:</div>
+                        <ul class="space-y-1 mb-4">
+                            @foreach($quote['night_prices'] as $np)
+                                <li class="flex justify-between text-sm">
+                                    <span class="text-gray-500">
+                                        {{ \Carbon\Carbon::parse($np['date'])->translatedFormat('d M Y') }}
+                                        @if($np['label'])
+                                            <span class="text-xs inline-block bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded ml-1">{{ $np['label'] }}</span>
+                                        @endif
+                                    </span>
+                                    <span class="text-gray-900">Rp{{ number_format($np['price'], 0, ',', '.') }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Harga per malam</span>
+                            <span class="font-medium text-gray-900">Rp{{ number_format($quote['price_per_night'], 0, ',', '.') }}</span>
+                        </div>
+                    @endif
+
+                    <div class="flex justify-between" x-show="addonTotal > 0" x-cloak>
+                        <span class="text-gray-600">Layanan Tambahan</span>
+                        <span class="font-medium text-gray-900">Rp<span x-text="formatPrice(addonTotal)">0</span></span>
+                    </div>
+
+                    <div class="flex justify-between" x-show="usePoints && pointDiscount > 0" x-cloak>
+                        <span class="text-primary-600">Diskon Poin</span>
+                        <span class="font-medium text-primary-600">-Rp<span x-text="formatPrice(pointDiscount)">0</span></span>
                     </div>
 
                     <hr class="border-gray-200">
 
                     <div class="flex justify-between text-base font-bold">
                         <span class="text-gray-900">Total</span>
-                        <span class="text-primary-600">Rp{{ number_format($quote['total_amount'], 0, ',', '.') }}</span>
+                        <span class="text-primary-600">Rp<span x-text="formatPrice(finalTotal)">{{ number_format($quote['total_amount'], 0, ',', '.') }}</span></span>
                     </div>
                 </div>
             </div>

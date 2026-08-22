@@ -6,7 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Penginapan Kelapa Sawit — Penginapan di Kota Bangun II')</title>
     @yield('meta')
-    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#0284c7">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen flex flex-col bg-white text-gray-800 font-sans">
@@ -16,7 +18,7 @@
             <div class="flex justify-between items-center h-16">
                 {{-- Logo --}}
                 <a href="{{ route('home') }}" class="text-xl font-bold text-primary-700 flex items-center gap-2">
-                    <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto object-contain">
                     <span class="hidden sm:inline">Penginapan Kelapa Sawit</span>
                     <span class="sm:hidden">Kelapa Sawit</span>
                 </a>
@@ -26,7 +28,10 @@
                     <a href="{{ route('home') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('home') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Beranda</a>
                     <a href="{{ route('rooms.index') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('rooms.*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Kamar</a>
                     <a href="{{ route('gallery') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('gallery') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Galeri</a>
+                    <a href="{{ route('nearby-places') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('nearby-places') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Sekitar</a>
+                    <a href="{{ route('faq') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('faq') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">FAQ</a>
                     <a href="{{ route('location') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('location') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Lokasi</a>
+                    <a href="{{ route('contact.create') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('contact.*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Hubungi</a>
                     <a href="{{ route('booking.my') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('booking.my') || request()->routeIs('booking.verify*') || request()->routeIs('booking.guest.detail') || request()->routeIs('member.bookings.*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">Booking Saya</a>
                     <a href="{{ route('home') }}#cari-kamar" class="ml-2 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition">Cari Kamar</a>
                 </nav>
@@ -141,7 +146,10 @@
                     <p class="px-3 py-1 pt-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Informasi</p>
                     <a href="{{ route('home') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('home') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Beranda</a>
                     <a href="{{ route('gallery') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('gallery') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Galeri</a>
+                    <a href="{{ route('nearby-places') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('nearby-places') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Sekitar</a>
+                    <a href="{{ route('faq') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('faq') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">FAQ</a>
                     <a href="{{ route('location') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('location') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Lokasi</a>
+                    <a href="{{ route('contact.create') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('contact.*') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Hubungi Kami</a>
                     <a href="{{ route('about') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('about') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Tentang</a>
                     <a href="{{ route('policy') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm {{ request()->routeIs('policy') ? 'text-primary-700 bg-primary-50 font-medium' : 'text-gray-700 hover:bg-gray-50' }}">Kebijakan</a>
                 </nav>
@@ -206,51 +214,91 @@
     </main>
 
     {{-- Footer --}}
-    <footer class="bg-gray-50 border-t border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm">
-                {{-- Property --}}
-                <div>
-                    <p class="font-semibold text-gray-800">Penginapan Kelapa Sawit</p>
-                    <p class="text-gray-500 mt-1">Kota Bangun II, Kutai Kartanegara, Kalimantan Timur</p>
+    <footer class="bg-gray-900 border-t border-gray-800 text-gray-400">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 text-sm">
+                {{-- Property Branding --}}
+                <div class="lg:col-span-1">
+                    <a href="{{ route('home') }}" class="text-2xl font-bold text-white flex items-center gap-2 mb-4">
+                        <div class="bg-white p-1 rounded-lg flex items-center justify-center">
+                            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto object-contain">
+                        </div>
+                        <span>{{ \App\Models\Setting::get('general', 'property_name', 'Penginapan Kelapa Sawit') }}</span>
+                    </a>
+                    <p class="text-gray-400 mb-6 leading-relaxed">
+                        Menghadirkan kenyamanan beristirahat layaknya di rumah sendiri, berlokasi strategis di Kota Bangun II.
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-primary-600 hover:text-white transition-all duration-300">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-primary-600 hover:text-white transition-all duration-300">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-primary-600 hover:text-white transition-all duration-300">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/></svg>
+                        </a>
+                    </div>
                 </div>
+
                 {{-- Quick Links --}}
                 <div>
-                    <p class="font-medium text-gray-700 mb-2">Tautan Cepat</p>
-                    <nav class="space-y-1 text-gray-500">
-                        <a href="{{ route('rooms.index') }}" class="block hover:text-primary-600 transition">Kamar</a>
-                        <a href="{{ route('gallery') }}" class="block hover:text-primary-600 transition">Galeri</a>
-                        <a href="{{ route('location') }}" class="block hover:text-primary-600 transition">Lokasi</a>
-                        <a href="{{ route('policy') }}" class="block hover:text-primary-600 transition">Kebijakan</a>
-                        <a href="{{ route('booking.my') }}" class="block hover:text-primary-600 transition">Booking Saya</a>
+                    <h3 class="text-white font-bold text-lg mb-4">Tautan Cepat</h3>
+                    <nav class="space-y-3">
+                        <a href="{{ route('rooms.index') }}" class="block text-gray-400 hover:text-white hover:translate-x-1 transition-all">Kamar Tersedia</a>
+                        <a href="{{ route('gallery') }}" class="block text-gray-400 hover:text-white hover:translate-x-1 transition-all">Galeri Penginapan</a>
+                        <a href="{{ route('faq') }}" class="block text-gray-400 hover:text-white hover:translate-x-1 transition-all">Tanya Jawab (FAQ)</a>
+                        <a href="{{ route('nearby-places') }}" class="block text-gray-400 hover:text-white hover:translate-x-1 transition-all">Destinasi Sekitar</a>
+                        <a href="{{ route('policy') }}" class="block text-gray-400 hover:text-white hover:translate-x-1 transition-all">Kebijakan & Syarat</a>
                     </nav>
                 </div>
-                {{-- Contact --}}
+
+                {{-- Contact Info --}}
                 <div>
-                    <p class="font-medium text-gray-700 mb-2">Hubungi</p>
-                    <nav class="space-y-1 text-gray-500">
-                        @php $footerWa = \App\Support\WhatsApp::url(\App\Models\Setting::get('contact', 'whatsapp', '')); @endphp
-                        @if($footerWa)
-                        <a href="{{ $footerWa }}" target="_blank" rel="noopener" class="block hover:text-green-600 transition">WhatsApp</a>
-                        @endif
-                        @php $footerEmail = \App\Models\Setting::get('contact', 'email', ''); @endphp
-                        @if($footerEmail)
-                        <a href="mailto:{{ $footerEmail }}" class="block hover:text-primary-600 transition">{{ $footerEmail }}</a>
-                        @endif
-                        @php $footerMapLink = \App\Models\Setting::get('contact', 'map_link', '') ?: \App\Models\Setting::get('contact', 'map_url', ''); @endphp
-                        @if($footerMapLink)
-                        <a href="{{ $footerMapLink }}" target="_blank" rel="noopener" class="block hover:text-primary-600 transition">Google Maps</a>
-                        @endif
-                        @auth
-                        <a href="{{ route('member.dashboard') }}" class="block hover:text-primary-600 transition">Akun Saya</a>
-                        @else
-                        <a href="{{ route('login') }}" class="block hover:text-primary-600 transition">Masuk / Daftar</a>
-                        @endauth
-                    </nav>
+                    <h3 class="text-white font-bold text-lg mb-4">Hubungi Kami</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-primary-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span class="text-gray-400 leading-relaxed">{{ \App\Models\Setting::get('contact', 'address', 'Kota Bangun II, Kutai Kartanegara, Kalimantan Timur') }}</span>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-primary-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                            <a href="tel:{{ \App\Models\Setting::get('contact', 'phone', '') }}" class="text-gray-400 hover:text-white transition-colors">{{ \App\Models\Setting::get('contact', 'phone', '') ?: \App\Models\Setting::get('contact', 'whatsapp', '') }}</a>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-primary-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            <a href="mailto:{{ \App\Models\Setting::get('contact', 'email', '') }}" class="text-gray-400 hover:text-white transition-colors">{{ \App\Models\Setting::get('contact', 'email', '') }}</a>
+                        </li>
+                    </ul>
+                </div>
+                
+                {{-- Payments & Support --}}
+                <div>
+                    <h3 class="text-white font-bold text-lg mb-4">Pembayaran & Dukungan</h3>
+                    <p class="text-gray-400 mb-4">Mendukung berbagai metode pembayaran untuk kenyamanan Anda.</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <div class="bg-gray-800 px-3 py-1.5 rounded border border-gray-700 text-xs font-semibold text-gray-300">Bank Transfer</div>
+                        <div class="bg-gray-800 px-3 py-1.5 rounded border border-gray-700 text-xs font-semibold text-gray-300">QRIS</div>
+                        <div class="bg-gray-800 px-3 py-1.5 rounded border border-gray-700 text-xs font-semibold text-gray-300">E-Wallet</div>
+                    </div>
+                    <div class="p-4 bg-gray-800 rounded-xl border border-gray-700 flex items-start gap-3">
+                        <svg class="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div>
+                            <h4 class="text-white font-medium text-sm">Resepsionis 24 Jam</h4>
+                            <p class="text-xs text-gray-400 mt-1">Kami siap melayani kebutuhan Anda kapanpun.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="mt-6 pt-4 border-t border-gray-200 text-center text-xs text-gray-400">
-                &copy; {{ date('Y') }} Penginapan Kelapa Sawit
+            
+            <div class="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="text-sm text-gray-500">
+                    &copy; {{ date('Y') }} {{ \App\Models\Setting::get('general', 'property_name', 'Penginapan Kelapa Sawit') }}. Seluruh hak cipta dilindungi.
+                </div>
+                <div class="flex items-center gap-4 text-sm font-medium text-gray-500">
+                    <span class="flex items-center gap-1.5"><svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg> Pembayaran Aman</span>
+                    <span class="flex items-center gap-1.5"><svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Konfirmasi Instan</span>
+                </div>
             </div>
         </div>
     </footer>
@@ -267,5 +315,14 @@
         method="POST"
     />
     @endauth
+
+    @stack('scripts')
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
 </body>
 </html>

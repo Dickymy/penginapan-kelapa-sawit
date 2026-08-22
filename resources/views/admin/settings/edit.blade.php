@@ -2,6 +2,8 @@
 
 @section('title', 'Pengaturan ' . ucfirst($group) . ' - Admin')
 
+@section('page-title', 'Pengaturan: ' . ucfirst($group))
+
 @section('content')
 <div class="mb-6">
     <h1 class="text-2xl font-bold text-gray-800">Pengaturan: {{ ucfirst($group) }}</h1>

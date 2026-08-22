@@ -22,16 +22,16 @@ class ExpirePendingBookingsCommand extends Command
         $count = 0;
 
         foreach ($bookings as $booking) {
-            DB::transaction(function () use ($booking, $bookingService) {
+            $expired = DB::transaction(function () use ($booking, $bookingService) {
                 // Re-fetch with lock
                 $locked = Booking::where('id', $booking->id)->lockForUpdate()->first();
 
                 if (! $locked || $locked->status !== BookingStatus::PendingPayment) {
-                    return;
+                    return false;
                 }
 
                 if ($locked->payment_expires_at->isFuture()) {
-                    return;
+                    return false;
                 }
 
                 $bookingService->expirePendingBooking($locked);
@@ -41,9 +41,13 @@ class ExpirePendingBookingsCommand extends Command
 
                 // Reverse any redeemed loyalty points
                 app(\App\Services\LoyaltyPointService::class)->reverseRedemptionForBooking($locked);
+                
+                return true;
             });
 
-            $count++;
+            if ($expired) {
+                $count++;
+            }
         }
 
         $this->info("Expired {$count} pending booking(s).");

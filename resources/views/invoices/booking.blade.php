@@ -122,10 +122,31 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>Harga per malam (Rp{{ number_format($booking->price_per_night_snapshot, 0, ',', '.') }} × {{ $booking->nights }} malam)</td>
-                    <td class="text-right">Rp{{ number_format($booking->subtotal, 0, ',', '.') }}</td>
-                </tr>
+                @if($booking->nightPrices->count() > 0)
+                    @foreach($booking->nightPrices as $np)
+                    <tr>
+                        <td>Harga menginap: {{ $np->date->format('d/m/Y') }}{{ $np->label ? ' ('.$np->label.')' : '' }}</td>
+                        <td class="text-right">Rp{{ number_format($np->price, 0, ',', '.') }}</td>
+                    </tr>
+                    @endforeach
+                    <tr style="background-color: #f8f9fa;">
+                        <td><strong>Subtotal ({{ $booking->nights }} malam)</strong></td>
+                        <td class="text-right"><strong>Rp{{ number_format($booking->subtotal, 0, ',', '.') }}</strong></td>
+                    </tr>
+                @else
+                    <tr>
+                        <td>Harga per malam (Rp{{ number_format($booking->price_per_night_snapshot, 0, ',', '.') }} × {{ $booking->nights }} malam)</td>
+                        <td class="text-right">Rp{{ number_format($booking->subtotal, 0, ',', '.') }}</td>
+                    </tr>
+                @endif
+                @if($booking->addons->count() > 0)
+                    @foreach($booking->addons as $ba)
+                    <tr>
+                        <td>Layanan Tambahan: {{ $ba->addon->name ?? 'Layanan' }} (×{{ $ba->quantity }})</td>
+                        <td class="text-right">{{ $ba->formatted_subtotal }}</td>
+                    </tr>
+                    @endforeach
+                @endif
                 @if($booking->promotion_discount > 0)
                 <tr class="discount-row">
                     <td>Diskon Promo{{ $booking->promotion_code_snapshot ? ' (' . $booking->promotion_code_snapshot . ')' : '' }}</td>

@@ -12,22 +12,29 @@
 
 @section('content')
 {{-- Hero --}}
-<section class="relative bg-gradient-to-br from-primary-700 to-primary-900 text-white py-14 md:py-18">
-    <div class="absolute inset-0 bg-black/10"></div>
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-3">{{ $propertyName }}</h1>
-        <p class="text-sm md:text-base text-primary-200 mb-4 flex items-center justify-center gap-1">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+<section class="relative text-white py-20 md:py-32 bg-gray-900 overflow-hidden">
+    {{-- Hero Background Image --}}
+    <img src="{{ asset('images/hero.jpg') }}" 
+         alt="Penginapan Kelapa Sawit" 
+         class="absolute inset-0 w-full h-full object-cover opacity-60">
+    
+    {{-- Gradient Overlay for Text Legibility --}}
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10"></div>
+    
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center min-h-[30vh]">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-tight drop-shadow-lg">{{ $propertyName }}</h1>
+        <p class="text-base md:text-lg text-gray-200 mb-6 flex items-center justify-center gap-1.5 drop-shadow-md">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             Kota Bangun II, Kutai Kartanegara, Kalimantan Timur
         </p>
         @if($cheapestPrice)
-            <p class="text-primary-200 mb-6">Mulai dari <span class="text-2xl font-bold text-white">Rp{{ number_format($cheapestPrice, 0, ',', '.') }}</span> / malam</p>
+            <p class="text-gray-100 mb-8 bg-black/30 backdrop-blur-sm px-6 py-2 rounded-full border border-white/10 drop-shadow-md">Mulai dari <span class="text-2xl font-bold text-white">Rp{{ number_format($cheapestPrice, 0, ',', '.') }}</span> / malam</p>
         @endif
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a href="#cari-kamar" class="px-6 py-3 bg-white text-primary-700 rounded-lg font-semibold hover:bg-primary-50 transition shadow">
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="#cari-kamar" class="px-8 py-3.5 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-500 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary-600/30 transition-all duration-300">
                 Cari Kamar
             </a>
-            <a href="{{ route('location') }}" class="px-6 py-3 border border-white/40 text-white rounded-lg font-medium hover:bg-white/10 transition">
+            <a href="{{ route('location') }}" class="px-8 py-3.5 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-xl font-semibold hover:bg-white/20 hover:-translate-y-1 transition-all duration-300">
                 Lihat Lokasi
             </a>
         </div>
@@ -35,9 +42,12 @@
 </section>
 
 {{-- Search Availability --}}
-<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10" id="cari-kamar">
-    <div class="bg-white rounded-xl shadow-lg p-5 md:p-6 border border-gray-100">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4 text-center md:text-left">Cari Kamar Tersedia</h2>
+<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10" id="cari-kamar"
+         x-data="{ shown: false }" x-intersect.once="shown = true" 
+         :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
+         class="transition-all duration-700 ease-out">
+    <div class="bg-white rounded-2xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] p-6 md:p-8 border border-white/50 ring-1 ring-black/5">
+        <h2 class="text-xl font-bold text-gray-800 mb-5 text-center md:text-left">Cari Kamar Tersedia</h2>
         <form action="{{ route('availability.search') }}" method="GET"
               class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end"
               x-data="{
@@ -113,31 +123,37 @@
 </section>
 
 {{-- Booking Options --}}
-<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <h2 class="text-center text-lg font-semibold text-gray-800 mb-6">Pilih cara yang paling nyaman</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="bg-white border border-gray-200 rounded-xl p-5 text-center">
-            <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-primary-100 flex items-center justify-center">
-                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14"
+         x-data="{ shown: false }" x-intersect.margin.-10%.once="shown = true"
+         :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
+         class="transition-all duration-700 ease-out delay-100">
+    <h2 class="text-center text-2xl font-bold text-gray-800 mb-8">Pilih cara yang paling nyaman</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="bg-white border border-gray-100 rounded-2xl p-8 text-center shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+            <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-primary-50 group-hover:bg-primary-100 flex items-center justify-center transition-colors">
+                <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
             </div>
-            <h3 class="font-semibold text-gray-800 mb-1">Booking Langsung</h3>
-            <p class="text-sm text-gray-500 mb-4">Tidak perlu membuat akun.</p>
-            <a href="#cari-kamar" class="inline-block px-5 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition">Cari Kamar</a>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Booking Langsung</h3>
+            <p class="text-sm text-gray-500 mb-6">Tidak perlu membuat akun, langsung pesan kamar yang Anda inginkan.</p>
+            <a href="#cari-kamar" class="inline-block px-6 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-semibold hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-600/30 transition-all duration-300">Cari Kamar</a>
         </div>
-        <div class="bg-white border border-gray-200 rounded-xl p-5 text-center">
-            <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-primary-100 flex items-center justify-center">
-                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        <div class="bg-white border border-gray-100 rounded-2xl p-8 text-center shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+            <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-primary-50 group-hover:bg-primary-100 flex items-center justify-center transition-colors">
+                <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
             </div>
-            <h3 class="font-semibold text-gray-800 mb-1">Masuk sebagai Member</h3>
-            <p class="text-sm text-gray-500 mb-4">Booking tersimpan di akun dan dapat mengumpulkan poin.</p>
-            <a href="{{ route('login') }}" class="inline-block px-5 py-2 border border-primary-600 text-primary-600 rounded-lg text-sm font-medium hover:bg-primary-50 transition">Masuk / Daftar</a>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Masuk sebagai Member</h3>
+            <p class="text-sm text-gray-500 mb-6">Booking tersimpan otomatis di akun Anda dan kumpulkan poin loyalitas.</p>
+            <a href="{{ route('login') }}" class="inline-block px-6 py-2.5 border-2 border-primary-600 text-primary-600 rounded-xl text-sm font-semibold hover:bg-primary-50 hover:shadow-lg transition-all duration-300">Masuk / Daftar</a>
         </div>
     </div>
 </section>
 
 {{-- Room Types --}}
 @if($roomTypes->isNotEmpty())
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+         x-data="{ shown: false }" x-intersect.margin.-10%.once="shown = true"
+         :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
+         class="transition-all duration-700 ease-out">
     <div class="text-center mb-8">
         <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Tipe Kamar</h2>
         <p class="text-gray-500 mt-2">Pilih kamar yang sesuai dengan kebutuhan Anda</p>
@@ -183,12 +199,94 @@
 @endif
 
 
-{{-- Property Info --}}
-<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+{{-- Guest Reviews Widget --}}
+@if(isset($reviews) && $reviews->isNotEmpty())
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-gray-50 rounded-2xl mb-12"
+         x-data="{ shown: false }" x-intersect.margin.-10%.once="shown = true"
+         :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
+         class="transition-all duration-700 ease-out">
+    <div class="text-center mb-8">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Apa Kata Tamu Kami</h2>
+        <p class="text-gray-500 mt-2">Pengalaman mereka menginap di {{ $propertyName }}</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        @foreach($reviews as $review)
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col h-full">
+            <div class="flex items-center mb-4">
+                <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-lg mr-3">
+                    {{ substr($review->user->name, 0, 1) }}
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-800">{{ $review->user->name }}</h3>
+                    <div class="text-xs text-gray-500">{{ $review->created_at->diffForHumans() }}</div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <x-star-rating :rating="$review->rating" size="4" />
+            </div>
+            @if($review->title)
+                <h4 class="font-bold text-gray-800 mb-1">{{ $review->title }}</h4>
+            @endif
+            <p class="text-gray-600 text-sm italic flex-1">"{{ $review->comment }}"</p>
+            <div class="mt-4 pt-4 border-t border-gray-50 text-xs text-gray-500">
+                Menginap di <span class="font-medium">{{ $review->booking->room_type_name_snapshot }}</span>
+            </div>
+        </div>
+        @endforeach
+    </div>
+</section>
+@endif
+
+{{-- Nearby Places Preview --}}
+@if(isset($nearbyPlaces) && $nearbyPlaces->isNotEmpty())
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
+         x-data="{ shown: false }" x-intersect.margin.-10%.once="shown = true"
+         :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
+         class="transition-all duration-700 ease-out">
+    <div class="text-center mb-6">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Tempat Menarik di Sekitar</h2>
+        <p class="text-gray-500 mt-2">Jelajahi destinasi dan fasilitas di sekitar penginapan kami</p>
+    </div>
+    <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        @foreach($nearbyPlaces as $place)
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full group hover:shadow-md transition">
+            <div class="aspect-[4/3] overflow-hidden bg-gray-100 relative">
+                @if($place->image)
+                    <img src="{{ Storage::url($place->image) }}" alt="{{ $place->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                @else
+                    <div class="w-full h-full flex items-center justify-center">
+                        <svg class="h-10 w-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                @endif
+                <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-medium text-gray-700 shadow-sm">
+                    {{ $place->category }}
+                </div>
+            </div>
+            <div class="p-4 flex flex-col flex-grow">
+                <h3 class="font-bold text-gray-900 mb-1 leading-tight">{{ $place->name }}</h3>
+                @if($place->distance)
+                    <p class="text-xs text-primary-600 font-medium mb-2">{{ $place->distance }}</p>
+                @endif
+                <p class="text-xs text-gray-500 line-clamp-2 flex-grow">{{ $place->description }}</p>
+            </div>
+        </div>
+        @endforeach
+    </div>
+    <div class="text-center sm:mt-8">
+        <a href="{{ route('nearby-places') }}" class="inline-flex items-center px-5 py-2.5 border border-primary-600 text-primary-600 rounded-lg text-sm font-medium hover:bg-primary-50 transition">
+            Lihat Semua Lokasi Sekitar
+            <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+    </div>
+</section>
+@endif
 
 {{-- Gallery Preview --}}
 @if($galleryPhotos->isNotEmpty())
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
+         x-data="{ shown: false }" x-intersect.margin.-10%.once="shown = true"
+         :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
+         class="transition-all duration-700 ease-out">
     <div class="text-center mb-6">
         <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Galeri</h2>
         <p class="text-gray-500 mt-2">Suasana penginapan kami</p>
@@ -217,6 +315,11 @@
     @endif
 </section>
 @endif
+{{-- Property Info --}}
+<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+         x-data="{ shown: false }" x-intersect.margin.-10%.once="shown = true"
+         :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
+         class="transition-all duration-700 ease-out">
     <div class="bg-white border border-gray-200 rounded-xl p-6 md:p-8">
         <h2 class="text-xl font-bold text-gray-800 mb-3">Tentang Penginapan</h2>
         <p class="text-gray-600 text-sm leading-relaxed">
@@ -230,7 +333,10 @@
 </section>
 
 {{-- Location Preview --}}
-<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
+         x-data="{ shown: false }" x-intersect.margin.-10%.once="shown = true"
+         :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
+         class="transition-all duration-700 ease-out">
     <div class="bg-white border border-gray-200 rounded-xl p-6">
         <h2 class="text-lg font-semibold text-gray-800 mb-3">Lokasi</h2>
         <div class="flex flex-col sm:flex-row sm:items-start gap-4">
@@ -261,7 +367,10 @@
 {{-- WhatsApp CTA --}}
 @php $waUrl = \App\Support\WhatsApp::url($whatsapp, 'Halo, saya ingin bertanya tentang ketersediaan kamar di Penginapan Kelapa Sawit.'); @endphp
 @if($waUrl)
-<section class="bg-green-50 border-y border-green-100 py-10">
+<section class="bg-green-50 border-y border-green-100 py-10"
+         x-data="{ shown: false }" x-intersect.margin.-10%.once="shown = true"
+         :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
+         class="transition-all duration-700 ease-out">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-lg font-bold text-gray-800 mb-2">Butuh bantuan sebelum memesan?</h2>
         <p class="text-gray-600 text-sm mb-5">Hubungi kami langsung via WhatsApp.</p>
@@ -276,7 +385,10 @@
 
 {{-- Policy Summary --}}
 @if($policy)
-<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+         x-data="{ shown: false }" x-intersect.margin.-10%.once="shown = true"
+         :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
+         class="transition-all duration-700 ease-out">
     <div class="bg-white border border-gray-200 rounded-xl p-6">
         <h2 class="text-lg font-semibold text-gray-800 mb-3">Informasi Penting</h2>
         <p class="text-sm text-gray-500 mb-4">Ringkasan kebijakan penginapan sebelum Anda memesan.</p>
@@ -285,6 +397,30 @@
         </div>
         <a href="{{ route('policy') }}" class="inline-flex items-center mt-4 text-sm text-primary-600 hover:text-primary-800 font-medium">
             Lihat Kebijakan Lengkap
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+    </div>
+</section>
+@endif
+
+{{-- FAQ Summary --}}
+@if(isset($faqs) && $faqs->isNotEmpty())
+<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+         x-data="{ shown: false }" x-intersect.margin.-10%.once="shown = true"
+         :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
+         class="transition-all duration-700 ease-out">
+    <div class="bg-white border border-gray-200 rounded-xl p-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-3">Pertanyaan yang Sering Diajukan</h2>
+        <div class="space-y-4 mb-4">
+            @foreach($faqs as $faq)
+                <div class="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                    <h3 class="text-sm font-medium text-gray-800">{{ $faq->question }}</h3>
+                    <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ $faq->answer }}</p>
+                </div>
+            @endforeach
+        </div>
+        <a href="{{ route('faq') }}" class="inline-flex items-center text-sm text-primary-600 hover:text-primary-800 font-medium">
+            Lihat semua FAQ
             <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
     </div>

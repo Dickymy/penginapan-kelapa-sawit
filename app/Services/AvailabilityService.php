@@ -39,16 +39,15 @@ class AvailabilityService
     /**
      * Find available physical rooms for a specific room type.
      */
-    public function findAvailableRooms(int $roomTypeId, Carbon $checkIn, Carbon $checkOut): Collection
+    public function findAvailableRooms(int $roomTypeId, Carbon $checkIn, Carbon $checkOut, ?int $excludeBookingId = null): Collection
     {
         $rooms = Room::where('room_type_id', $roomTypeId)
-            ->where('is_active', true)
-            ->where('status', 'active')
+            ->sellable()
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
 
-        return $rooms->filter(fn (Room $room) => $this->isRoomAvailable($room->id, $checkIn, $checkOut));
+        return $rooms->filter(fn (Room $room) => $this->isRoomAvailable($room->id, $checkIn, $checkOut, $excludeBookingId));
     }
 
     /**
