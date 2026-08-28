@@ -4,13 +4,15 @@
 @section('meta_description', 'Hubungi Penginapan Kelapa Sawit untuk pertanyaan, reservasi khusus, atau bantuan lainnya. Kami siap membantu Anda.')
 
 @section('content')
-<div class="bg-gray-50 py-12 lg:py-20">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h1 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">Hubungi Kami</h1>
-            <p class="mt-4 text-lg text-gray-600">Ada pertanyaan atau butuh bantuan? Kirimkan pesan kepada kami dan tim kami akan segera merespons Anda.</p>
-        </div>
+<section class="bg-primary-700 text-white py-12 md:py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-3xl md:text-4xl font-bold mb-4">Hubungi Kami</h1>
+        <p class="text-primary-100 max-w-2xl mx-auto text-lg">Ada pertanyaan atau butuh bantuan? Kirimkan pesan kepada kami dan tim kami akan segera merespons Anda.</p>
+    </div>
+</section>
 
+<div class="bg-gray-50 py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div class="grid grid-cols-1 md:grid-cols-2">
                 <!-- Contact Info -->
@@ -26,7 +28,7 @@
                             </svg>
                             <div class="ml-4">
                                 <h4 class="text-lg font-medium">Alamat</h4>
-                                <p class="mt-1 text-primary-100">Jl. Poros Kota Bangun, SP 2<br>Desa Kota Bangun II<br>Kutai Kartanegara, Kaltim</p>
+                                <p class="mt-1 text-primary-100">Gunung Kelambu, SP 2<br>Kota Bangun Darat<br>Kalimantan Timur</p>
                             </div>
                         </div>
 
@@ -36,7 +38,7 @@
                             </svg>
                             <div class="ml-4">
                                 <h4 class="text-lg font-medium">Telepon / WhatsApp</h4>
-                                <p class="mt-1 text-primary-100">+62 812-3456-7890</p>
+                                <p class="mt-1 text-primary-100">081350286635</p>
                             </div>
                         </div>
 

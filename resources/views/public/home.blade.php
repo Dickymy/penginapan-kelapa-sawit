@@ -12,14 +12,12 @@
 
 @section('content')
 {{-- Hero --}}
-<section class="relative text-white py-20 md:py-32 bg-gray-900 overflow-hidden">
-    {{-- Hero Background Image --}}
-    <img src="{{ asset('images/hero.jpg') }}" 
-         alt="Penginapan Kelapa Sawit" 
-         class="absolute inset-0 w-full h-full object-cover opacity-60">
+<section class="relative text-white py-20 md:py-32 bg-primary-900 overflow-hidden">
+    {{-- Hero Background Pattern --}}
+    <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#4ade80 1.5px, transparent 1.5px); background-size: 32px 32px;"></div>
     
-    {{-- Gradient Overlay for Text Legibility --}}
-    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10"></div>
+    {{-- Gradient Overlay for Depth --}}
+    <div class="absolute inset-0 bg-gradient-to-t from-primary-950 via-primary-900/60 to-transparent"></div>
     
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center min-h-[30vh]">
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-tight drop-shadow-lg">{{ $propertyName }}</h1>
@@ -320,15 +318,50 @@
          x-data="{ shown: false }" x-intersect.margin.-10%.once="shown = true"
          :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
          class="transition-all duration-700 ease-out">
-    <div class="bg-white border border-gray-200 rounded-xl p-6 md:p-8">
-        <h2 class="text-xl font-bold text-gray-800 mb-3">Tentang Penginapan</h2>
-        <p class="text-gray-600 text-sm leading-relaxed">
-            Penginapan satu lantai di Kota Bangun II dengan {{ $activeRoomCount }} kamar aktif yang siap melayani tamu.
-            Kamar terus dikembangkan untuk memenuhi kebutuhan pengunjung.
-        </p>
-        @if($shortDescription)
-        <p class="text-gray-600 text-sm leading-relaxed mt-2">{{ $shortDescription }}</p>
-        @endif
+    <div class="bg-white border border-gray-100 rounded-2xl p-8 md:p-10 shadow-sm relative overflow-hidden hover:shadow-md transition-shadow duration-300">
+        {{-- Decorative background --}}
+        <div class="absolute -right-16 -top-16 w-64 h-64 bg-primary-50 rounded-full opacity-50 blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-16 -bottom-16 w-48 h-48 bg-primary-100 rounded-full opacity-30 blur-3xl pointer-events-none"></div>
+        
+        <div class="relative z-10 md:flex md:items-start md:gap-10">
+            <div class="md:w-1/2 mb-8 md:mb-0">
+                <div class="inline-flex items-center justify-center p-3 bg-primary-100 rounded-xl text-primary-700 mb-5">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Tentang Penginapan</h2>
+                <div class="space-y-4">
+                    <p class="text-gray-600 leading-relaxed text-sm">
+                        Penginapan satu lantai di Kota Bangun II dengan <strong class="text-primary-700">{{ $activeRoomCount }} kamar aktif</strong> yang siap melayani tamu. Kamar terus dikembangkan untuk memenuhi kebutuhan pengunjung.
+                    </p>
+                    @if($shortDescription)
+                    <p class="text-gray-600 leading-relaxed text-sm">{{ $shortDescription }}</p>
+                    @endif
+                </div>
+            </div>
+            
+            <div class="md:w-1/2 grid grid-cols-2 gap-4">
+                <div class="bg-gray-50/80 border border-gray-100 p-5 rounded-xl hover:shadow-sm hover:bg-white transition duration-300 group">
+                    <svg class="w-8 h-8 text-primary-500 mb-3 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <h3 class="font-semibold text-gray-800 text-sm mb-1">Resepsionis 24 Jam</h3>
+                    <p class="text-xs text-gray-500">Staf siap sedia kapanpun Anda butuh</p>
+                </div>
+                <div class="bg-gray-50/80 border border-gray-100 p-5 rounded-xl hover:shadow-sm hover:bg-white transition duration-300 group">
+                    <svg class="w-8 h-8 text-primary-500 mb-3 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    <h3 class="font-semibold text-gray-800 text-sm mb-1">Nyaman & Bersih</h3>
+                    <p class="text-xs text-gray-500">Istirahat tenang seperti di rumah sendiri</p>
+                </div>
+                <div class="bg-gray-50/80 border border-gray-100 p-5 rounded-xl hover:shadow-sm hover:bg-white transition duration-300 group">
+                    <svg class="w-8 h-8 text-primary-500 mb-3 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <h3 class="font-semibold text-gray-800 text-sm mb-1">Proses Cepat</h3>
+                    <p class="text-xs text-gray-500">Check-in dan check-out tanpa antri</p>
+                </div>
+                <div class="bg-gray-50/80 border border-gray-100 p-5 rounded-xl hover:shadow-sm hover:bg-white transition duration-300 group">
+                    <svg class="w-8 h-8 text-primary-500 mb-3 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <h3 class="font-semibold text-gray-800 text-sm mb-1">Lokasi Strategis</h3>
+                    <p class="text-xs text-gray-500">Akses mudah di Kota Bangun II</p>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
