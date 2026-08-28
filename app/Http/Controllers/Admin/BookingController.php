@@ -6,6 +6,7 @@ use App\Enums\BookingSource;
 use App\Enums\BookingStatus;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Booking;
 use App\Models\BookingStatusHistory;
 use App\Models\Room;
@@ -128,7 +129,6 @@ class BookingController extends Controller
                 abort(422, 'Booking tidak dapat dibatalkan dari status saat ini.');
             }
 
-            // Capture fromStatus BEFORE update
             $fromStatus = $booking->status->value;
 
             $booking->update([
@@ -147,6 +147,17 @@ class BookingController extends Controller
                 'actor_id' => Auth::guard('admin')->id(),
                 'created_at' => now(),
             ]);
+
+            AuditLog::record(
+                action: 'booking_cancelled',
+                actorType: 'admin',
+                actorId: Auth::guard('admin')->id(),
+                subjectType: 'booking',
+                subjectId: $booking->id,
+                before: ['status' => $fromStatus],
+                after: ['status' => BookingStatus::Cancelled->value],
+                metadata: ['reason' => $request->reason],
+            );
 
             // Release promotion and reverse loyalty inside the same transaction
             app(\App\Services\PromotionService::class)->releaseForBooking($booking);
@@ -172,6 +183,15 @@ class BookingController extends Controller
                 'actor_id' => Auth::guard('admin')->id(),
                 'created_at' => now(),
             ]);
+            AuditLog::record(
+                action: 'booking_checked_in',
+                actorType: 'admin',
+                actorId: Auth::guard('admin')->id(),
+                subjectType: 'booking',
+                subjectId: $booking->id,
+                before: ['status' => BookingStatus::Confirmed->value],
+                after: ['status' => BookingStatus::CheckedIn->value],
+            );
         });
         return back()->with('success', 'Check-in berhasil.');
     }
@@ -192,6 +212,15 @@ class BookingController extends Controller
                 'actor_id' => Auth::guard('admin')->id(),
                 'created_at' => now(),
             ]);
+            AuditLog::record(
+                action: 'booking_checked_out',
+                actorType: 'admin',
+                actorId: Auth::guard('admin')->id(),
+                subjectType: 'booking',
+                subjectId: $booking->id,
+                before: ['status' => BookingStatus::CheckedIn->value],
+                after: ['status' => BookingStatus::CheckedOut->value],
+            );
         });
         return back()->with('success', 'Check-out berhasil.');
     }
@@ -212,6 +241,15 @@ class BookingController extends Controller
                 'actor_id' => Auth::guard('admin')->id(),
                 'created_at' => now(),
             ]);
+            AuditLog::record(
+                action: 'booking_completed',
+                actorType: 'admin',
+                actorId: Auth::guard('admin')->id(),
+                subjectType: 'booking',
+                subjectId: $booking->id,
+                before: ['status' => BookingStatus::CheckedOut->value],
+                after: ['status' => BookingStatus::Completed->value],
+            );
         });
 
         $booking->refresh();
@@ -236,6 +274,15 @@ class BookingController extends Controller
                 'actor_id' => Auth::guard('admin')->id(),
                 'created_at' => now(),
             ]);
+            AuditLog::record(
+                action: 'booking_no_show',
+                actorType: 'admin',
+                actorId: Auth::guard('admin')->id(),
+                subjectType: 'booking',
+                subjectId: $booking->id,
+                before: ['status' => BookingStatus::Confirmed->value],
+                after: ['status' => BookingStatus::NoShow->value],
+            );
         });
         return back()->with('success', 'Booking ditandai no-show.');
     }

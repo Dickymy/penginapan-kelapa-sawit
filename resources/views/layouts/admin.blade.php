@@ -6,9 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin - Penginapan Kelapa Sawit')</title>
     <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
+    <style>[x-cloak] { display: none !important; }</style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-gray-50 font-sans" x-data="{ sidebarOpen: false, moreOpen: false }">
+<body class="min-h-screen bg-gray-50 font-sans overflow-x-hidden" x-data="{ sidebarOpen: false, moreOpen: false }">
     {{-- Toast --}}
     <x-toast />
 

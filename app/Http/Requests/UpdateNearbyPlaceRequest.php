@@ -27,7 +27,7 @@ class UpdateNearbyPlaceRequest extends FormRequest
             'category' => ['required', 'string', 'max:100'],
             'distance' => ['nullable', 'string', 'max:50'],
             'description' => ['nullable', 'string'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'image' => ['nullable', 'string'],
             'map_link' => ['nullable', 'url', 'max:500'],
             'sort_order' => ['required', 'integer', 'min:0'],
             'is_active' => ['boolean'],

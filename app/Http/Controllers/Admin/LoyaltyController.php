@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\LoyaltyTransaction;
 use App\Models\User;
 use App\Services\LoyaltyPointService;
@@ -43,11 +44,28 @@ class LoyaltyController extends Controller
             'reason' => 'required|string|max:255',
         ]);
 
+        $admin = $request->user('admin');
+        $pointsBefore = $this->loyaltyService->getBalance($user);
+
         $this->loyaltyService->adjustPoints(
             $user,
             (int) $validated['points'],
             $validated['reason'],
-            $request->user('admin'),
+            $admin,
+        );
+
+        AuditLog::record(
+            action: 'loyalty_adjusted',
+            actorType: 'admin',
+            actorId: $admin->id,
+            subjectType: 'user',
+            subjectId: $user->id,
+            before: ['balance' => $pointsBefore],
+            after: ['balance' => $pointsBefore + (int) $validated['points']],
+            metadata: [
+                'points_delta' => (int) $validated['points'],
+                'reason' => $validated['reason'],
+            ],
         );
 
         return redirect()

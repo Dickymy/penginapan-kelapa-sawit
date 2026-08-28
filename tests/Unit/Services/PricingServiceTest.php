@@ -16,7 +16,7 @@ class PricingServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new PricingService();
+        $this->service = app(PricingService::class);
     }
 
     public function test_calculate_nights_one_night(): void

@@ -7,6 +7,7 @@
     <meta name="theme-color" content="#ffffff">
     <title>@yield('title', 'Member - Penginapan Kelapa Sawit')</title>
     <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
+    <style>[x-cloak] { display: none !important; }</style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         /* Safe area for bottom navigation on mobile */

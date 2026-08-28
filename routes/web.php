@@ -113,6 +113,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
+        // AJAX Upload
+        Route::post('/upload/image', [\App\Http\Controllers\Admin\AdminUploadController::class, 'store'])->name('upload.image');
+
         // Room Types
         Route::resource('room-types', RoomTypeController::class)->except(['show', 'destroy']);
         Route::patch('room-types/{room_type}/toggle', [RoomTypeController::class, 'toggleActive'])->name('room-types.toggle');

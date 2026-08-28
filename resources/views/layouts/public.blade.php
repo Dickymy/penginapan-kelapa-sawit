@@ -9,6 +9,8 @@
     <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="theme-color" content="#0284c7">
+    {{-- x-cloak harus aktif sebelum Alpine init agar tidak ada flash of unstyled Alpine elements --}}
+    <style>[x-cloak] { display: none !important; }</style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen flex flex-col bg-white text-gray-800 font-sans">
@@ -46,8 +48,11 @@
                     @php
                         $isLainnyaActive = request()->routeIs('nearby-places') || request()->routeIs('faq') || request()->routeIs('location') || request()->routeIs('contact.*') || request()->routeIs('about') || request()->routeIs('policy');
                     @endphp
-                    <div x-data="{ dropdownOpen: false }" class="relative" @mouseleave="dropdownOpen = false">
-                        <button @mouseover="dropdownOpen = true" @click="dropdownOpen = !dropdownOpen" class="flex items-center gap-1 px-3 py-2 rounded-md transition border-b-2 {{ $isLainnyaActive ? 'border-primary-600 text-primary-700 bg-primary-50' : 'border-transparent text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">
+                    <div x-data="{ dropdownOpen: false, closeTimeout: null }" 
+                         class="relative h-full flex items-center" 
+                         @mouseenter="clearTimeout(closeTimeout); dropdownOpen = true" 
+                         @mouseleave="closeTimeout = setTimeout(() => dropdownOpen = false, 200)">
+                        <button @click="dropdownOpen = !dropdownOpen" class="flex items-center gap-1 px-3 py-2 rounded-md transition border-b-2 {{ $isLainnyaActive ? 'border-primary-600 text-primary-700 bg-primary-50' : 'border-transparent text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
                             Lainnya
                             <svg class="w-3.5 h-3.5 opacity-70 transition-transform duration-200" :class="dropdownOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -101,8 +106,11 @@
                 {{-- Desktop Account --}}
                 <div class="hidden lg:flex items-center gap-3">
                     @auth
-                        <div x-data="{ accountOpen: false }" class="relative">
-                            <button @click="accountOpen = !accountOpen" @click.outside="accountOpen = false"
+                        <div x-data="{ accountOpen: false, closeTimeout: null }" 
+                             class="relative h-full flex items-center"
+                             @mouseenter="clearTimeout(closeTimeout); accountOpen = true" 
+                             @mouseleave="closeTimeout = setTimeout(() => accountOpen = false, 200)">
+                            <button @click="accountOpen = !accountOpen"
                                     class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 transition">
                                 @if(auth()->user()->avatar_url)
                                     <img src="{{ auth()->user()->avatar_url }}" alt="" class="w-8 h-8 rounded-full object-cover">

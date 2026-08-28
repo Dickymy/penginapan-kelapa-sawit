@@ -44,9 +44,8 @@ class RoomTypeController extends Controller
             $roomType->facilities()->sync($request->input('facilities', []));
         }
 
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $file) {
-                $path = $this->imageService->upload($file, 'room-images');
+        if ($request->has('images')) {
+            foreach ($request->input('images') as $index => $path) {
                 $roomType->images()->create([
                     'path' => $path,
                     'sort_order' => $index,
@@ -75,9 +74,8 @@ class RoomTypeController extends Controller
             $roomType->facilities()->sync($request->input('facilities', []));
         }
 
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $file) {
-                $path = $this->imageService->upload($file, 'room-images');
+        if ($request->has('images')) {
+            foreach ($request->input('images') as $index => $path) {
                 $roomType->images()->create([
                     'path' => $path,
                     'sort_order' => $roomType->images()->max('sort_order') + 1 + $index,

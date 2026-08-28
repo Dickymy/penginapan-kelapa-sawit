@@ -25,58 +25,23 @@
         <h2 class="text-sm font-semibold text-gray-700 mb-1">Unggah Foto Baru</h2>
         <p class="text-xs text-gray-500 mb-4">Anda dapat mengunggah foto beresolusi tinggi. Sistem akan mengoptimalkan ukuran file secara otomatis tanpa mengurangi kualitas visual secara berlebihan.</p>
 
-        <form action="{{ route('admin.galleries.store') }}" method="POST" enctype="multipart/form-data"
-              x-ref="uploadForm"
-              @submit="handleUploadSubmit($event)"
-              class="space-y-4">
+        <form action="{{ route('admin.galleries.store') }}" method="POST" class="space-y-4"
+              x-data="{ submitting: false }"
+              @submit="if(submitting) event.preventDefault(); else submitting = true;">
             @csrf
 
-            {{-- Drag & Drop Zone --}}
-            <div class="relative border-2 border-dashed rounded-xl p-6 text-center transition-colors"
-                 :class="dragOver ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-gray-400'"
-                 @dragover.prevent="dragOver = true"
-                 @dragleave.prevent="dragOver = false"
-                 @drop.prevent="handleDrop($event)">
-
-                <svg class="mx-auto w-10 h-10 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-
-                <p class="text-sm text-gray-600 mb-1">
-                    <button type="button" @click="$refs.fileInput.click()" class="text-primary-600 font-medium hover:text-primary-700">Pilih foto</button>
-                    atau seret ke sini
-                </p>
-                <p class="text-xs text-gray-400">JPEG, PNG, WebP • Maks {{ config('image.upload_max_mb', 15) }} MB per file • Maks 10 file</p>
-
-                <input type="file" name="images[]" multiple accept="image/jpeg,image/png,image/webp"
-                       x-ref="fileInput"
-                       @change="handleFileSelect($event)"
-                       class="hidden" required>
-            </div>
-
-            {{-- Preview Area --}}
-            <div x-show="previews.length > 0" x-cloak class="space-y-3">
-                <p class="text-xs font-medium text-gray-600"><span x-text="previews.length"></span> file dipilih</p>
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                    <template x-for="(preview, idx) in previews" :key="idx">
-                        <div class="relative rounded-lg overflow-hidden border border-gray-200 aspect-[4/3]">
-                            <img :src="preview.url" :alt="preview.name" class="w-full h-full object-cover">
-                            <button type="button" @click="removePreview(idx)"
-                                    class="absolute top-1 right-1 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-700 shadow"
-                                    aria-label="Hapus file">
-                                &times;
-                            </button>
-                            <div class="absolute bottom-0 inset-x-0 bg-black/60 px-2 py-1">
-                                <p class="text-white text-[10px] truncate" x-text="preview.name"></p>
-                                <p class="text-white/70 text-[10px]" x-text="preview.size"></p>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
+            <x-image-uploader 
+                name="images" 
+                directory="galleries" 
+                :multiple="true" 
+                :variants="true" 
+                :max-files="10" 
+                :max-size-mb="15" 
+                label="Pilih Foto"
+                hint="Anda dapat memilih beberapa foto sekaligus. Maks 10 file, 15MB per file." />
 
             {{-- Title & Alt --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                 <div>
                     <label for="title" class="block text-xs font-medium text-gray-600 mb-1">Judul (opsional)</label>
                     <input type="text" name="title" id="title" class="w-full rounded-lg border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" placeholder="Contoh: Tampak Depan Penginapan">
@@ -88,16 +53,15 @@
             </div>
 
             {{-- Submit --}}
-            <div class="flex items-center gap-3">
-                <button type="submit" :disabled="uploading || previews.length === 0"
+            <div class="flex items-center gap-3 pt-2">
+                <button type="submit" :disabled="submitting"
                         class="inline-flex items-center px-5 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                    <svg x-show="uploading" x-cloak class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <svg x-show="submitting" x-cloak class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span x-text="uploading ? 'Mengunggah & Mengoptimasi...' : 'Unggah Foto'"></span>
+                    <span x-text="submitting ? 'Menyimpan...' : 'Simpan ke Galeri'"></span>
                 </button>
-                <p x-show="uploading" x-cloak class="text-xs text-gray-500">Sistem sedang memproses dan mengoptimasi gambar...</p>
             </div>
         </form>
 
@@ -258,72 +222,10 @@
 <script>
 function galleryManager() {
     return {
-        dragOver: false,
-        previews: [],
-        uploading: false,
         reordering: false,
         lightboxOpen: false,
         lightboxSrc: '',
         lightboxTitle: '',
-
-        handleFileSelect(event) {
-            this.addFiles(event.target.files);
-        },
-
-        handleDrop(event) {
-            this.dragOver = false;
-            this.addFiles(event.dataTransfer.files);
-            // Sync with input
-            const dt = new DataTransfer();
-            this.previews.forEach(p => dt.items.add(p.file));
-            this.$refs.fileInput.files = dt.files;
-        },
-
-        addFiles(files) {
-            const maxMb = {{ config('image.upload_max_mb', 15) }};
-            for (const file of files) {
-                if (this.previews.length >= 10) break;
-                if (!file.type.startsWith('image/')) continue;
-                if (file.size > maxMb * 1024 * 1024) {
-                    window.dispatchEvent(new CustomEvent('toast', {
-                        detail: { type: 'error', message: `${file.name} terlalu besar (maks ${maxMb} MB)` }
-                    }));
-                    continue;
-                }
-                this.previews.push({
-                    file: file,
-                    name: file.name,
-                    size: this.formatSize(file.size),
-                    url: URL.createObjectURL(file)
-                });
-            }
-            // Sync files with input
-            const dt = new DataTransfer();
-            this.previews.forEach(p => dt.items.add(p.file));
-            this.$refs.fileInput.files = dt.files;
-        },
-
-        removePreview(idx) {
-            URL.revokeObjectURL(this.previews[idx].url);
-            this.previews.splice(idx, 1);
-            const dt = new DataTransfer();
-            this.previews.forEach(p => dt.items.add(p.file));
-            this.$refs.fileInput.files = dt.files;
-        },
-
-        handleUploadSubmit(event) {
-            if (this.previews.length === 0) {
-                event.preventDefault();
-                return;
-            }
-            this.uploading = true;
-        },
-
-        formatSize(bytes) {
-            if (bytes < 1024) return bytes + ' B';
-            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-        },
 
         toggleReorder() {
             this.reordering = !this.reordering;
