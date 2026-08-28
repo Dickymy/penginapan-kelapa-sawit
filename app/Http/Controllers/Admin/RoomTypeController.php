@@ -45,9 +45,17 @@ class RoomTypeController extends Controller
         }
 
         if ($request->has('images')) {
-            foreach ($request->input('images') as $index => $path) {
+            foreach ($request->input('images') as $index => $jsonOrPath) {
+                $variants = json_decode($jsonOrPath, true);
+                if (!$variants || !is_array($variants)) {
+                    $variants = ['original' => $jsonOrPath, 'large' => $jsonOrPath];
+                }
+
                 $roomType->images()->create([
-                    'path' => $path,
+                    'path' => $variants['original'] ?? $variants['large'] ?? $jsonOrPath,
+                    'thumb_path' => $variants['thumb'] ?? null,
+                    'medium_path' => $variants['medium'] ?? null,
+                    'large_path' => $variants['large'] ?? null,
                     'sort_order' => $index,
                     'is_cover' => $index === 0 && $roomType->images()->count() === 0,
                 ]);
@@ -75,10 +83,19 @@ class RoomTypeController extends Controller
         }
 
         if ($request->has('images')) {
-            foreach ($request->input('images') as $index => $path) {
+            $maxSort = $roomType->images()->max('sort_order') ?? 0;
+            foreach ($request->input('images') as $index => $jsonOrPath) {
+                $variants = json_decode($jsonOrPath, true);
+                if (!$variants || !is_array($variants)) {
+                    $variants = ['original' => $jsonOrPath, 'large' => $jsonOrPath];
+                }
+
                 $roomType->images()->create([
-                    'path' => $path,
-                    'sort_order' => $roomType->images()->max('sort_order') + 1 + $index,
+                    'path' => $variants['original'] ?? $variants['large'] ?? $jsonOrPath,
+                    'thumb_path' => $variants['thumb'] ?? null,
+                    'medium_path' => $variants['medium'] ?? null,
+                    'large_path' => $variants['large'] ?? null,
+                    'sort_order' => $maxSort + 1 + $index,
                 ]);
             }
         }

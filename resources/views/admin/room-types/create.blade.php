@@ -92,7 +92,7 @@
             name="images" 
             directory="room-images" 
             :multiple="true" 
-            :variants="false" 
+            :variants="true" 
             :max-files="10" 
             :max-size-mb="15" 
             label="Gambar"

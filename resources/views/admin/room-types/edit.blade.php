@@ -136,10 +136,10 @@
             name="images" 
             directory="room-images" 
             :multiple="true" 
-            :variants="false" 
+            :variants="true" 
             :max-files="10" 
             :max-size-mb="15" 
-            label="Tambah Gambar"
+            label="Tambah Gambar Baru"
             hint="Maksimal 10 gambar per tipe kamar. JPG/PNG/WEBP hingga 15MB." />
         <x-form-error field="images" />
         <x-form-error field="images.*" />
