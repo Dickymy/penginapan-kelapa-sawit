@@ -35,7 +35,7 @@
             @foreach($faqs as $category => $items)
                 <div x-data="{ active: null }">
                     @if($category)
-                        <h2 class="text-xl font-bold text-gray-800 mb-4">{{ $category }}</h2>
+                        <h2 class="text-xl font-bold text-gray-800 mb-4">{{ ucfirst($category === 'general' ? 'umum' : $category) }}</h2>
                     @endif
                     
                     <div class="space-y-4">
