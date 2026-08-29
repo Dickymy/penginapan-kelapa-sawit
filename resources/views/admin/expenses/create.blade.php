@@ -3,7 +3,7 @@
 @section('title', 'Tambah Pengeluaran')
 
 @section('content')
-<div class="max-w-2xl">
+<div class="">
     <h1 class="text-2xl font-bold text-gray-800 mb-6">Tambah Pengeluaran</h1>
 
     <form method="POST" action="{{ route('admin.expenses.store') }}" class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 space-y-4">

@@ -12,7 +12,7 @@
     </div>
 </div>
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-3xl">
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden ">
     <form action="{{ route('admin.nearby-places.store') }}" method="POST" enctype="multipart/form-data" class="p-6 sm:p-8 space-y-6">
         @csrf
 

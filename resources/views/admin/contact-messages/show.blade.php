@@ -15,14 +15,22 @@
     </div>
     
     <div class="mt-4 md:mt-0 flex space-x-3">
-        <form action="{{ route('admin.contact-messages.destroy', $contactMessage) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pesan ini?');">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+        <div x-data>
+            <button type="button" @click="$dispatch('open-confirm', { id: 'delete-msg-{{ $contactMessage->id }}' })" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                 <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 Hapus
             </button>
-        </form>
+            <x-confirm-modal 
+                id="delete-msg-{{ $contactMessage->id }}"
+                title="Hapus Pesan" 
+                message="Apakah Anda yakin ingin menghapus pesan ini?"
+                confirm-text="Ya, Hapus"
+                cancel-text="Batal"
+                variant="danger"
+                form-action="{{ route('admin.contact-messages.destroy', $contactMessage) }}"
+                method="DELETE"
+            />
+        </div>
         <a href="mailto:{{ $contactMessage->email }}?subject=RE: {{ rawurlencode($contactMessage->subject) }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
             <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
             Balas via Email

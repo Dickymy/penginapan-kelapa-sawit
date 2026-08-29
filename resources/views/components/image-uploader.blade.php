@@ -104,6 +104,8 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('imageUploader', (config) => ({
         isDragging: false,
         files: [],
+        name: config.name,
+        multiple: config.multiple,
         
         handleFileSelect(event) {
             this.processFiles(event.target.files);
@@ -168,8 +170,8 @@ document.addEventListener('alpine:init', () => {
                 
                 this.files.push(fileObj);
                 
-                // Start upload immediately
-                this.uploadFile(fileObj);
+                // Start upload immediately using the proxied object
+                this.uploadFile(this.files[this.files.length - 1]);
             });
         },
         

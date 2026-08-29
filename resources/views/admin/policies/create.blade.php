@@ -8,7 +8,7 @@
     <a href="{{ route('admin.policies.index') }}" class="text-sm text-primary-600 hover:text-primary-800">&larr; Kembali</a>
 </div>
 
-<form action="{{ route('admin.policies.store') }}" method="POST" class="bg-white rounded-lg shadow p-6 max-w-3xl space-y-5">
+<form action="{{ route('admin.policies.store') }}" method="POST" class="bg-white rounded-lg shadow p-6 space-y-5">
     @csrf
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

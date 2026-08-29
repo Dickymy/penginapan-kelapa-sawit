@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin - Penginapan Kelapa Sawit')</title>
-    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
+    <link rel="icon" href="{{ asset('images/logo.webp') }}" type="image/png">
     <style>[x-cloak] { display: none !important; }</style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -22,7 +22,7 @@
                 {{-- Brand --}}
                 <div class="px-4 py-4 border-b border-gray-100 flex-shrink-0">
                     <div class="flex items-center gap-2">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-6 w-auto object-contain">
+                        <img src="{{ asset('images/logo.webp') }}" alt="Logo" class="h-6 w-auto object-contain">
                         <h1 class="text-base font-bold text-primary-700">Kelapa Sawit</h1>
                     </div>
                     <p class="text-xs text-gray-400">Panel Admin</p>
@@ -51,7 +51,7 @@
             <div class="px-4 py-4 border-b border-gray-100 flex items-center justify-between">
                 <div>
                     <div class="flex items-center gap-2">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-6 w-auto object-contain">
+                        <img src="{{ asset('images/logo.webp') }}" alt="Logo" class="h-6 w-auto object-contain">
                         <h1 class="text-base font-bold text-primary-700">Kelapa Sawit</h1>
                     </div>
                     <p class="text-xs text-gray-400">Panel Admin</p>
@@ -83,7 +83,7 @@
                                 {{ strtoupper(substr(auth('admin')->user()->name, 0, 1)) }}
                             </span>
                             <span class="text-sm text-gray-700 hidden sm:inline">{{ auth('admin')->user()->name }}</span>
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            <svg :class="{'rotate-180': open}" class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
                         <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
                              class="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] py-1.5 z-50">

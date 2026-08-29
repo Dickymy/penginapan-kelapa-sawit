@@ -8,7 +8,7 @@
     <a href="{{ route('admin.room-types.index') }}" class="text-sm text-primary-600 hover:text-primary-800">&larr; Kembali</a>
 </div>
 
-<form action="{{ route('admin.room-types.update', $roomType) }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6 max-w-3xl space-y-5">
+<form action="{{ route('admin.room-types.update', $roomType) }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6 space-y-5">
     @csrf
     @method('PUT')
 
@@ -101,29 +101,9 @@
                     @if($image->is_cover)
                         <span class="bg-green-500 text-white text-xs px-1 rounded">Cover</span>
                     @else
-                        <form action="{{ route('admin.room-images.cover', $image) }}" method="POST">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" class="bg-blue-500 text-white text-xs px-1 rounded hover:bg-blue-600" title="Jadikan Cover">★</button>
-                        </form>
+                        <button type="submit" form="cover-form-{{ $image->id }}" class="bg-blue-500 text-white text-xs px-1 rounded hover:bg-blue-600" title="Jadikan Cover">★</button>
                     @endif
-                    <form action="{{ route('admin.room-images.destroy', $image) }}" method="POST"
-                          x-data
-                          @submit.prevent="$dispatch('open-confirm', { id: 'delete-image-{{ $image->id }}' })">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="bg-red-500 text-white text-xs px-1 rounded hover:bg-red-600">&times;</button>
-                    </form>
-                    <x-confirm-modal
-                        id="delete-image-{{ $image->id }}"
-                        title="Hapus gambar?"
-                        message="Gambar ini akan dihapus secara permanen."
-                        confirm-text="Ya, Hapus"
-                        cancel-text="Batal"
-                        variant="danger"
-                        :form-action="route('admin.room-images.destroy', $image)"
-                        method="DELETE"
-                    />
+                    <button type="button" @click="$dispatch('open-confirm', { id: 'delete-image-{{ $image->id }}' })" class="bg-red-500 text-white text-xs px-1 rounded hover:bg-red-600">&times;</button>
                 </div>
             </div>
             @endforeach
@@ -149,4 +129,28 @@
         <x-button type="submit">Perbarui</x-button>
     </div>
 </form>
+
+{{-- Hidden Forms for Image Actions --}}
+@if($roomType->images->isNotEmpty())
+    @foreach($roomType->images as $image)
+        @if(!$image->is_cover)
+            <form id="cover-form-{{ $image->id }}" action="{{ route('admin.room-images.cover', $image) }}" method="POST" class="hidden">
+                @csrf
+                @method('PATCH')
+            </form>
+        @endif
+        
+        <x-confirm-modal
+            id="delete-image-{{ $image->id }}"
+            title="Hapus gambar?"
+            message="Gambar ini akan dihapus secara permanen."
+            confirm-text="Ya, Hapus"
+            cancel-text="Batal"
+            variant="danger"
+            :form-action="route('admin.room-images.destroy', $image)"
+            method="DELETE"
+        />
+    @endforeach
+@endif
+
 @endsection

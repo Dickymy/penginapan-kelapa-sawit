@@ -12,7 +12,7 @@
     <h1 class="text-2xl font-bold text-gray-900">Edit FAQ</h1>
 </div>
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-3xl">
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 ">
     <form action="{{ route('admin.faqs.update', $faq) }}" method="POST">
         @csrf
         @method('PUT')

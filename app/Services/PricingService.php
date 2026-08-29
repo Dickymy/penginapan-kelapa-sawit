@@ -72,13 +72,18 @@ class PricingService
         $addonTotal = 0;
         $addonDetails = [];
         foreach ($selectedAddons as $item) {
-            $addon = \App\Models\Addon::active()->findOrFail($item['addon_id']);
-            $subtotal = $addon->price * $item['quantity'];
+            // We do not use active() here so that previously purchased addons can still carry over even if deactivated by admin
+            $addon = \App\Models\Addon::findOrFail($item['addon_id']);
+            
+            // Security: force quantity to 1 if addon type is 'single'
+            $qty = $addon->isSingle() ? 1 : $item['quantity'];
+
+            $subtotal = $addon->price * $qty;
             $addonTotal += $subtotal;
             $addonDetails[] = [
                 'addon_id' => $addon->id,
                 'name' => $addon->name,
-                'quantity' => $item['quantity'],
+                'quantity' => $qty,
                 'unit_price' => $addon->price,
                 'subtotal' => $subtotal,
             ];

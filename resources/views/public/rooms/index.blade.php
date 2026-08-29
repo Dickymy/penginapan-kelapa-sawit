@@ -155,6 +155,8 @@
                         <div class="lg:w-72 xl:w-80 flex-shrink-0 relative overflow-hidden">
                             <template x-if="type.cover_medium">
                                 <img :src="type.cover_medium"
+                                     :srcset="`${type.cover_thumb} 480w, ${type.cover_medium} 960w`"
+                                     sizes="(max-width: 1024px) 100vw, 320px"
                                      :alt="type.name"
                                      loading="lazy"
                                      decoding="async"

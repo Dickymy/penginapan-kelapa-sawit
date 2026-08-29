@@ -138,7 +138,7 @@
                     class="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition {{ request()->routeIs('admin.reports.*') ? 'bg-primary-50 text-primary-700 font-medium' : 'text-gray-600 hover:bg-gray-100' }}">
                 <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 <span class="flex-1 text-left">Laporan</span>
-                <svg class="w-3.5 h-3.5 text-gray-400 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                <svg :class="{'rotate-180': open}" class="w-3.5 h-3.5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div x-show="open" x-cloak class="ml-7 mt-0.5 space-y-0.5">
                 <a href="{{ route('admin.reports.revenue') }}" class="block px-3 py-1.5 rounded-lg text-xs {{ request()->routeIs('admin.reports.revenue') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-500 hover:bg-gray-100' }}">Pendapatan</a>

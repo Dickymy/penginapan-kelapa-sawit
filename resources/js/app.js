@@ -13,3 +13,10 @@ Alpine.store('checkoutForm', {
 
 window.Alpine = Alpine;
 Alpine.start();
+
+// Blur native select inputs after value change so their :focus styling (like animated arrows) resets
+document.addEventListener('change', (e) => {
+    if (e.target && e.target.tagName && e.target.tagName.toLowerCase() === 'select') {
+        e.target.blur();
+    }
+});

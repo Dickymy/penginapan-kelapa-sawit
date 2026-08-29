@@ -15,6 +15,7 @@ class Addon extends Model
         'price',
         'is_active',
         'sort_order',
+        'type',
     ];
 
     protected $casts = [
@@ -36,5 +37,15 @@ class Addon extends Model
     public function getFormattedPriceAttribute(): string
     {
         return 'Rp' . number_format($this->price, 0, ',', '.');
+    }
+
+    public function isQuantityBased(): bool
+    {
+        return $this->type === 'quantity';
+    }
+
+    public function isSingle(): bool
+    {
+        return $this->type === 'single';
     }
 }

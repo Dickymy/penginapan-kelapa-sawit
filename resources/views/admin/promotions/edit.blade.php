@@ -8,7 +8,7 @@
     <a href="{{ route('admin.promotions.index') }}" class="text-sm text-gray-600 hover:text-gray-800">&larr; Kembali</a>
 </div>
 
-<div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 max-w-2xl">
+<div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 ">
     <form action="{{ route('admin.promotions.update', $promotion) }}" method="POST" class="space-y-4">
         @csrf
         @method('PUT')

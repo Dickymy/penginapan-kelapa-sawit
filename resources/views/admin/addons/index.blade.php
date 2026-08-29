@@ -18,6 +18,7 @@
                 <tr>
                     <th class="px-6 py-4">Nama Layanan</th>
                     <th class="px-6 py-4">Harga</th>
+                    <th class="px-6 py-4">Tipe</th>
                     <th class="px-6 py-4">Status</th>
                     <th class="px-6 py-4 text-center">Urutan</th>
                     <th class="px-6 py-4 text-right">Aksi</th>
@@ -34,6 +35,11 @@
                     </td>
                     <td class="px-6 py-4 text-gray-600">{{ $addon->formatted_price }}</td>
                     <td class="px-6 py-4">
+                        <span class="inline-flex px-2 py-1 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                            {{ $addon->isSingle() ? 'Hanya Ceklis' : 'Kuantitas' }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
                         <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium {{ $addon->is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700' }}">
                             {{ $addon->is_active ? 'Aktif' : 'Nonaktif' }}
                         </span>
@@ -41,10 +47,17 @@
                     <td class="px-6 py-4 text-center text-gray-600">{{ $addon->sort_order }}</td>
                     <td class="px-6 py-4 text-right space-x-2">
                         <a href="{{ route('admin.addons.edit', $addon) }}" class="text-blue-600 hover:text-blue-800 font-medium">Edit</a>
-                        <form action="{{ route('admin.addons.destroy', $addon) }}" method="POST" class="inline-block" onsubmit="return confirm('Hapus add-on ini?');">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-800 font-medium">Hapus</button>
-                        </form>
+                        <button type="button" @click="$dispatch('open-confirm', { id: 'delete-addon-{{ $addon->id }}' })" class="text-red-600 hover:text-red-800 font-medium ml-2">Hapus</button>
+                        
+                        <x-confirm-modal 
+                            id="delete-addon-{{ $addon->id }}"
+                            title="Hapus Layanan Tambahan" 
+                            message="Apakah Anda yakin ingin menghapus layanan {{ $addon->name }}? Tindakan ini tidak dapat dibatalkan."
+                            confirm-text="Ya, Hapus"
+                            cancel-text="Batal"
+                            variant="danger"
+                            form-action="{{ route('admin.addons.destroy', $addon) }}"
+                        />
                     </td>
                 </tr>
                 @empty

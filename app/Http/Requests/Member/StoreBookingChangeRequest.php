@@ -10,7 +10,7 @@ class StoreBookingChangeRequest extends FormRequest
     public function authorize(): bool
     {
         $booking = $this->route('booking');
-        return $booking && $booking->user_id === $this->user('web')->id && $booking->status === \App\Enums\BookingStatus::Confirmed->value;
+        return $booking && $booking->user_id === $this->user('web')->id && $booking->status === \App\Enums\BookingStatus::Confirmed;
     }
 
     public function rules(): array

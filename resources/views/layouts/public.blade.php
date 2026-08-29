@@ -6,8 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Penginapan Kelapa Sawit — Penginapan di Kota Bangun II')</title>
     @yield('meta')
-    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
+    <link rel="icon" href="{{ asset('images/logo.webp') }}" type="image/webp">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <link rel="preload" as="image" href="{{ asset('images/logo.webp') }}">
     <meta name="theme-color" content="#0284c7">
     {{-- x-cloak harus aktif sebelum Alpine init agar tidak ada flash of unstyled Alpine elements --}}
     <style>[x-cloak] { display: none !important; }</style>
@@ -20,7 +21,7 @@
             <div class="flex justify-between items-center h-16">
                 {{-- Logo --}}
                 <a href="{{ route('home') }}" class="text-xl font-bold text-primary-700 flex items-center gap-2">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto object-contain">
+                    <img src="{{ asset('images/logo.webp') }}" alt="Logo" class="h-8 w-auto object-contain">
                     <span class="hidden sm:inline">Penginapan Kelapa Sawit</span>
                     <span class="sm:hidden">Kelapa Sawit</span>
                 </a>
@@ -120,7 +121,7 @@
                                     </div>
                                 @endif
                                 <span class="hidden xl:inline max-w-[120px] truncate">{{ auth()->user()->name }}</span>
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                <svg :class="{'rotate-180': accountOpen}" class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </button>
                             <div x-show="accountOpen" x-cloak
                                  x-transition:enter="transition ease-out duration-100"
@@ -129,7 +130,7 @@
                                  x-transition:leave="transition ease-in duration-75"
                                  x-transition:leave-start="opacity-100 scale-100"
                                  x-transition:leave-end="opacity-0 scale-95"
-                                 class="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                                 class="absolute top-full right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 origin-top-right">
                                 <a href="{{ route('member.dashboard') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                                     Dashboard
@@ -199,7 +200,7 @@
                 {{-- Drawer Header --}}
                 <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-white">
                     <a href="{{ route('home') }}" class="flex items-center gap-2 text-lg font-bold text-primary-700">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-6 w-auto object-contain">
+                        <img src="{{ asset('images/logo.webp') }}" alt="Logo" class="h-6 w-auto object-contain">
                         <span>Penginapan Kelapa Sawit</span>
                     </a>
                     <button @click="open = false" class="p-2 -mr-2 rounded-md text-gray-500 hover:bg-gray-100" aria-label="Tutup menu">
@@ -331,7 +332,7 @@
                 <div class="lg:col-span-1">
                     <a href="{{ route('home') }}" class="text-2xl font-bold text-white flex items-center gap-2 mb-4">
                         <div class="bg-white p-1 rounded-lg flex items-center justify-center">
-                            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto object-contain">
+                            <img src="{{ asset('images/logo.webp') }}" alt="Logo" class="h-8 w-auto object-contain">
                         </div>
                         <span>{{ \App\Models\Setting::get('general', 'property_name', 'Penginapan Kelapa Sawit') }}</span>
                     </a>

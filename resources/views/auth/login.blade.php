@@ -8,7 +8,7 @@
     <div class="bg-white border border-gray-100 rounded-2xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] p-6 md:p-8">
         <div class="text-center mb-6">
             <div class="flex justify-center mb-4">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo Penginapan Kelapa Sawit" class="h-16 w-auto object-contain">
+                <img src="{{ asset('images/logo.webp') }}" alt="Logo Penginapan Kelapa Sawit" class="h-16 w-auto object-contain">
             </div>
             <h1 class="text-2xl font-bold text-gray-900">Masuk ke Akun</h1>
             <p class="text-sm text-gray-500 mt-1">Akses dashboard, histori booking, dan poin loyalitas Anda.</p>

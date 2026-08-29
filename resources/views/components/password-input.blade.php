@@ -15,7 +15,7 @@
 $fieldId = $id ?? $name;
 @endphp
 
-<div x-data="{ show: false, value: '' }">
+<div x-data="{ show: false, value: '' }" x-modelable="value" {{ $attributes->whereStartsWith('x-model') }}>
     <label for="{{ $fieldId }}" class="block text-sm font-medium text-gray-700 mb-1">
         {{ $label }}
         @if($required) <span class="text-red-500">*</span> @endif

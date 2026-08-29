@@ -39,7 +39,7 @@
                 <td class="footer">
                     <p>Penginapan Kelapa Sawit<br>Kota Bangun II, Kutai Kartanegara, Kalimantan Timur</p>
                     <p style="margin-top: 8px;">
-                        <a href="https://wa.me/6281234567890">Hubungi kami via WhatsApp</a>
+                        <a href="{{ \App\Support\WhatsApp::url(\App\Models\Setting::get('contact', 'whatsapp', '081350286635')) }}">Hubungi kami via WhatsApp</a>
                     </p>
                 </td>
             </tr>

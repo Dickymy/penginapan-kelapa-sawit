@@ -3,7 +3,7 @@
 @section('title', 'Profil & Akun')
 
 @section('content')
-<div class="max-w-lg mx-auto space-y-6">
+<div class="space-y-6">
 
     {{-- Mobile Account Header --}}
     <div class="lg:hidden bg-white rounded-xl border border-gray-100 p-5">

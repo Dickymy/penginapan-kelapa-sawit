@@ -3,7 +3,7 @@
 @section('title', 'Tambah Add-on')
 
 @section('content')
-<div class="max-w-2xl">
+<div class="">
     <div class="flex items-center gap-4 mb-6">
         <a href="{{ route('admin.addons.index') }}" class="text-gray-500 hover:text-gray-700">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
@@ -20,10 +20,21 @@
             @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
 
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Harga (Rp) <span class="text-red-500">*</span></label>
-            <input type="number" name="price" value="{{ old('price') }}" required min="0" class="w-full rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500">
-            @error('price') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Harga (Rp) <span class="text-red-500">*</span></label>
+                <input type="number" name="price" value="{{ old('price') }}" required min="0" class="w-full rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500">
+                @error('price') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tipe Pilihan <span class="text-red-500">*</span></label>
+                <select name="type" required class="w-full rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500">
+                    <option value="quantity" @selected(old('type') === 'quantity')>Berdasarkan Jumlah (Bisa diisi kuantitas)</option>
+                    <option value="single" @selected(old('type') === 'single')>Hanya Ceklis (1 kali per booking)</option>
+                </select>
+                @error('type') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
         </div>
 
         <div>

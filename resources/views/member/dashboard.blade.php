@@ -73,13 +73,21 @@
                 <div class="mt-4 md:mt-0 flex flex-col items-end gap-2">
                     <span class="text-lg font-bold text-gray-800">{{ $booking->formatted_total }}</span>
                     <div class="flex gap-2">
-                        <form action="{{ route('member.bookings.cancel', $booking) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?');">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition">
-                                Batalkan
-                            </button>
-                        </form>
+                        <button type="button" @click="$dispatch('open-confirm', { id: 'cancel-dashboard-booking-{{ $booking->id }}' })"
+                                class="inline-flex items-center justify-center px-4 py-2.5 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition">
+                            Batalkan
+                        </button>
+                        
+                        <x-confirm-modal 
+                            id="cancel-dashboard-booking-{{ $booking->id }}"
+                            title="Batalkan Pesanan" 
+                            message="Apakah Anda yakin ingin membatalkan pesanan kamar {{ $booking->room_type_name_snapshot }}? Pesanan yang dibatalkan tidak dapat dikembalikan."
+                            confirm-text="Ya, Batalkan"
+                            cancel-text="Tutup"
+                            variant="danger"
+                            form-action="{{ route('member.bookings.cancel', $booking) }}"
+                            method="PATCH"
+                        />
                         <a href="{{ route('member.bookings.show', $booking) }}"
                            class="inline-flex items-center justify-center px-4 py-2.5 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition">
                             Bayar Sekarang

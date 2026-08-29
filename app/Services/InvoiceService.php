@@ -48,6 +48,7 @@ class InvoiceService
             'payment' => $paidPayment,
         ];
 
-        return Pdf::loadView('invoices.booking', $data)->setPaper('a4');
+        // Use A4 portrait to prevent pagination issues, letting content flow naturally
+        return Pdf::loadView('invoices.booking', $data)->setPaper('a4', 'portrait');
     }
 }

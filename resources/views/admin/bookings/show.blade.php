@@ -4,7 +4,7 @@
 @section('page-title', 'Detail Reservasi')
 
 @section('content')
-<div class="max-w-4xl space-y-4">
+<div class="space-y-4">
     {{-- Header --}}
     <div class="flex items-start justify-between">
         <div>

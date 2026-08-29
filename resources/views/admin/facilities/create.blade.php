@@ -8,7 +8,7 @@
     <a href="{{ route('admin.facilities.index') }}" class="text-sm text-primary-600 hover:text-primary-800">&larr; Kembali</a>
 </div>
 
-<form action="{{ route('admin.facilities.store') }}" method="POST" class="bg-white rounded-lg shadow p-6 max-w-2xl space-y-5">
+<form action="{{ route('admin.facilities.store') }}" method="POST" class="bg-white rounded-lg shadow p-6 space-y-5">
     @csrf
 
     <div>

@@ -9,7 +9,7 @@
     <h1 class="text-2xl font-bold text-gray-800">Pengaturan: {{ ucfirst($group) }}</h1>
 </div>
 
-<form action="{{ route('admin.settings.update', $group) }}" method="POST" class="bg-white rounded-lg shadow p-6 max-w-2xl space-y-5">
+<form action="{{ route('admin.settings.update', $group) }}" method="POST" class="bg-white rounded-lg shadow p-6 space-y-5">
     @csrf
     @method('PUT')
 

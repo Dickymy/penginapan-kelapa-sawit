@@ -114,6 +114,9 @@ aria-label="Notifikasi"
 @if(session('toast_success'))
 <script>document.addEventListener('alpine:init', () => { setTimeout(() => window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', message: @json(session('toast_success')) }})), 100) })</script>
 @endif
+@if(session('error'))
+<script>document.addEventListener('alpine:init', () => { setTimeout(() => window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: @json(session('error')) }})), 100) })</script>
+@endif
 @if(session('toast_error'))
 <script>document.addEventListener('alpine:init', () => { setTimeout(() => window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: @json(session('toast_error')) }})), 100) })</script>
 @endif

@@ -40,7 +40,9 @@
 </div>
 
 <div class="bg-white shadow ring-1 ring-black ring-opacity-5 rounded-lg overflow-hidden">
-    <table class="min-w-full divide-y divide-gray-300">
+    {{-- Desktop Table View --}}
+    <div class="hidden md:block">
+        <table class="min-w-full divide-y divide-gray-300">
         <thead class="bg-gray-50">
             <tr>
                 <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Detail Ulasan</th>
@@ -126,7 +128,86 @@
                 </tr>
             @endforelse
         </tbody>
-    </table>
+        </table>
+    </div>
+
+    {{-- Mobile Card View --}}
+    <div class="block md:hidden divide-y divide-gray-200">
+        @forelse($reviews as $review)
+            <div x-data="{ showReplyForm: false }" class="p-4 space-y-3">
+                <div class="flex justify-between items-start gap-2">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-1">
+                            <x-star-rating :rating="$review->rating" size="4" />
+                            <span class="ml-2 font-medium text-gray-900">{{ $review->user->name }}</span>
+                        </div>
+                        @if($review->title)
+                            <div class="font-bold text-gray-900 mt-2 text-sm">{{ $review->title }}</div>
+                        @endif
+                        <div class="text-gray-700 mt-1 italic text-sm">"{{ $review->comment }}"</div>
+                        <div class="text-gray-400 text-[10px] mt-2">{{ $review->created_at->format('d M Y, H:i') }}</div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        @if($review->is_published)
+                            <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-800">
+                                Dipublikasikan
+                            </span>
+                        @else
+                            <span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-medium text-yellow-800">
+                                Menunggu
+                            </span>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Booking Info --}}
+                <div class="bg-gray-50 rounded-lg p-2 text-xs text-gray-600 flex justify-between items-center border border-gray-100">
+                    <div>
+                        <span class="font-medium text-gray-900">{{ $review->booking->room_type_name_snapshot }}</span>
+                        <span> - {{ $review->booking->room_name_snapshot }}</span>
+                    </div>
+                    <a href="{{ route('admin.bookings.show', $review->booking) }}" class="text-primary-600 font-medium">{{ $review->booking->booking_code }}</a>
+                </div>
+
+                {{-- Admin Reply --}}
+                <div class="mt-3 p-3 bg-primary-50 rounded-lg border border-primary-100 text-sm" x-show="!showReplyForm && {{ $review->admin_reply ? 'true' : 'false' }}">
+                    <div class="font-semibold text-primary-700 mb-1 text-xs uppercase tracking-wider">Balasan Anda:</div>
+                    <div class="text-gray-700">{{ $review->admin_reply }}</div>
+                    <div class="text-gray-400 text-xs mt-2">{{ $review->replied_at?->format('d M Y, H:i') }}</div>
+                </div>
+
+                {{-- Reply Form --}}
+                <div x-show="showReplyForm" class="mt-3" style="display: none;">
+                    <form action="{{ route('admin.reviews.reply', $review) }}" method="POST">
+                        @csrf
+                        <textarea name="admin_reply" rows="3" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm text-sm" placeholder="Tulis balasan untuk ulasan ini...">{{ $review->admin_reply }}</textarea>
+                        <div class="mt-2 flex justify-end space-x-2">
+                            <button type="button" @click="showReplyForm = false" class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none">Batal</button>
+                            <button type="submit" class="inline-flex items-center rounded-lg border border-transparent bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+
+                {{-- Actions --}}
+                <div class="flex justify-end space-x-4 pt-3 border-t border-gray-100 mt-2">
+                    <form action="{{ route('admin.reviews.publish', $review) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="text-xs font-semibold {{ $review->is_published ? 'text-orange-600' : 'text-green-600' }}">
+                            {{ $review->is_published ? 'Sembunyikan' : 'Publikasikan' }}
+                        </button>
+                    </form>
+                    <button type="button" @click="showReplyForm = !showReplyForm" class="text-xs font-semibold text-primary-600">
+                        {{ $review->admin_reply ? 'Edit Balasan' : 'Balas' }}
+                    </button>
+                </div>
+            </div>
+        @empty
+            <div class="p-8 text-center text-sm text-gray-500">
+                Belum ada ulasan yang sesuai dengan filter ini.
+            </div>
+        @endforelse
+    </div>
     
     @if($reviews->hasPages())
         <div class="border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
