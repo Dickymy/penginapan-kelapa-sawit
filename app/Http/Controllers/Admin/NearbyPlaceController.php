@@ -25,8 +25,8 @@ class NearbyPlaceController extends Controller
     {
         $data = $request->validated();
 
-        if ($request->hasFile('image')) {
-            $data['image'] = $imageUploadService->upload($request->file('image'), 'nearby-places');
+        if ($request->has('image') && $request->input('image')) {
+            $data['image'] = $request->input('image');
         }
 
         NearbyPlace::create($data);
@@ -48,13 +48,8 @@ class NearbyPlaceController extends Controller
     {
         $data = $request->validated();
 
-        if ($request->hasFile('image')) {
-            if ($nearbyPlace->image) {
-                // Delete old variants if needed, or simply let the service handle overwrite/storage.
-                // Normally you'd delete old image here if ImageUploadService had a delete method.
-                // Assuming we just store the new one.
-            }
-            $data['image'] = $imageUploadService->upload($request->file('image'), 'nearby-places');
+        if ($request->has('image') && $request->input('image')) {
+            $data['image'] = $request->input('image');
         }
 
         $nearbyPlace->update($data);

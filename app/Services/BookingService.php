@@ -173,6 +173,7 @@ class BookingService
                 'subtotal' => $quote['subtotal'],
                 'promotion_discount' => $quote['promotion_discount'],
                 'points_discount' => $quote['points_discount'],
+                'points_redeemed' => $quote['points_redeemed'] ?? 0,
                 'total_amount' => $quote['total_amount'],
                 'currency' => 'IDR',
                 'eligible_loyalty_amount' => $quote['eligible_loyalty_amount'],

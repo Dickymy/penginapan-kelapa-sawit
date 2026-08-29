@@ -63,7 +63,7 @@
                     <input type="tel" name="guest_whatsapp" id="guest_whatsapp"
                            value="{{ old('guest_whatsapp') }}"
                            required
-                           placeholder="Contoh: 08123456789"
+                           placeholder="Contoh: 081350286635"
                            autocomplete="tel"
                            class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-base px-4 py-3 placeholder:text-gray-400">
                     <p class="mt-1.5 text-xs text-gray-500">Nomor WhatsApp yang digunakan saat memesan.</p>

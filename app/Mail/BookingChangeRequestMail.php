@@ -37,7 +37,7 @@ class BookingChangeRequestMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'emails.booking_change_request',
+            markdown: 'emails.booking_change_request',
         );
     }
 

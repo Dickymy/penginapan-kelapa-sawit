@@ -25,15 +25,72 @@ class AvailabilityService
             ->with(['images', 'facilities' => fn ($q) => $q->active()->ordered()])
             ->get();
 
-        return $roomTypes->map(function (RoomType $roomType) use ($checkIn, $checkOut) {
-            $availableRooms = $this->findAvailableRooms($roomType->id, $checkIn, $checkOut);
+        $results = $roomTypes->map(function (RoomType $roomType) use ($checkIn, $checkOut) {
+            $rooms = Room::where('room_type_id', $roomType->id)
+                ->sellable()
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+
+            $availableRooms = collect();
+            $blockedRooms = collect();
+            $bookedRooms = collect();
+
+            foreach ($rooms as $room) {
+                // Check if blocked
+                $block = \DB::table('room_blocks')
+                    ->where('room_id', $room->id)
+                    ->where('start_date', '<', $checkOut->toDateString())
+                    ->where(function ($q) use ($checkIn) {
+                        $q->where('end_date', '>', $checkIn->toDateString())
+                          ->orWhereNull('end_date');
+                    })
+                    ->first();
+
+                if ($block) {
+                    $blockedRooms->push([
+                        'room' => $room,
+                        'reason' => $block->reason
+                    ]);
+                    continue;
+                }
+
+                // Check if booked
+                $hasBooking = Booking::where('room_id', $room->id)
+                    ->where('check_in', '<', $checkOut->toDateString())
+                    ->where('check_out', '>', $checkIn->toDateString())
+                    ->where(function (Builder $query) {
+                        $query->whereIn('status', [
+                            BookingStatus::Confirmed->value,
+                            BookingStatus::CheckedIn->value,
+                        ])
+                        ->orWhere(function (Builder $q) {
+                            $q->where('status', BookingStatus::PendingPayment->value)
+                              ->where('payment_expires_at', '>', now());
+                        });
+                    })
+                    ->exists();
+
+                if ($hasBooking) {
+                    $bookedRooms->push($room);
+                    continue;
+                }
+
+                $availableRooms->push($room);
+            }
 
             return [
                 'room_type' => $roomType,
+                'total_rooms' => $rooms->count(),
                 'available_count' => $availableRooms->count(),
                 'available_rooms' => $availableRooms,
+                'blocked_rooms' => $blockedRooms,
+                'booked_rooms' => $bookedRooms,
             ];
-        })->filter(fn ($item) => $item['available_count'] > 0)->values();
+        });
+
+        // Sort: Available first, then unavailable
+        return $results->sortByDesc(fn ($item) => $item['available_count'] > 0 ? 1 : 0)->values();
     }
 
     /**
@@ -80,7 +137,10 @@ class AvailabilityService
         $hasBlockConflict = \DB::table('room_blocks')
             ->where('room_id', $roomId)
             ->where('start_date', '<', $checkOut->toDateString())
-            ->where('end_date', '>', $checkIn->toDateString())
+            ->where(function ($q) use ($checkIn) {
+                $q->where('end_date', '>', $checkIn->toDateString())
+                  ->orWhereNull('end_date');
+            })
             ->exists();
 
         return ! $hasBlockConflict;

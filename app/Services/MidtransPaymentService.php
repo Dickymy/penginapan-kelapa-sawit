@@ -357,7 +357,7 @@ class MidtransPaymentService
     /**
      * Process payment status change.
      */
-    private function processPaymentStatus(Payment $payment, array $payload, ?PaymentWebhookEvent $event): void
+    public function processPaymentStatus(Payment $payment, array $payload, ?PaymentWebhookEvent $event): void
     {
         $newStatus = $this->mapProviderStatus($payload);
 

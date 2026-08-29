@@ -44,11 +44,18 @@ class RoomTypeController extends Controller
             $roomType->facilities()->sync($request->input('facilities', []));
         }
 
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $file) {
-                $path = $this->imageService->upload($file, 'room-images');
+        if ($request->has('images')) {
+            foreach ($request->input('images') as $index => $jsonOrPath) {
+                $variants = json_decode($jsonOrPath, true);
+                if (!$variants || !is_array($variants)) {
+                    $variants = ['original' => $jsonOrPath, 'large' => $jsonOrPath];
+                }
+
                 $roomType->images()->create([
-                    'path' => $path,
+                    'path' => $variants['original'] ?? $variants['large'] ?? $jsonOrPath,
+                    'thumb_path' => $variants['thumb'] ?? null,
+                    'medium_path' => $variants['medium'] ?? null,
+                    'large_path' => $variants['large'] ?? null,
                     'sort_order' => $index,
                     'is_cover' => $index === 0 && $roomType->images()->count() === 0,
                 ]);
@@ -75,12 +82,20 @@ class RoomTypeController extends Controller
             $roomType->facilities()->sync($request->input('facilities', []));
         }
 
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $file) {
-                $path = $this->imageService->upload($file, 'room-images');
+        if ($request->has('images')) {
+            $maxSort = $roomType->images()->max('sort_order') ?? 0;
+            foreach ($request->input('images') as $index => $jsonOrPath) {
+                $variants = json_decode($jsonOrPath, true);
+                if (!$variants || !is_array($variants)) {
+                    $variants = ['original' => $jsonOrPath, 'large' => $jsonOrPath];
+                }
+
                 $roomType->images()->create([
-                    'path' => $path,
-                    'sort_order' => $roomType->images()->max('sort_order') + 1 + $index,
+                    'path' => $variants['original'] ?? $variants['large'] ?? $jsonOrPath,
+                    'thumb_path' => $variants['thumb'] ?? null,
+                    'medium_path' => $variants['medium'] ?? null,
+                    'large_path' => $variants['large'] ?? null,
+                    'sort_order' => $maxSort + 1 + $index,
                 ]);
             }
         }

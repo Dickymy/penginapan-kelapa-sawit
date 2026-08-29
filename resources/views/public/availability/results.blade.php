@@ -13,27 +13,61 @@
         </a>
     </div>
 
-    {{-- Info Bar --}}
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
-        <div class="flex flex-wrap gap-4 text-sm text-blue-800">
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                Check-in: <strong>{{ \Carbon\Carbon::parse($checkIn)->format('d M Y') }}</strong>
-            </span>
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                Check-out: <strong>{{ \Carbon\Carbon::parse($checkOut)->format('d M Y') }}</strong>
-            </span>
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-                <strong>{{ $nights }}</strong> malam
-            </span>
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                <strong>{{ $guestCount }}</strong> tamu
-            </span>
+    {{-- Search Summary --}}
+    <div class="bg-primary-50 border border-primary-100 rounded-xl p-4 mb-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-primary-900">
+        <div class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span class="font-semibold">Check-in:</span> {{ Carbon\Carbon::parse(request('check_in'))->format('d M Y') }}
+        </div>
+        <div class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span class="font-semibold">Check-out:</span> {{ Carbon\Carbon::parse(request('check_out'))->format('d M Y') }}
+        </div>
+        <div class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+            <span class="font-semibold">{{ Carbon\Carbon::parse(request('check_in'))->diffInDays(Carbon\Carbon::parse(request('check_out'))) }}</span> malam
+        </div>
+        <div class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <span class="font-semibold">{{ request('guest_count', 1) }}</span> tamu
         </div>
     </div>
+
+    @php
+        $requestedRoomSlug = request('room_type');
+        $requestedRoom = null;
+        $isRequestedAvailable = false;
+        
+        if ($requestedRoomSlug) {
+            $requestedRoom = collect($results)->first(function ($item) use ($requestedRoomSlug) {
+                return isset($item['room_type']) && $item['room_type']->slug === $requestedRoomSlug;
+            });
+            if ($requestedRoom) {
+                $isRequestedAvailable = $requestedRoom['available_count'] > 0;
+            }
+        }
+    @endphp
+
+    @if($requestedRoom && !$isRequestedAvailable)
+        <div class="bg-amber-50 border-l-4 border-amber-500 p-5 mb-8 rounded-r-xl shadow-sm">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-bold text-amber-800">Kamar Pilihan Anda Tidak Tersedia</h3>
+                    <div class="mt-1 text-amber-700 text-sm">
+                        <p>Mohon maaf, tipe kamar <strong class="text-amber-900">{{ $requestedRoom['room_type']->name }}</strong> saat ini sedang tidak tersedia untuk tanggal yang Anda pilih.</p>
+                        @if(collect($results)->where('available_count', '>', 0)->count() > 0)
+                            <p class="mt-2 font-medium">Sebagai gantinya, kami merekomendasikan tipe kamar lain yang masih tersedia di bawah ini 👇</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
     {{-- Results --}}
     @if($results->isEmpty())
@@ -61,10 +95,27 @@
         </div>
     @else
         <div class="grid gap-6">
+            @php $hasShownUnavailableDivider = false; @endphp
             @foreach($results as $item)
-                <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col md:flex-row">
+                @php
+                    $isFullyBlocked = $item['available_count'] == 0 && isset($item['blocked_rooms']) && $item['blocked_rooms']->isNotEmpty();
+                    $isFullyBooked = $item['available_count'] == 0 && !$isFullyBlocked;
+                    $isPartiallyBlocked = $item['available_count'] > 0 && isset($item['blocked_rooms']) && $item['blocked_rooms']->isNotEmpty();
+                @endphp
+
+                @if($item['available_count'] == 0 && !$hasShownUnavailableDivider && $results->first()['available_count'] > 0)
+                    <div class="flex items-center gap-4 py-4 mt-2">
+                        <div class="h-px bg-gray-300 flex-1"></div>
+                        <span class="text-sm font-semibold text-gray-400 uppercase tracking-widest">Tidak Tersedia</span>
+                        <div class="h-px bg-gray-300 flex-1"></div>
+                    </div>
+                    @php $hasShownUnavailableDivider = true; @endphp
+                @endif
+
+                <div class="relative bg-white border {{ $isFullyBlocked ? 'border-red-400 ring-1 ring-red-200 shadow-red-100' : 'border-gray-200 group hover:shadow-lg hover:border-primary-200 transition-all duration-300' }} rounded-xl shadow-sm overflow-hidden flex flex-col {{ $isFullyBooked ? 'opacity-80' : '' }}">
+                    <div class="flex flex-col md:flex-row {{ $isFullyBlocked ? 'bg-red-50/30' : '' }}">
                     {{-- Room Image --}}
-                    <div class="md:w-72 h-48 md:h-auto flex-shrink-0">
+                    <div class="md:w-72 h-48 md:h-auto flex-shrink-0 relative overflow-hidden">
                         @if($item['room_type']->coverImage)
                             <img src="{{ $item['room_type']->coverImage->medium_url }}"
                                  srcset="{{ $item['room_type']->coverImage->thumb_url }} 480w, {{ $item['room_type']->coverImage->medium_url }} 960w"
@@ -73,7 +124,7 @@
                                  loading="lazy"
                                  decoding="async"
                                  width="480" height="360"
-                                 class="w-full h-full object-cover">
+                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                         @else
                             <div class="w-full h-full bg-gray-200 flex items-center justify-center">
                                 <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,12 +132,33 @@
                                 </svg>
                             </div>
                         @endif
+                        
+                        @if($isFullyBlocked)
+                            <div class="absolute inset-0 bg-red-900/30 flex items-center justify-center backdrop-blur-[2px] p-4">
+                                <span class="bg-red-600 text-white px-5 py-2 rounded-lg font-bold uppercase tracking-widest text-sm shadow-lg border border-red-500/50 text-center max-w-full truncate">
+                                    {{ $item['blocked_rooms']->first()['reason'] ?? 'TIDAK TERSEDIA' }}
+                                </span>
+                            </div>
+                        @elseif($isFullyBooked)
+                            <div class="absolute inset-0 bg-gray-900/30 flex items-center justify-center backdrop-blur-[2px]">
+                                <span class="bg-gray-800 text-white px-5 py-2 rounded-lg font-bold uppercase tracking-widest text-sm shadow-lg border border-gray-700/50">Penuh</span>
+                            </div>
+                        @endif
                     </div>
 
                     {{-- Room Info --}}
                     <div class="flex-1 p-6 flex flex-col justify-between">
                         <div>
-                            <h2 class="text-xl font-semibold text-gray-900">{{ $item['room_type']->name }}</h2>
+                            <h2 class="text-xl font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
+                                <a href="{{ route('rooms.show', [
+                                    'slug' => $item['room_type']->slug,
+                                    'check_in' => $checkIn->format('Y-m-d'),
+                                    'check_out' => $checkOut->format('Y-m-d'),
+                                    'guest_count' => $guestCount
+                                ]) }}" class="focus:outline-none before:absolute before:inset-0 before:z-10">
+                                    {{ $item['room_type']->name }}
+                                </a>
+                            </h2>
                             <div class="mt-2 flex flex-wrap gap-3 text-sm text-gray-600">
                                 <span class="flex items-center gap-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
@@ -97,9 +169,15 @@
                                     {{ $item['room_type']->bed_count }} tempat tidur {{ $item['room_type']->bed_type ?? '' }}
                                 </span>
                             </div>
-                            <p class="mt-2 text-sm text-green-700 font-medium">
-                                {{ $item['available_count'] }} kamar tersedia
-                            </p>
+                            @if($item['available_count'] > 0)
+                                <p class="mt-2 text-sm text-green-700 font-medium">
+                                    {{ $item['available_count'] }} kamar tersedia
+                                </p>
+                            @else
+                                <p class="mt-2 text-sm text-red-600 font-medium">
+                                    Kamar tidak tersedia
+                                </p>
+                            @endif
                         </div>
 
                         <div class="mt-4 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
@@ -113,17 +191,63 @@
                                     <span class="font-semibold text-gray-900">Rp{{ number_format($item['quote']['total_amount'], 0, ',', '.') }}</span>
                                 </p>
                             </div>
-                            <a href="{{ route('booking.checkout', [
-                                    'room_type_id' => $item['room_type']->id,
-                                    'check_in' => $checkIn->format('Y-m-d'),
-                                    'check_out' => $checkOut->format('Y-m-d'),
-                                    'guest_count' => $guestCount,
-                                ]) }}"
-                               class="inline-flex items-center justify-center bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition">
-                                Pilih Kamar
-                            </a>
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('rooms.show', [
+                                        'slug' => $item['room_type']->slug,
+                                        'check_in' => $checkIn->format('Y-m-d'),
+                                        'check_out' => $checkOut->format('Y-m-d'),
+                                        'guest_count' => $guestCount
+                                    ]) }}"
+                                   class="relative z-20 inline-flex items-center justify-center bg-white text-gray-700 border border-gray-300 px-4 py-3 rounded-lg font-medium hover:bg-gray-50 hover:text-primary-700 transition-all duration-300">
+                                    Lihat Detail
+                                </a>
+                                @if($item['available_count'] > 0)
+                                    <a href="{{ route('booking.checkout', [
+                                            'room_type_id' => $item['room_type']->id,
+                                            'check_in' => $checkIn->format('Y-m-d'),
+                                            'check_out' => $checkOut->format('Y-m-d'),
+                                            'guest_count' => $guestCount,
+                                        ]) }}"
+                                       class="relative z-20 inline-flex items-center justify-center bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+                                        Pilih Kamar
+                                    </a>
+                                @else
+                                    <button type="button" disabled
+                                            class="relative z-20 inline-flex items-center justify-center bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-medium cursor-not-allowed">
+                                        Tidak Tersedia
+                                    </button>
+                                @endif
+                            </div>
                         </div>
                     </div>
+
+                    </div>
+
+                    {{-- Blocked Rooms Info (At the bottom, separated by border) --}}
+                    @if($isFullyBlocked)
+                        <div class="border-t border-red-200 bg-red-50 p-4 px-6">
+                            <div class="flex items-start gap-3 text-sm text-red-800">
+                                <svg class="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                <div>
+                                    <span class="font-bold text-base text-red-900">Kamar Tidak Dapat Dipesan</span>
+                                    <ul class="mt-1 space-y-1 text-red-700">
+                                        @foreach($item['blocked_rooms'] as $blocked)
+                                            <li>&bull; {{ $blocked['reason'] ?? 'Tanpa keterangan' }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    @elseif($isPartiallyBlocked)
+                        <div class="border-t border-orange-100 bg-orange-50/50 p-3 px-6">
+                            <div class="flex items-center gap-2 text-sm text-orange-800">
+                                <svg class="w-4 h-4 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>
+                                    <strong>Info:</strong> {{ $item['blocked_rooms']->count() }} unit lain pada tipe kamar ini sedang tidak tersedia ({{ $item['blocked_rooms']->pluck('reason')->filter()->join(', ') ?: 'Diblokir' }}).
+                                </span>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             @endforeach
         </div>

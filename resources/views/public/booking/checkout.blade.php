@@ -3,7 +3,7 @@
 @section('title', 'Checkout - Penginapan Kelapa Sawit')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-36 lg:pb-8">
     {{-- Progress --}}
     <div class="mb-6">
         <p class="text-sm text-gray-500 mb-2">Langkah 2 dari 4</p>
@@ -23,7 +23,7 @@
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-900">Checkout</h1>
-        <a href="{{ route('availability.search', ['check_in' => $checkIn, 'check_out' => $checkOut, 'guest_count' => $guestCount]) }}"
+        <a href="{{ route('availability.search', ['check_in' => $checkIn->format('Y-m-d'), 'check_out' => $checkOut->format('Y-m-d'), 'guest_count' => $guestCount]) }}"
            class="text-sm text-primary-600 hover:text-primary-800 mt-1 sm:mt-0">
             ← Ubah tanggal atau jumlah tamu
         </a>
@@ -46,50 +46,50 @@
         </div>
     @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8"
+         x-data="{
+             baseTotal: {{ $quote['total_amount'] }},
+             addonTotal: 0,
+             usePoints: false,
+             pointBalance: {{ $user ? app(\App\Services\LoyaltyPointService::class)->getBalance($user) : 0 }},
+             pointValue: {{ config('loyalty.point_value', 50) }},
+             get pointDiscount() {
+                 if (!this.usePoints || this.pointBalance <= 0) return 0;
+                 return Math.min(this.baseTotal, this.pointBalance * this.pointValue);
+             },
+             get finalTotal() {
+                 return Math.max(0, this.baseTotal - this.pointDiscount) + this.addonTotal;
+             },
+             updateAddonTotal() {
+                 let total = 0;
+                 document.querySelectorAll('.addon-item').forEach(item => {
+                     if (item.querySelector('.addon-checkbox').checked) {
+                         let price = parseInt(item.dataset.price);
+                         let qty = parseInt(item.querySelector('.addon-qty').value) || 1;
+                         total += price * qty;
+                     }
+                 });
+                 this.addonTotal = total;
+             },
+             formatPrice(val) {
+                 return new Intl.NumberFormat('id-ID').format(val);
+             }
+         }">
         {{-- Form --}}
         <div class="lg:col-span-2">
             <form action="{{ route('booking.store') }}" method="POST" class="space-y-6"
-                  x-data="{
-                      baseTotal: {{ $quote['total_amount'] }},
-                      addonTotal: 0,
-                      usePoints: false,
-                      pointBalance: {{ $user ? app(\App\Services\LoyaltyPointService::class)->getBalance($user) : 0 }},
-                      pointValue: {{ config('loyalty.point_value', 50) }},
-                      get pointDiscount() {
-                          if (!this.usePoints || this.pointBalance <= 0) return 0;
-                          return Math.min(this.baseTotal, this.pointBalance * this.pointValue);
-                      },
-                      get finalTotal() {
-                          return Math.max(0, this.baseTotal - this.pointDiscount) + this.addonTotal;
-                      },
-                      updateAddonTotal() {
-                          let total = 0;
-                          document.querySelectorAll('.addon-item').forEach(item => {
-                              if (item.querySelector('.addon-checkbox').checked) {
-                                  let price = parseInt(item.dataset.price);
-                                  let qty = parseInt(item.querySelector('.addon-qty').value) || 1;
-                                  total += price * qty;
-                              }
-                          });
-                          this.addonTotal = total;
-                      },
-                      formatPrice(val) {
-                          return new Intl.NumberFormat('id-ID').format(val);
-                      }
-                  }"
                   @submit="$store.checkoutForm.submitting = true">
                 @csrf
 
                 {{-- Hidden Fields --}}
                 <input type="hidden" name="room_type_id" value="{{ $roomType->id }}">
-                <input type="hidden" name="check_in" value="{{ $checkIn }}">
-                <input type="hidden" name="check_out" value="{{ $checkOut }}">
+                <input type="hidden" name="check_in" value="{{ $checkIn->format('Y-m-d') }}">
+                <input type="hidden" name="check_out" value="{{ $checkOut->format('Y-m-d') }}">
                 <input type="hidden" name="guest_count" value="{{ $guestCount }}">
                 <input type="hidden" name="idempotency_key" value="{{ $idempotencyKey }}">
 
                 {{-- Guest Info --}}
-                <div class="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div class="bg-white border border-gray-100 rounded-2xl p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                     <h2 class="text-lg font-semibold text-gray-900 mb-1">Informasi Tamu</h2>
                     @guest
                     <p class="text-sm text-gray-500 mb-4">Tidak perlu akun untuk memesan. <a href="{{ route('login') }}" class="text-primary-600 hover:underline">Masuk</a> agar data terisi otomatis dan booking tersimpan di akun.</p>
@@ -142,7 +142,7 @@
 
                 {{-- Add-ons --}}
                 @if(isset($addons) && $addons->isNotEmpty())
-                <div class="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div class="bg-white border border-gray-100 rounded-2xl p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4">Layanan Tambahan (Opsional)</h2>
                     <div class="space-y-4">
                         @foreach($addons as $index => $addon)
@@ -152,23 +152,27 @@
                             <div class="flex items-start gap-3">
                                 <input type="checkbox" name="addons[{{ $index }}][addon_id]" value="{{ $addon->id }}"
                                        x-model="selected"
-                                       @change="updateAddonTotal()"
+                                       @change="$nextTick(() => updateAddonTotal())"
                                        class="addon-checkbox mt-1 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                                 <div>
                                     <p class="text-sm font-medium text-gray-900">{{ $addon->name }}</p>
                                     @if($addon->description)
                                     <p class="text-xs text-gray-500 mt-0.5">{{ $addon->description }}</p>
                                     @endif
-                                    <p class="text-sm text-primary-600 font-medium mt-1">{{ $addon->formatted_price }} <span class="text-xs text-gray-400 font-normal">/ unit</span></p>
+                                    <p class="text-sm text-primary-600 font-medium mt-1">{{ $addon->formatted_price }} @if($addon->isQuantityBased())<span class="text-xs text-gray-400 font-normal">/ unit</span>@endif</p>
                                 </div>
                             </div>
                             
                             <div x-show="selected" x-cloak>
+                                @if($addon->isQuantityBased())
                                 <div class="flex items-center gap-2">
-                                    <button type="button" @click="if(qty > 1) { qty--; updateAddonTotal(); }" class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200">-</button>
-                                    <input type="number" name="addons[{{ $index }}][quantity]" x-model="qty" min="1" @input="updateAddonTotal()" :disabled="!selected" class="addon-qty w-12 text-center border-transparent focus:border-transparent focus:ring-0 p-0 text-sm font-medium" readonly>
-                                    <button type="button" @click="qty++; updateAddonTotal();" class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200">+</button>
+                                    <button type="button" @click="if(qty > 1) { qty--; $nextTick(() => updateAddonTotal()); }" class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200">-</button>
+                                    <input type="number" name="addons[{{ $index }}][quantity]" x-model="qty" min="1" @input="$nextTick(() => updateAddonTotal())" :disabled="!selected" class="addon-qty w-12 text-center border-transparent focus:border-transparent focus:ring-0 p-0 text-sm font-medium" readonly>
+                                    <button type="button" @click="qty++; $nextTick(() => updateAddonTotal());" class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200">+</button>
                                 </div>
+                                @else
+                                <input type="hidden" name="addons[{{ $index }}][quantity]" value="1" class="addon-qty" :disabled="!selected">
+                                @endif
                             </div>
                         </div>
                         @endforeach
@@ -178,7 +182,7 @@
 
                 {{-- Poin Loyalti --}}
                 @auth
-                <div x-show="pointBalance > 0" class="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div x-show="pointBalance > 0" class="bg-white border border-gray-100 rounded-2xl p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                     <div class="flex items-start justify-between">
                         <div>
                             <h2 class="text-lg font-semibold text-gray-900 mb-1">Gunakan Poin Loyalti</h2>
@@ -194,7 +198,7 @@
                 @endauth
 
                 {{-- Additional Info --}}
-                <div class="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div class="bg-white border border-gray-100 rounded-2xl p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4">Informasi Tambahan</h2>
 
                     <div class="space-y-4">
@@ -229,7 +233,7 @@
                 </div>
 
                 {{-- Policy Acceptance --}}
-                <div class="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div class="bg-white border border-gray-100 rounded-2xl p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                     <div class="flex items-start gap-3">
                         <input type="checkbox" name="policy_accepted" id="policy_accepted" value="1"
                                {{ old('policy_accepted') ? 'checked' : '' }}
@@ -259,7 +263,7 @@
                 </div>
 
                 {{-- Mobile Sticky Footer --}}
-                <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:hidden z-30 safe-area-bottom">
+                <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-4 pb-8 md:hidden z-50 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-xs text-gray-500">Total</p>
@@ -278,13 +282,11 @@
                     </div>
                 </div>
             </form>
-            {{-- Spacer for mobile sticky footer --}}
-            <div class="h-20 md:hidden"></div>
         </div>
 
         {{-- Booking Summary Sidebar --}}
         <div class="lg:col-span-1">
-            <div class="bg-white border-gray-100 border rounded-2xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] p-6 md:p-8 sticky top-24">
+            <div class="bg-white border-gray-100 border rounded-2xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] p-5 md:p-8 sticky top-24">
                 <h2 class="text-lg font-semibold text-gray-900 mb-4">Ringkasan Booking</h2>
 
                 <div class="space-y-3 text-sm">

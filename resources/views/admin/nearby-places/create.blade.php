@@ -12,7 +12,7 @@
     </div>
 </div>
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-3xl">
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden ">
     <form action="{{ route('admin.nearby-places.store') }}" method="POST" enctype="multipart/form-data" class="p-6 sm:p-8 space-y-6">
         @csrf
 
@@ -68,12 +68,14 @@
             </div>
 
             <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">Foto (Opsional)</label>
-                <div class="mt-1 flex items-center gap-4">
-                    <input type="file" name="image" id="image" accept="image/*"
-                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
-                </div>
-                <p class="mt-1 text-xs text-gray-500">Maksimal 2MB. Format: JPG, PNG, WEBP.</p>
+                <x-image-uploader 
+                    name="image" 
+                    directory="nearby-places" 
+                    :multiple="false" 
+                    :variants="false" 
+                    :max-size-mb="2" 
+                    label="Foto (Opsional)"
+                    hint="Maksimal 2MB. Format: JPG, PNG, WEBP." />
                 @error('image') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
         </div>

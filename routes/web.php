@@ -53,6 +53,7 @@ Route::get('/booking/{bookingCode}/detail', [BookingController::class, 'guestDet
 
 // Payment
 Route::get('/booking/{bookingCode}/bayar', [PaymentController::class, 'pay'])->name('booking.pay')->middleware('throttle:payment-initiate');
+Route::post('/booking/{bookingCode}/simulate-payment', [PaymentController::class, 'simulate'])->name('booking.simulate-payment');
 Route::get('/booking/{bookingCode}/selesai', [PaymentController::class, 'finish'])->name('booking.finish');
 
 // Invoice
@@ -93,6 +94,11 @@ Route::middleware(['auth', 'verified'])->prefix('member')->name('member.')->grou
     // Booking Changes
     Route::get('/bookings/{booking}/change', [\App\Http\Controllers\Member\BookingChangeRequestController::class, 'create'])->name('booking-changes.create');
     Route::post('/bookings/{booking}/change', [\App\Http\Controllers\Member\BookingChangeRequestController::class, 'store'])->name('booking-changes.store');
+    Route::post('/bookings/{booking}/calculate-change', [\App\Http\Controllers\Member\BookingChangeRequestController::class, 'calculateChange'])->name('booking-changes.calculate');
+    
+    // Booking Cancellations
+    Route::get('/bookings/{booking}/cancel-request', [\App\Http\Controllers\Member\BookingChangeRequestController::class, 'createCancel'])->name('booking-cancellations.create');
+    Route::post('/bookings/{booking}/cancel-request', [\App\Http\Controllers\Member\BookingChangeRequestController::class, 'storeCancel'])->name('booking-cancellations.store');
 });
 
 /*
@@ -112,6 +118,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('auth:admin')->group(function () {
         Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+        // AJAX Upload
+        Route::post('/upload/image', [\App\Http\Controllers\Admin\AdminUploadController::class, 'store'])->name('upload.image');
 
         // Room Types
         Route::resource('room-types', RoomTypeController::class)->except(['show', 'destroy']);

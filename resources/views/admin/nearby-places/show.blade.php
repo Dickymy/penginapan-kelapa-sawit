@@ -18,7 +18,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 ">
     <div class="md:col-span-1">
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             @if($nearbyPlace->image)

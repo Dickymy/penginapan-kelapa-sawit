@@ -4,39 +4,179 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    {{-- Breadcrumb --}}
-    <nav class="text-sm text-gray-500 mb-6">
-        <a href="{{ route('rooms.index') }}" class="hover:text-primary-600">Kamar</a>
-        <span class="mx-2">/</span>
-        <span class="text-gray-800">{{ $roomType->name }}</span>
-    </nav>
+    {{-- Breadcrumb & Back Button --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <nav class="text-sm text-gray-500">
+            @if(request()->has(['check_in', 'check_out']))
+                <a href="{{ route('availability.search', request()->only(['check_in', 'check_out', 'guest_count'])) }}" class="hover:text-primary-600">Hasil Pencarian</a>
+            @else
+                <a href="{{ route('rooms.index') }}" class="hover:text-primary-600">Kamar</a>
+            @endif
+            <span class="mx-2">/</span>
+            <span class="text-gray-800">{{ $roomType->name }}</span>
+        </nav>
+
+        @if(request()->has(['check_in', 'check_out']))
+        <a href="{{ route('availability.search', request()->only(['check_in', 'check_out', 'guest_count'])) }}" 
+           class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-800 bg-primary-50 hover:bg-primary-100 px-3 py-1.5 rounded-lg transition-colors">
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Kembali ke Hasil Pencarian
+        </a>
+        @endif
+    </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {{-- Left: Images & Description --}}
         <div class="lg:col-span-2 space-y-6">
             {{-- Image Gallery --}}
             @if($roomType->images->isNotEmpty())
-            <div x-data="{ activeImage: 0 }" class="space-y-3">
-                <div class="rounded-lg overflow-hidden bg-gray-100">
+            <div x-data="{ 
+                    activeImage: 0, 
+                    totalImages: {{ $roomType->images->count() }},
+                    autoSlideInterval: null,
+                    lightboxOpen: false,
+                    isHovering: false,
+                    nextImage(manual = false) {
+                        this.activeImage = (this.activeImage + 1) % this.totalImages;
+                        if (manual) this.resetAutoSlide();
+                    },
+                    prevImage(manual = false) {
+                        this.activeImage = (this.activeImage - 1 + this.totalImages) % this.totalImages;
+                        if (manual) this.resetAutoSlide();
+                    },
+                    setImage(index) {
+                        this.activeImage = index;
+                        this.resetAutoSlide();
+                    },
+                    resetAutoSlide() {
+                        this.stopAutoSlide();
+                        this.startAutoSlide();
+                    },
+                    startAutoSlide() {
+                        if (this.totalImages > 1 && !this.lightboxOpen && !this.isHovering) {
+                            this.autoSlideInterval = setInterval(() => this.nextImage(false), 4000);
+                        }
+                    },
+                    stopAutoSlide() {
+                        if (this.autoSlideInterval) {
+                            clearInterval(this.autoSlideInterval);
+                        }
+                    },
+                    openLightbox() {
+                        this.lightboxOpen = true;
+                        this.stopAutoSlide();
+                        document.body.style.overflow = 'hidden';
+                    },
+                    closeLightbox() {
+                        this.lightboxOpen = false;
+                        this.startAutoSlide();
+                        document.body.style.overflow = '';
+                    }
+                 }" 
+                 x-init="startAutoSlide()"
+                 @mouseenter="isHovering = true; stopAutoSlide()"
+                 @mouseleave="isHovering = false; startAutoSlide()"
+                 @touchstart="isHovering = true; stopAutoSlide()"
+                 @touchend="isHovering = false; startAutoSlide()"
+                 @keydown.window.escape="closeLightbox()"
+                 @keydown.window.arrow-right="if(lightboxOpen) nextImage(true)"
+                 @keydown.window.arrow-left="if(lightboxOpen) prevImage(true)"
+                 class="space-y-4">
+                
+                <div @click="openLightbox()" class="relative rounded-2xl overflow-hidden bg-gray-100 group shadow-sm border border-gray-100 cursor-zoom-in">
                     @foreach($roomType->images as $index => $image)
-                    <img x-show="activeImage === {{ $index }}"
-                         src="{{ $image->large_url }}"
-                         alt="{{ $image->alt_text ?? $roomType->name }}"
-                         {{ $index === 0 ? '' : 'loading=lazy' }}
-                         decoding="{{ $index === 0 ? 'sync' : 'async' }}"
-                         width="1920" height="1440"
-                         class="w-full h-72 md:h-96 object-cover">
+                    <div x-show="activeImage === {{ $index }}"
+                         x-transition:enter="transition ease-out duration-500"
+                         x-transition:enter-start="opacity-0 scale-105"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         style="display: {{ $index === 0 ? 'block' : 'none' }};">
+                        <img src="{{ $image->large_url }}"
+                             alt="{{ $image->alt_text ?? $roomType->name }}"
+                             {{ $index === 0 ? '' : 'loading=lazy' }}
+                             decoding="{{ $index === 0 ? 'sync' : 'async' }}"
+                             width="1920" height="1440"
+                             class="w-full h-72 md:h-96 lg:h-[450px] object-cover">
+                    </div>
                     @endforeach
+
+                    @if($roomType->images->count() > 1)
+                        {{-- Prev/Next Buttons --}}
+                        <button @click.stop.prevent="prevImage(true)" class="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 hover:scale-110 focus:outline-none cursor-pointer" aria-label="Gambar sebelumnya">
+                            <svg class="w-5 h-5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <button @click.stop.prevent="nextImage(true)" class="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 hover:scale-110 focus:outline-none cursor-pointer" aria-label="Gambar selanjutnya">
+                            <svg class="w-5 h-5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+
+                        {{-- Pagination Dots inside image --}}
+                        <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
+                            @foreach($roomType->images as $index => $image)
+                            <button @click.stop="setImage({{ $index }})" class="h-1.5 rounded-full transition-all duration-300 focus:outline-none shadow-sm cursor-pointer" :class="activeImage === {{ $index }} ? 'bg-white w-5' : 'bg-white/60 hover:bg-white/90 w-1.5'"></button>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
+
                 @if($roomType->images->count() > 1)
-                <div class="flex gap-2 overflow-x-auto pb-1">
+                <div class="flex gap-2.5 overflow-x-auto pb-2 scroll-smooth" style="scrollbar-width: thin;">
                     @foreach($roomType->images as $index => $image)
-                    <button @click="activeImage = {{ $index }}" class="flex-shrink-0 rounded-lg overflow-hidden border-2 transition" :class="activeImage === {{ $index }} ? 'border-primary-500' : 'border-transparent hover:border-gray-300'">
-                        <img src="{{ $image->thumb_url }}" alt="" loading="lazy" decoding="async" width="80" height="56" class="w-20 h-14 object-cover">
+                    <button @click="setImage({{ $index }})" class="flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all duration-200" :class="activeImage === {{ $index }} ? 'border-primary-500 opacity-100 shadow-md' : 'border-transparent hover:border-gray-300 opacity-60 hover:opacity-100'">
+                        <img src="{{ $image->thumb_url }}" alt="" loading="lazy" decoding="async" width="80" height="56" class="w-24 h-16 object-cover">
                     </button>
                     @endforeach
                 </div>
                 @endif
+
+                {{-- Lightbox / Fullscreen Modal --}}
+                <div x-show="lightboxOpen" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100"
+                     x-transition:leave-end="opacity-0">
+                    
+                    {{-- Close Button --}}
+                    <button @click="closeLightbox()" class="absolute top-4 right-4 md:top-6 md:right-6 text-white/70 hover:text-white bg-black/20 hover:bg-black/50 p-2 rounded-full backdrop-blur-md transition-all z-50 focus:outline-none" aria-label="Tutup">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+
+                    @if($roomType->images->count() > 1)
+                        {{-- Lightbox Prev Button --}}
+                        <button @click.prevent="prevImage(true)" class="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-black/20 hover:bg-black/50 p-3 md:p-4 rounded-full backdrop-blur-md transition-all z-50 focus:outline-none" aria-label="Sebelumnya">
+                            <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        
+                        {{-- Lightbox Next Button --}}
+                        <button @click.prevent="nextImage(true)" class="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-black/20 hover:bg-black/50 p-3 md:p-4 rounded-full backdrop-blur-md transition-all z-50 focus:outline-none" aria-label="Selanjutnya">
+                            <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    @endif
+
+                    {{-- Image Container inside Lightbox --}}
+                    <div class="relative w-full h-full max-w-7xl mx-auto flex items-center justify-center p-4 md:p-12" @click.self="closeLightbox()">
+                        @foreach($roomType->images as $index => $image)
+                        <img x-show="activeImage === {{ $index }}"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             src="{{ $image->large_url }}"
+                             alt="{{ $image->alt_text ?? $roomType->name }}"
+                             class="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                             style="display: none;">
+                        @endforeach
+
+                        @if($roomType->images->count() > 1)
+                        {{-- Lightbox Dots --}}
+                        <div class="absolute bottom-6 md:bottom-8 left-0 right-0 flex justify-center gap-2 z-50">
+                            @foreach($roomType->images as $index => $image)
+                            <button @click="setImage({{ $index }})" class="h-2 rounded-full transition-all duration-300 focus:outline-none" :class="activeImage === {{ $index }} ? 'bg-white w-6 shadow-md' : 'bg-white/40 hover:bg-white/80 w-2'"></button>
+                            @endforeach
+                        </div>
+                        @endif
+                    </div>
+                </div>
+
             </div>
             @else
             <div class="w-full h-72 md:h-96 relative flex flex-col items-center justify-center overflow-hidden rounded-2xl bg-gray-50 border border-gray-100">
@@ -149,12 +289,43 @@
                 </div>
 
                 {{-- Booking Form --}}
-                <form action="{{ route('availability.search') }}" method="GET" class="space-y-3 border-t pt-4"
+                <form :action="buttonConfig.action" method="GET" class="space-y-3 border-t pt-4"
                       x-data="{
                           submitting: false,
+                          initialCheckIn: '{{ request('check_in', '') }}',
+                          initialCheckOut: '{{ request('check_out', '') }}',
                           checkIn: '{{ request('check_in', date('Y-m-d')) }}',
                           checkOut: '{{ request('check_out', date('Y-m-d', strtotime('+1 day'))) }}',
+                          isAvailableForSearch: {{ isset($isAvailableForSearch) ? ($isAvailableForSearch ? 'true' : 'false') : 'null' }},
                           error: '',
+                          get isDateModified() {
+                              if (!this.initialCheckIn) return true;
+                              return this.checkIn !== this.initialCheckIn || this.checkOut !== this.initialCheckOut;
+                          },
+                          get buttonConfig() {
+                              if (!this.isDateModified && this.isAvailableForSearch === true) {
+                                  return { 
+                                      text: 'Lanjut ke Pembayaran', 
+                                      action: '{{ route('booking.checkout') }}', 
+                                      disabled: false,
+                                      class: 'bg-primary-600 text-white hover:bg-primary-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary-600/30 disabled:opacity-60'
+                                  };
+                              }
+                              if (!this.isDateModified && this.isAvailableForSearch === false) {
+                                  return { 
+                                      text: 'Kamar Tidak Tersedia', 
+                                      action: 'javascript:void(0)', 
+                                      disabled: true,
+                                      class: 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  };
+                              }
+                              return { 
+                                  text: 'Cek Ketersediaan', 
+                                  action: '{{ route('availability.search') }}', 
+                                  disabled: false,
+                                  class: 'bg-primary-600 text-white hover:bg-primary-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary-600/30 disabled:opacity-60'
+                              };
+                          },
                           adjustCheckOut() {
                               if (this.checkOut <= this.checkIn) {
                                   const next = new Date(this.checkIn);
@@ -168,10 +339,19 @@
                           if (!checkIn) { error = 'Pilih tanggal check-in'; return; }
                           if (!checkOut) { error = 'Pilih tanggal check-out'; return; }
                           if (checkOut <= checkIn) { error = 'Tanggal check-out harus setelah check-in'; return; }
+                          if (buttonConfig.disabled) return;
                           submitting = true;
                           $el.submit();
-                      ">
-                    <input type="hidden" name="room_type" value="{{ $roomType->slug }}">
+                      "
+                      @pageshow.window="if ($event.persisted) submitting = false"
+                      x-init="$watch('checkIn', () => adjustCheckOut())">
+                      
+                    <template x-if="buttonConfig.action === '{{ route('booking.checkout') }}'">
+                        <input type="hidden" name="room_type_id" value="{{ $roomType->id }}">
+                    </template>
+                    <template x-if="buttonConfig.action !== '{{ route('booking.checkout') }}'">
+                        <input type="hidden" name="room_type" value="{{ $roomType->slug }}">
+                    </template>
 
                     {{-- Error Message --}}
                     <template x-if="error">
@@ -186,7 +366,6 @@
                         <label class="block text-xs font-medium text-gray-600 mb-1">Tanggal check-in <span class="text-red-500">*</span></label>
                         <input type="date" name="check_in" min="{{ date('Y-m-d') }}" required
                                x-model="checkIn"
-                               @change="adjustCheckOut()"
                                class="w-full border-gray-300 rounded-lg text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
                     </div>
                     <div>
@@ -200,14 +379,15 @@
                         <input type="number" name="guest_count" min="1" max="{{ $roomType->capacity }}" value="{{ request('guest_count', 2) }}"
                                class="w-full border-gray-300 rounded-lg text-sm shadow-sm focus:ring-primary-500 focus:border-primary-500">
                     </div>
-                    <button type="submit" :disabled="submitting"
-                            class="w-full px-4 py-3.5 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary-600/30 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center">
-                        <svg x-show="submitting" x-cloak class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <button type="submit" :disabled="buttonConfig.disabled || submitting"
+                            :class="buttonConfig.class"
+                            class="w-full px-4 py-3.5 rounded-xl font-bold transition-all duration-300 inline-flex items-center justify-center">
+                        <svg x-show="submitting" x-cloak class="animate-spin -ml-1 mr-2 h-4 w-4 text-current" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span x-show="!submitting">Cek Ketersediaan</span>
-                        <span x-show="submitting" x-cloak>Mencari...</span>
+                        <span x-show="!submitting" x-text="buttonConfig.text"></span>
+                        <span x-show="submitting" x-cloak x-text="buttonConfig.action === '{{ route('booking.checkout') }}' ? 'Memproses...' : 'Mencari...'"></span>
                     </button>
                 </form>
             </div>

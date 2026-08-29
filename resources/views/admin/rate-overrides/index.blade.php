@@ -34,19 +34,26 @@
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6 text-gray-900">
                             <h3 class="text-lg font-bold mb-4">Set Harga Khusus</h3>
-                            <form action="{{ route('admin.rate-overrides.store') }}" method="POST">
+                            <form action="{{ route('admin.rate-overrides.store') }}" method="POST"
+                                  x-data="{
+                                      start: '{{ old('start_date', date('Y-m-d')) }}',
+                                      end: '{{ old('end_date', date('Y-m-d')) }}'
+                                  }"
+                                  x-init="$watch('start', val => {
+                                      if (end < val) end = val;
+                                  })">
                                 @csrf
                                 <input type="hidden" name="room_type_id" value="{{ $selectedRoomTypeId }}">
                                 
                                 <div class="mb-4">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label>
-                                    <input type="date" name="start_date" required min="{{ date('Y-m-d') }}" value="{{ old('start_date') }}" class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <input type="date" name="start_date" required min="{{ date('Y-m-d') }}" x-model="start" class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                     <x-form-error field="start_date" />
                                 </div>
 
                                 <div class="mb-4">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai (Termasuk)</label>
-                                    <input type="date" name="end_date" required min="{{ date('Y-m-d') }}" value="{{ old('end_date') }}" class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <input type="date" name="end_date" required :min="start" x-model="end" class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                     <x-form-error field="end_date" />
                                     <p class="text-xs text-gray-500 mt-1">Gunakan tanggal yang sama dengan Tanggal Mulai untuk set 1 hari saja.</p>
                                 </div>
@@ -100,11 +107,18 @@
                                                         {{ $override->label ?? '-' }}
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                        <form action="{{ route('admin.rate-overrides.destroy', $override) }}" method="POST" class="inline-block" onsubmit="return confirm('Hapus harga khusus ini?');">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
-                                                        </form>
+                                                        <button type="button" @click="$dispatch('open-confirm', { id: 'delete-rate-{{ $override->id }}' })" class="text-red-600 hover:text-red-900">Hapus</button>
+                                                        
+                                                        <x-confirm-modal 
+                                                            id="delete-rate-{{ $override->id }}"
+                                                            title="Hapus Harga Khusus" 
+                                                            message="Apakah Anda yakin ingin menghapus harga khusus ini?"
+                                                            confirm-text="Ya, Hapus"
+                                                            cancel-text="Batal"
+                                                            variant="danger"
+                                                            form-action="{{ route('admin.rate-overrides.destroy', $override) }}"
+                                                            method="DELETE"
+                                                        />
                                                     </td>
                                                 </tr>
                                             @endforeach

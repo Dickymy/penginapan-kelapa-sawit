@@ -3,7 +3,7 @@
 @section('title', 'Buat Refund')
 
 @section('content')
-<div class="max-w-2xl mx-auto">
+<div class="mx-auto">
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Buat Refund</h1>
         <p class="text-gray-600 mt-1">Booking: {{ $booking->booking_code }} — {{ $booking->guest_name }}</p>

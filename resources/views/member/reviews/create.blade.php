@@ -15,7 +15,7 @@
     <p class="text-gray-600 mt-1">Bagikan pengalaman menginap Anda di {{ $booking->room_type_name_snapshot }}</p>
 </div>
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-3xl">
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
     <form action="{{ route('member.reviews.store') }}" method="POST" class="p-6 md:p-8" x-data="{ rating: {{ old('rating', 5) }} }">
         @csrf
         <input type="hidden" name="booking_id" value="{{ $booking->id }}">

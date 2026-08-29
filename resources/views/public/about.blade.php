@@ -6,7 +6,7 @@
 {{-- Page Hero --}}
 <section class="relative bg-gray-900 text-white py-24 lg:py-32 overflow-hidden">
     {{-- Hero Background Image --}}
-    <img src="{{ asset('images/hero.jpg') }}" 
+    <img src="{{ asset('images/hero.webp') }}" 
          alt="{{ $propertyName }}" 
          class="absolute inset-0 w-full h-full object-cover opacity-40">
     
@@ -45,7 +45,7 @@
         </div>
         <div class="relative">
             <div class="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
-                <img src="{{ asset('images/hero.jpg') }}" alt="Suasana {{ $propertyName }}" class="w-full h-full object-cover">
+                <img src="{{ asset('images/hero.webp') }}" alt="Suasana {{ $propertyName }}" class="w-full h-full object-cover" width="800" height="600" loading="lazy" decoding="async">
             </div>
             <div class="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-xl border border-gray-100 hidden md:block">
                 <div class="flex items-center gap-4">

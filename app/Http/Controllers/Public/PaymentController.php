@@ -41,7 +41,32 @@ class PaymentController extends Controller
             'booking' => $booking,
             'snapToken' => $result['snap_token'],
             'clientKey' => $result['client_key'],
+            'payment' => $result['payment'],
         ]);
+    }
+
+    /**
+     * Simulate successful payment (Local/Testing only).
+     */
+    public function simulate(Request $request, string $bookingCode)
+    {
+        if (config('app.env') === 'production') {
+            abort(403, 'Hanya tersedia di mode testing/local.');
+        }
+
+        $booking = Booking::where('booking_code', $bookingCode)->firstOrFail();
+        $payment = $booking->payments()->latest()->first();
+
+        if ($payment && $payment->status !== \App\Enums\PaymentStatus::Paid) {
+            $payload = [
+                'transaction_status' => 'settlement',
+                'fraud_status' => 'accept'
+            ];
+            $this->paymentService->processPaymentStatus($payment, $payload, null);
+        }
+
+        return redirect()->route('booking.finish', $booking->booking_code)
+                         ->with('success', 'Pembayaran berhasil disimulasikan (Test Mode).');
     }
 
     /**

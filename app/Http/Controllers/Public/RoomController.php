@@ -4,10 +4,17 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\RoomType;
+use App\Services\AvailabilityService;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class RoomController extends Controller
 {
+    public function __construct(
+        private AvailabilityService $availability,
+    ) {}
+
     public function index(): View
     {
         $roomTypes = RoomType::active()
@@ -36,6 +43,21 @@ class RoomController extends Controller
             ->limit(5)
             ->get();
 
-        return view('public.rooms.show', compact('roomType', 'reviews'));
+        $isAvailableForSearch = null;
+        $request = request();
+        if ($request->has(['check_in', 'check_out'])) {
+            try {
+                $checkIn = Carbon::parse($request->check_in);
+                $checkOut = Carbon::parse($request->check_out);
+                if ($checkIn->isValid() && $checkOut->isValid() && $checkOut->isAfter($checkIn)) {
+                    $availableRooms = $this->availability->findAvailableRooms($roomType->id, $checkIn, $checkOut);
+                    $isAvailableForSearch = $availableRooms->isNotEmpty();
+                }
+            } catch (\Exception $e) {
+                // Ignore parsing errors
+            }
+        }
+
+        return view('public.rooms.show', compact('roomType', 'reviews', 'isAvailableForSearch'));
     }
 }

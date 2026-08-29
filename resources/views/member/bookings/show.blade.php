@@ -74,7 +74,7 @@
     };
 @endphp
 
-<div class="max-w-2xl space-y-6">
+<div class="space-y-6">
     {{-- Back --}}
     <a href="{{ route('member.bookings.index') }}" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 transition">
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
@@ -96,12 +96,30 @@
 
         @if($booking->status === \App\Enums\BookingStatus::Confirmed)
             <div class="mt-6 flex gap-4">
-                <a href="{{ route('member.booking-changes.create', $booking) }}" class="inline-flex items-center gap-2 px-6 py-2.5 border border-primary-600 text-primary-600 rounded-xl hover:bg-primary-50 transition-all font-medium">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Ajukan Perubahan
-                </a>
+                @if($booking->changeRequests->where('status', 'pending')->isNotEmpty())
+                    <button disabled class="inline-flex items-center gap-2 px-6 py-2.5 border border-slate-300 text-slate-500 bg-slate-50 rounded-xl cursor-not-allowed font-medium opacity-80" title="Anda memiliki pengajuan yang sedang diproses.">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Menunggu Konfirmasi Admin
+                    </button>
+                @else
+                    <a href="{{ route('member.booking-changes.create', $booking) }}" class="inline-flex items-center gap-2 px-6 py-2.5 border border-primary-600 text-primary-600 rounded-xl hover:bg-primary-50 transition-all font-medium">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Ajukan Perubahan
+                    </a>
+                    
+                    @if(now()->startOfDay()->diffInDays($booking->check_in->startOfDay(), false) >= 1)
+                        <a href="{{ route('member.booking-cancellations.create', $booking) }}" class="inline-flex items-center gap-2 px-6 py-2.5 border border-red-600 text-red-600 rounded-xl hover:bg-red-50 transition-all font-medium">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Batalkan Booking
+                        </a>
+                    @endif
+                @endif
             </div>
             
             @if($booking->changeRequests->isNotEmpty())
@@ -155,14 +173,11 @@
 
     {{-- CTAs for different statuses --}}
     @if($booking->status === BookingStatus::Confirmed)
-        <div class="flex flex-col sm:flex-row gap-3">
-            @if($booking->invoice_number)
-                <a href="{{ route('booking.invoice', $booking->booking_code) }}"
-                   class="flex-1 inline-flex items-center justify-center px-5 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition text-sm">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    Download Invoice
-                </a>
-            @endif
+            <a href="{{ route('booking.invoice', $booking->booking_code) }}"
+               class="flex-1 inline-flex items-center justify-center px-5 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition text-sm">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Download Invoice
+            </a>
             <a href="{{ route('location') }}"
                class="flex-1 inline-flex items-center justify-center px-5 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition text-sm">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -175,7 +190,7 @@
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             Cari Kamar Lagi
         </a>
-    @elseif(($booking->status === BookingStatus::Completed || $booking->payment_status === PaymentStatus::Paid) && $booking->invoice_number)
+    @elseif($booking->status === BookingStatus::Completed || $booking->payment_status === PaymentStatus::Paid)
         <a href="{{ route('booking.invoice', $booking->booking_code) }}"
            class="w-full inline-flex items-center justify-center px-5 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition text-sm">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -215,6 +230,12 @@
                     <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Dibuat</p>
                     <p class="font-semibold text-gray-900 text-sm">{{ $booking->created_at->translatedFormat('d M Y') }}</p>
                 </div>
+                @if($booking->arrival_estimate)
+                <div>
+                    <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Estimasi Tiba</p>
+                    <p class="font-semibold text-gray-900 text-sm">{{ $booking->arrival_estimate }}</p>
+                </div>
+                @endif
             </div>
         </div>
     </div>
@@ -256,11 +277,18 @@
             @endif
             @if($booking->addons->count() > 0)
             <div class="text-sm font-medium text-gray-700 mt-3 mb-2">Layanan Tambahan:</div>
-            <ul class="space-y-1 mb-3 border-b border-gray-50 pb-3">
+            <ul class="space-y-2 mb-3 border-b border-gray-50 pb-3">
                 @foreach($booking->addons as $ba)
-                    <li class="flex justify-between text-sm">
-                        <span class="text-gray-600">{{ $ba->addon->name ?? 'Layanan' }} x{{ $ba->quantity }}</span>
-                        <span class="text-gray-900">{{ $ba->formatted_subtotal }}</span>
+                    <li class="flex justify-between text-sm items-start">
+                        <div class="text-gray-600">
+                            {{ $ba->addon->name ?? 'Layanan' }} x{{ $ba->quantity }}
+                            @if($ba->quantity > 1 || $ba->addon?->isQuantityBased())
+                                <div class="text-xs text-gray-400 mt-0.5">
+                                    ({{ $ba->formatted_unit_price }} / unit)
+                                </div>
+                            @endif
+                        </div>
+                        <span class="text-gray-900 mt-0.5">{{ $ba->formatted_subtotal }}</span>
                     </li>
                 @endforeach
             </ul>
@@ -289,7 +317,7 @@
     </div>
 
     {{-- Invoice --}}
-    @if(($booking->status === BookingStatus::Completed || $booking->payment_status === PaymentStatus::Paid) && $booking->invoice_number)
+    @if($booking->status === BookingStatus::Completed || $booking->payment_status === PaymentStatus::Paid)
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
@@ -299,10 +327,11 @@
             </div>
             <div>
                 <p class="text-sm font-medium text-gray-900">Invoice</p>
-                <p class="text-xs text-gray-500">{{ $booking->invoice_number }}</p>
+                <p class="text-xs text-gray-500">{{ $booking->invoice_number ?? 'Tersedia' }}</p>
             </div>
         </div>
         <a href="{{ route('booking.invoice', $booking->booking_code) }}"
+           download="invoice-{{ $booking->booking_code }}.pdf"
            class="text-sm text-primary-600 font-medium hover:text-primary-800 transition">
             Unduh PDF →
         </a>

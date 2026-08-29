@@ -21,8 +21,15 @@ class ResetUserPassword implements ResetsUserPasswords
      */
     public function reset(User $user, array $input): void
     {
+        $rules = $this->passwordRules();
+        $rules[] = function ($attribute, $value, $fail) use ($user) {
+            if (Hash::check($value, $user->password)) {
+                $fail('Kata sandi baru tidak boleh sama dengan kata sandi Anda saat ini. Silakan gunakan kata sandi yang lain demi keamanan.');
+            }
+        };
+
         Validator::make($input, [
-            'password' => $this->passwordRules(),
+            'password' => $rules,
         ])->validate();
 
         $user->forceFill([

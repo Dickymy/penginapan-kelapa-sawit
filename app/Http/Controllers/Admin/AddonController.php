@@ -25,6 +25,7 @@ class AddonController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|integer|min:0',
+            'type' => 'required|in:quantity,single',
             'is_active' => 'boolean',
             'sort_order' => 'integer|min:0',
         ]);
@@ -48,6 +49,7 @@ class AddonController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|integer|min:0',
+            'type' => 'required|in:quantity,single',
             'is_active' => 'boolean',
             'sort_order' => 'integer|min:0',
         ]);

@@ -25,28 +25,26 @@ class GalleryController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $maxMb = config('image.upload_max_mb', 15);
-
         $request->validate([
             'images' => ['required', 'array', 'max:10'],
-            'images.*' => ['image', 'mimes:jpeg,jpg,png,webp', "max:{$this->getMaxKb()}"],
+            'images.*' => ['required', 'string'],
             'title' => ['nullable', 'string', 'max:191'],
             'alt_text' => ['nullable', 'string', 'max:255'],
         ], [
             'images.required' => 'Pilih minimal satu gambar.',
             'images.max' => 'Maksimal 10 gambar per upload.',
-            'images.*.image' => 'File harus berupa gambar.',
-            'images.*.mimes' => 'Format didukung: JPEG, PNG, WebP.',
-            'images.*.max' => "Ukuran gambar maksimal {$maxMb} MB.",
         ]);
 
         $maxSort = Gallery::max('sort_order') ?? 0;
         $uploadedCount = 0;
         $errors = [];
 
-        foreach ($request->file('images') as $index => $file) {
+        foreach ($request->input('images') as $index => $jsonOrPath) {
             try {
-                $variants = $this->imageService->uploadWithVariants($file, 'galleries');
+                $variants = json_decode($jsonOrPath, true);
+                if (!$variants || !is_array($variants)) {
+                    $variants = ['original' => $jsonOrPath, 'large' => $jsonOrPath];
+                }
 
                 Gallery::create([
                     'title' => $request->input('title'),
@@ -61,21 +59,21 @@ class GalleryController extends Controller
                 ]);
 
                 $uploadedCount++;
-            } catch (\InvalidArgumentException $e) {
-                $errors[] = basename($file->getClientOriginalName()) . ': ' . $e->getMessage();
+            } catch (\Exception $e) {
+                $errors[] = 'Gagal memproses gambar ' . ($index + 1) . ': ' . $e->getMessage();
             }
         }
 
         if ($uploadedCount > 0 && empty($errors)) {
-            return back()->with('success', "{$uploadedCount} foto berhasil diunggah dan dioptimasi.");
+            return back()->with('success', "{$uploadedCount} foto berhasil ditambahkan.");
         }
 
         if ($uploadedCount > 0 && !empty($errors)) {
             return back()
-                ->with('warning', "{$uploadedCount} foto berhasil diunggah. " . implode(' ', $errors));
+                ->with('warning', "{$uploadedCount} foto berhasil ditambahkan. " . implode(' ', $errors));
         }
 
-        return back()->with('error', 'Gagal mengunggah: ' . implode(' ', $errors));
+        return back()->with('error', 'Gagal menambahkan foto: ' . implode(' ', $errors));
     }
 
     public function update(Request $request, Gallery $gallery): RedirectResponse

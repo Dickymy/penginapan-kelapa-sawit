@@ -71,7 +71,9 @@
                   if (checkOut <= checkIn) { error = 'Tanggal check-out harus setelah check-in'; return; }
                   submitting = true;
                   $el.submit();
-              ">
+              "
+              @pageshow.window="if ($event.persisted) submitting = false"
+              x-init="$watch('checkIn', () => adjustCheckOut())">
             {{-- Inline Error --}}
             <template x-if="error">
                 <p class="md:col-span-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2" x-text="error"></p>
@@ -80,7 +82,6 @@
                 <label for="check_in" class="block text-sm font-medium text-gray-700 mb-1">Check-in <span class="text-red-500">*</span></label>
                 <input type="date" name="check_in" id="check_in" min="{{ date('Y-m-d') }}" required
                        x-model="checkIn"
-                       @change="adjustCheckOut()"
                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500">
             </div>
             <div>

@@ -6,7 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#ffffff">
     <title>@yield('title', 'Member - Penginapan Kelapa Sawit')</title>
-    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
+    <link rel="icon" href="{{ asset('images/logo.webp') }}" type="image/png">
+    <style>[x-cloak] { display: none !important; }</style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         /* Safe area for bottom navigation on mobile */
@@ -25,7 +26,7 @@
             <div class="flex justify-between items-center h-14 sm:h-16">
                 {{-- Left: Logo --}}
                 <a href="{{ route('home') }}" class="text-lg font-bold text-primary-700 flex items-center gap-2">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-7 w-auto object-contain">
+                    <img src="{{ asset('images/logo.webp') }}" alt="Logo" class="h-7 w-auto object-contain">
                     <span class="hidden sm:inline">Penginapan Kelapa Sawit</span>
                     <span class="sm:hidden text-base">Kelapa Sawit</span>
                 </a>
@@ -66,7 +67,7 @@
                             </div>
                         @endif
                         <span class="max-w-[120px] truncate">{{ auth()->user()->name }}</span>
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        <svg :class="{'rotate-180': accountOpen}" class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="accountOpen" x-cloak
                          x-transition:enter="transition ease-out duration-100"
@@ -75,7 +76,7 @@
                          x-transition:leave="transition ease-in duration-75"
                          x-transition:leave-start="opacity-100 scale-100"
                          x-transition:leave-end="opacity-0 scale-95"
-                         class="absolute right-4 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                         class="absolute top-full right-4 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 origin-top-right">
                         <a href="{{ route('home') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                             Kembali ke Website
@@ -94,15 +95,15 @@
                 </div>
 
                 {{-- Mobile: Avatar (no hamburger needed, we use bottom nav) --}}
-                <div class="lg:hidden flex items-center gap-2">
+                <a href="{{ route('member.profile.edit') }}" class="lg:hidden flex items-center gap-2 hover:opacity-80 transition cursor-pointer">
                     @if(auth()->user()->avatar_url)
-                        <img src="{{ auth()->user()->avatar_url }}" alt="" class="w-8 h-8 rounded-full object-cover">
+                        <img src="{{ auth()->user()->avatar_url }}" alt="" class="w-8 h-8 rounded-full object-cover shadow-sm border border-gray-200">
                     @else
-                        <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
+                        <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center shadow-sm">
                             <span class="text-sm font-bold text-primary-700">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
                         </div>
                     @endif
-                </div>
+                </a>
             </div>
         </div>
     </header>
@@ -190,12 +191,6 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                 <span class="text-[10px] mt-0.5">Profil</span>
             </a>
-            
-            {{-- Cari Kamar --}}
-            <a href="{{ route('home') }}#cari-kamar" class="flex flex-col items-center justify-center w-full h-full text-primary-600">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <span class="text-[10px] mt-0.5 font-bold">Cari Kamar</span>
-            </a>
         </div>
     </nav>
 
@@ -210,5 +205,7 @@
         form-action="{{ route('logout') }}"
         method="POST"
     />
+
+    @stack('scripts')
 </body>
 </html>

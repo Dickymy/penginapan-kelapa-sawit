@@ -39,8 +39,10 @@ class RoomBlockController extends Controller
 
         // Check booking conflicts for the room + dates
         $hasConflict = Booking::where('room_id', $validated['room_id'])
-            ->where('check_in', '<', $validated['end_date'])
             ->where('check_out', '>', $validated['start_date'])
+            ->when(!empty($validated['end_date']), function ($query) use ($validated) {
+                $query->where('check_in', '<', $validated['end_date']);
+            })
             ->where(function ($query) {
                 $query->whereIn('status', [
                     BookingStatus::Confirmed->value,
@@ -60,7 +62,12 @@ class RoomBlockController extends Controller
         }
 
         RoomBlock::create([
-            ...$validated,
+            'room_id' => $validated['room_id'],
+            'start_date' => $validated['start_date'],
+            'end_date' => !empty($validated['is_indefinite']) ? null : $validated['end_date'],
+            'reason_type' => $validated['reason_type'],
+            'reason' => $validated['reason'],
+            'notes' => $validated['notes'] ?? null,
             'created_by_admin_id' => Auth::guard('admin')->id(),
         ]);
 

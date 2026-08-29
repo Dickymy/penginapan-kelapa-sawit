@@ -24,7 +24,7 @@ class StoreRoomTypeRequest extends FormRequest
             'facilities' => ['nullable', 'array'],
             'facilities.*' => ['exists:facilities,id'],
             'images' => ['nullable', 'array'],
-            'images.*' => ['image', 'mimes:jpeg,png,webp', 'max:2048'],
+            'images.*' => ['string'],
         ];
     }
 }

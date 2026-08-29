@@ -158,9 +158,8 @@ class ImageUploadService
         $paths = [];
 
         try {
-            // Read and auto-orient (fixes EXIF rotation from phone cameras)
+            // Read (Intervention Image v3 auto-orients based on EXIF by default)
             $image = $this->manager->read($file->getPathname());
-            $image->orient();
 
             $originalWidth = $image->width();
             $originalHeight = $image->height();
@@ -174,7 +173,6 @@ class ImageUploadService
 
             foreach ($variants as $variantName => $config) {
                 $variantImage = $this->manager->read($file->getPathname());
-                $variantImage->orient();
 
                 $maxW = $config['width'];
                 $maxH = $config['height'];

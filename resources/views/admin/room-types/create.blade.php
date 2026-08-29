@@ -8,7 +8,7 @@
     <a href="{{ route('admin.room-types.index') }}" class="text-sm text-primary-600 hover:text-primary-800">&larr; Kembali</a>
 </div>
 
-<form action="{{ route('admin.room-types.store') }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6 max-w-3xl space-y-5">
+<form action="{{ route('admin.room-types.store') }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6 space-y-5">
     @csrf
 
     <div>
@@ -88,8 +88,15 @@
     @endif
 
     <div>
-        <label for="images" class="block text-sm font-medium text-gray-700 mb-1">Gambar</label>
-        <input type="file" name="images[]" id="images" multiple accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
+        <x-image-uploader 
+            name="images" 
+            directory="room-images" 
+            :multiple="true" 
+            :variants="true" 
+            :max-files="10" 
+            :max-size-mb="15" 
+            label="Gambar"
+            hint="Maksimal 10 gambar per tipe kamar. JPG/PNG/WEBP hingga 15MB." />
         <x-form-error field="images" />
         <x-form-error field="images.*" />
     </div>

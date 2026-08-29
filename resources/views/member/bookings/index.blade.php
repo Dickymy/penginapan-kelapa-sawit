@@ -27,7 +27,9 @@
     {{-- Booking Cards --}}
     <div class="space-y-3">
         @forelse($bookings as $booking)
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5 hover:border-primary-300 hover:shadow-md transition cursor-pointer"
+             x-data
+             @click="window.location.href = '{{ route('member.bookings.show', $booking) }}'">
             <div class="flex items-start justify-between gap-2 mb-2">
                 <div class="flex items-center gap-2 flex-wrap">
                     <x-status-badge :status="$booking->status" />
@@ -47,20 +49,28 @@
                 <span class="text-base font-bold text-gray-800">{{ $booking->formatted_total }}</span>
                 <div class="flex items-center gap-2">
                     @if($booking->status->value === 'pending_payment')
-                        <form action="{{ route('member.bookings.cancel', $booking) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?');">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" class="inline-flex items-center px-3.5 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition">
-                                Batalkan
-                            </button>
-                        </form>
-                        <a href="{{ route('booking.pay', $booking->booking_code) }}"
-                           class="inline-flex items-center px-3.5 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition">
+                        <button type="button" @click.stop="$dispatch('open-confirm', { id: 'cancel-booking-{{ $booking->id }}' })"
+                                class="inline-flex items-center px-3.5 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition relative z-10">
+                            Batalkan
+                        </button>
+                        
+                        <x-confirm-modal 
+                            id="cancel-booking-{{ $booking->id }}"
+                            title="Batalkan Pesanan" 
+                            message="Apakah Anda yakin ingin membatalkan pesanan kamar {{ $booking->room_type_name_snapshot }}? Pesanan yang dibatalkan tidak dapat dikembalikan."
+                            confirm-text="Ya, Batalkan"
+                            cancel-text="Tutup"
+                            variant="danger"
+                            form-action="{{ route('member.bookings.cancel', $booking) }}"
+                            method="PATCH"
+                        />
+                        <a href="{{ route('booking.pay', $booking->booking_code) }}" @click.stop
+                           class="inline-flex items-center px-3.5 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition relative z-10">
                             Bayar Sekarang
                         </a>
                     @else
-                        <a href="{{ route('member.bookings.show', $booking) }}"
-                           class="text-sm text-primary-600 hover:text-primary-800 font-medium">
+                        <a href="{{ route('member.bookings.show', $booking) }}" @click.stop
+                           class="text-sm text-primary-600 hover:text-primary-800 font-medium relative z-10">
                             Lihat Detail &rarr;
                         </a>
                     @endif

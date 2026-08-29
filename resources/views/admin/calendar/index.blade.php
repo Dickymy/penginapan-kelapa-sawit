@@ -40,11 +40,11 @@
         <div class="min-w-max">
             <!-- Header Row -->
             <div class="flex border-b border-gray-200 sticky top-0 bg-gray-50 z-20">
-                <div class="w-48 flex-shrink-0 border-r border-gray-200 p-3 font-semibold text-gray-700 bg-gray-50 sticky left-0 z-30 flex items-center">
+                <div class="w-32 md:w-48 flex-shrink-0 border-r border-gray-200 p-3 font-semibold text-gray-700 bg-gray-50 sticky left-0 z-30 flex items-center">
                     Kamar
                 </div>
                 <template x-for="day in daysInMonth" :key="day.date">
-                    <div class="w-12 flex-shrink-0 border-r border-gray-200 p-2 text-center text-xs font-medium text-gray-500"
+                    <div class="w-16 flex-shrink-0 border-r border-gray-200 p-2 text-center text-xs font-medium text-gray-500"
                          :class="{ 'bg-primary-50 text-primary-700': isToday(day.date), 'bg-gray-100': isWeekend(day.date) }">
                         <div x-text="day.dayName"></div>
                         <div class="text-base font-bold mt-0.5" x-text="day.dayNumber"></div>
@@ -56,15 +56,15 @@
             <template x-for="room in rooms" :key="room.id">
                 <div class="flex border-b border-gray-100 hover:bg-gray-50 transition relative group h-14">
                     <!-- Room Info -->
-                    <div class="w-48 flex-shrink-0 border-r border-gray-200 p-2 bg-white group-hover:bg-gray-50 sticky left-0 z-10 flex flex-col justify-center">
-                        <div class="font-bold text-gray-800 text-sm" x-text="room.name"></div>
-                        <div class="text-xs text-gray-500 truncate" x-text="room.room_type"></div>
+                    <div class="w-32 md:w-48 flex-shrink-0 border-r border-gray-200 p-2 bg-white group-hover:bg-gray-50 sticky left-0 z-10 flex flex-col justify-center">
+                        <div class="font-bold text-gray-800 text-sm truncate" x-text="room.name" :title="room.name"></div>
+                        <div class="text-xs text-gray-500 truncate" x-text="room.room_type" :title="room.room_type"></div>
                     </div>
                     
                     <!-- Days Grid -->
                     <div class="flex relative flex-1">
                         <template x-for="day in daysInMonth" :key="day.date">
-                            <div class="w-12 flex-shrink-0 border-r border-gray-100"
+                            <div class="w-16 flex-shrink-0 border-r border-gray-100"
                                  :class="{ 'bg-primary-50/30': isToday(day.date), 'bg-gray-50': isWeekend(day.date) }">
                             </div>
                         </template>
@@ -224,8 +224,8 @@ document.addEventListener('alpine:init', () => {
                 itemEnd = monthEnd;
             }
             
-            // Cell width is 48px (w-12)
-            const CELL_WIDTH = 48;
+            // Cell width is 64px (w-16)
+            const CELL_WIDTH = 64;
             
             // Calculate start offset (days from start of month)
             const startOffsetDays = Math.round((itemStart - monthStart) / (1000 * 60 * 60 * 24));
