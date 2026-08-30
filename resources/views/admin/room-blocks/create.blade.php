@@ -39,8 +39,7 @@
         }" x-init="$watch('start', val => { 
             let d = new Date(val); 
             d.setDate(d.getDate() + 1); 
-            let nextDay = d.toISOString().split('T')[0];
-            if (val >= end) end = nextDay; 
+            end = d.toISOString().split('T')[0];
         })">
             
             <div class="mb-5 flex items-start mt-2">

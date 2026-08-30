@@ -40,11 +40,15 @@
 </section>
 
 {{-- Search Availability --}}
-<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10" id="cari-kamar"
-         x-data="{ shown: false }" x-intersect.once="shown = true" 
+<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10 scroll-mt-28 md:scroll-mt-32" id="cari-kamar"
+         x-data="{ shown: false, highlight: false }" 
+         x-intersect.once="shown = true" 
+         @click.document="if ($event.target.closest('a[href$=\'#cari-kamar\']')) { highlight = false; setTimeout(() => highlight = true, 50); setTimeout(() => highlight = false, 2000) }"
+         x-init="if(window.location.hash === '#cari-kamar') { setTimeout(() => highlight = true, 500); setTimeout(() => highlight = false, 2500) }"
          :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
          class="transition-all duration-700 ease-out">
-    <div class="bg-white rounded-2xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] p-6 md:p-8 border border-white/50 ring-1 ring-black/5">
+    <div :class="highlight ? 'ring-4 ring-primary-500 ring-offset-4 shadow-2xl shadow-primary-500/40 scale-[1.02]' : 'ring-1 ring-black/5 shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)]'"
+         class="bg-white rounded-2xl p-6 md:p-8 border border-white/50 transition-all duration-500">
         <h2 class="text-xl font-bold text-gray-800 mb-5 text-center md:text-left">Cari Kamar Tersedia</h2>
         <form action="{{ route('availability.search') }}" method="GET"
               class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end"
@@ -55,13 +59,11 @@
                   guestCount: {{ request('guest_count', old('guest_count', 1)) }},
                   error: '',
                   adjustCheckOut() {
-                      if (this.checkOut <= this.checkIn) {
-                          const next = new Date(this.checkIn);
-                          next.setDate(next.getDate() + 1);
-                          this.checkOut = next.toISOString().split('T')[0];
-                      }
+                      const next = new Date(this.checkIn);
+                      next.setDate(next.getDate() + 1);
+                      this.checkOut = next.toISOString().split('T')[0];
                   },
-                  increment() { if (this.guestCount < 10) this.guestCount++; },
+                  increment() { if (this.guestCount < 4) this.guestCount++; },
                   decrement() { if (this.guestCount > 1) this.guestCount--; }
               }"
               @submit.prevent="
@@ -97,12 +99,12 @@
                             class="px-3 py-2.5 text-gray-600 hover:bg-gray-100 active:bg-gray-200 transition text-lg font-bold"
                             :class="guestCount <= 1 && 'opacity-40 cursor-not-allowed'"
                             :disabled="guestCount <= 1" aria-label="Kurangi tamu">−</button>
-                    <input type="number" name="guest_count" x-model="guestCount" min="1" max="10" readonly
+                    <input type="number" name="guest_count" x-model="guestCount" min="1" max="4" readonly
                            class="flex-1 text-center border-0 focus:ring-0 text-sm font-medium py-2.5 bg-transparent [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
                     <button type="button" @click="increment()"
                             class="px-3 py-2.5 text-gray-600 hover:bg-gray-100 active:bg-gray-200 transition text-lg font-bold"
-                            :class="guestCount >= 10 && 'opacity-40 cursor-not-allowed'"
-                            :disabled="guestCount >= 10" aria-label="Tambah tamu">+</button>
+                            :class="guestCount >= 4 && 'opacity-40 cursor-not-allowed'"
+                            :disabled="guestCount >= 4" aria-label="Tambah tamu">+</button>
                 </div>
             </div>
             <div>
@@ -122,6 +124,7 @@
 </section>
 
 {{-- Booking Options --}}
+@guest
 <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14"
          x-data="{ shown: false }" x-intersect.margin.-10%.once="shown = true"
          :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
@@ -146,6 +149,7 @@
         </div>
     </div>
 </section>
+@endguest
 
 {{-- Room Types --}}
 @if($roomTypes->isNotEmpty())
@@ -243,8 +247,12 @@
          :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
          class="transition-all duration-700 ease-out">
     <div class="text-center mb-6">
-        <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Tempat Menarik di Sekitar</h2>
-        <p class="text-gray-500 mt-2">Jelajahi destinasi dan fasilitas di sekitar penginapan kami</p>
+        <div class="inline-flex items-center justify-center px-3 py-1 bg-primary-50 text-primary-600 rounded-full mb-3 border border-primary-100">
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+            <span class="text-xs font-bold uppercase tracking-wider">Sekitar Penginapan</span>
+        </div>
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Toko Sembako Arkhan</h2>
+        <p class="text-gray-500 mt-2">Penuhi segala kebutuhan harian, cemilan, minuman tanpa harus pergi jauh.</p>
     </div>
     <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
         @foreach($nearbyPlaces as $place)
@@ -253,8 +261,9 @@
                 @if($place->image)
                     <img src="{{ Storage::url($place->image) }}" alt="{{ $place->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                 @else
-                    <div class="w-full h-full flex items-center justify-center">
-                        <svg class="h-10 w-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <div class="w-full h-full flex flex-col items-center justify-center bg-gray-50">
+                        <svg class="h-8 w-8 text-primary-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                        <span class="text-[10px] text-primary-400 font-medium">Belum Ada Foto</span>
                     </div>
                 @endif
                 <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-medium text-gray-700 shadow-sm">
@@ -273,7 +282,7 @@
     </div>
     <div class="text-center sm:mt-8">
         <a href="{{ route('nearby-places') }}" class="inline-flex items-center px-5 py-2.5 border border-primary-600 text-primary-600 rounded-lg text-sm font-medium hover:bg-primary-50 transition">
-            Lihat Semua Lokasi Sekitar
+            Lihat Katalog Toko Sembako
             <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
     </div>

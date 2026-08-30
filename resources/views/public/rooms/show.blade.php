@@ -327,11 +327,9 @@
                               };
                           },
                           adjustCheckOut() {
-                              if (this.checkOut <= this.checkIn) {
-                                  const next = new Date(this.checkIn);
-                                  next.setDate(next.getDate() + 1);
-                                  this.checkOut = next.toISOString().split('T')[0];
-                              }
+                              const next = new Date(this.checkIn);
+                              next.setDate(next.getDate() + 1);
+                              this.checkOut = next.toISOString().split('T')[0];
                           }
                       }"
                       @submit.prevent="
