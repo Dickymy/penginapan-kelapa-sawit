@@ -1,17 +1,17 @@
 @extends('layouts.admin')
 
-@section('title', 'Lokasi Sekitar')
+@section('title', 'Toko Sembako')
 
 @section('content')
 <div class="mb-6 md:flex md:items-center md:justify-between">
     <div>
-        <h1 class="text-2xl font-bold text-gray-900">Lokasi Sekitar</h1>
-        <p class="mt-1 text-sm text-gray-500">Kelola daftar tempat menarik, kuliner, dan fasilitas di sekitar penginapan.</p>
+        <h1 class="text-2xl font-bold text-gray-900">Toko Sembako</h1>
+        <p class="mt-1 text-sm text-gray-500">Kelola foto, produk, dan etalase Toko Sembako Anda.</p>
     </div>
     <div class="mt-4 md:mt-0">
         <a href="{{ route('admin.nearby-places.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-lg font-medium text-white hover:bg-primary-700 transition">
             <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-            Tambah Lokasi
+            Tambah Foto / Produk
         </a>
     </div>
 </div>
@@ -22,9 +22,9 @@
             <thead class="bg-gray-50">
                 <tr>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Urutan</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Tempat</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Foto / Produk</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jarak</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga / Info</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th scope="col" class="relative px-6 py-3"><span class="sr-only">Aksi</span></th>
                 </tr>
@@ -48,12 +48,6 @@
                                 </div>
                                 <div class="ml-4">
                                     <div class="text-sm font-medium text-gray-900">{{ $place->name }}</div>
-                                    @if($place->map_link)
-                                        <a href="{{ $place->map_link }}" target="_blank" class="text-xs text-primary-600 hover:text-primary-800 flex items-center mt-0.5">
-                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                            Lihat di Peta
-                                        </a>
-                                    @endif
                                 </div>
                             </div>
                         </td>
@@ -101,7 +95,7 @@
                 @empty
                     <tr>
                         <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-                            Belum ada data tempat sekitar.
+                            Belum ada data produk/foto Toko Sembako.
                         </td>
                     </tr>
                 @endforelse

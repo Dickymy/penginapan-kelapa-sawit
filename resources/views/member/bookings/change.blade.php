@@ -259,15 +259,12 @@ function changePreview() {
         handleCheckInChange() {
             if (!this.checkInDate) return;
             let ci = new Date(this.checkInDate + 'T00:00:00');
-            let co = this.checkOutDate ? new Date(this.checkOutDate + 'T00:00:00') : null;
-            if (!co || ci >= co) {
-                let newCo = new Date(ci);
-                newCo.setDate(newCo.getDate() + 1);
-                let y = newCo.getFullYear();
-                let m = String(newCo.getMonth() + 1).padStart(2, '0');
-                let d = String(newCo.getDate()).padStart(2, '0');
-                this.checkOutDate = `${y}-${m}-${d}`;
-            }
+            let newCo = new Date(ci);
+            newCo.setDate(newCo.getDate() + 1);
+            let y = newCo.getFullYear();
+            let m = String(newCo.getMonth() + 1).padStart(2, '0');
+            let d = String(newCo.getDate()).padStart(2, '0');
+            this.checkOutDate = `${y}-${m}-${d}`;
             this.fetchPreview();
         },
         getMinCheckOut() {

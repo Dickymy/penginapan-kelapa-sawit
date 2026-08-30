@@ -4,10 +4,12 @@
 
 @section('content')
 {{-- Page Hero --}}
-<section class="bg-primary-700 text-white py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-3xl font-bold">Tipe Kamar Kami</h1>
-        <p class="mt-2 text-primary-100">Temukan kamar yang sesuai dengan kebutuhan Anda</p>
+<section class="relative bg-primary-900 text-white py-16 lg:py-24 overflow-hidden">
+    <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#4ade80 1.5px, transparent 1.5px); background-size: 32px 32px;"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-primary-950 via-primary-900/60 to-transparent"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg">Tipe Kamar Kami</h1>
+        <p class="mt-4 text-lg text-primary-100 max-w-2xl mx-auto drop-shadow-md">Temukan kamar yang dirancang khusus untuk kenyamanan istirahat Anda.</p>
     </div>
 </section>
 
@@ -74,7 +76,7 @@
         </div>
 
         {{-- Sidebar Filters --}}
-        <div class="w-full md:w-64 flex-shrink-0 bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 md:block"
+        <div class="w-full md:w-64 md:sticky md:top-24 flex-shrink-0 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 md:block"
              :class="showFilters ? 'block' : 'hidden'">
             
             <div class="p-5 border-b border-gray-100 flex items-center justify-between">
@@ -103,7 +105,7 @@
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-3">Kapasitas Minimum</label>
                     <div class="flex items-center gap-3">
-                        <input type="range" x-model.number="filter.minCapacity" min="1" max="10" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600">
+                        <input type="range" x-model.number="filter.minCapacity" min="1" max="4" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600">
                         <span class="text-sm font-medium text-gray-700 w-12 text-right" x-text="`${filter.minCapacity} org`"></span>
                     </div>
                 </div>
@@ -149,10 +151,10 @@
             <div class="space-y-6 relative min-h-[400px]">
                 
                 <template x-for="type in filteredAndSortedRooms" :key="type.id">
-                    <div x-transition.opacity.duration.300ms class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] hover:-translate-y-1 transition-all duration-300 flex flex-col lg:flex-row group">
+                    <a :href="type.url" x-transition.opacity.duration.300ms class="block bg-white rounded-2xl border border-gray-100/60 overflow-hidden shadow-sm hover:shadow-[0_20px_50px_rgba(8,_112,_184,_0.08)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col lg:flex-row group cursor-pointer">
                         
                         {{-- Image --}}
-                        <div class="lg:w-72 xl:w-80 flex-shrink-0 relative overflow-hidden">
+                        <div class="lg:w-80 xl:w-96 flex-shrink-0 relative overflow-hidden">
                             <template x-if="type.cover_medium">
                                 <img :src="type.cover_medium"
                                      :srcset="`${type.cover_thumb} 480w, ${type.cover_medium} 960w`"
@@ -180,7 +182,7 @@
                         <div class="flex-1 p-5 md:p-6 flex flex-col justify-between">
                             <div>
                                 <div class="flex justify-between items-start mb-2">
-                                    <h2 class="text-xl font-bold text-gray-800" x-text="type.name"></h2>
+                                    <h2 class="text-xl font-bold text-gray-800 group-hover:text-primary-600 transition-colors duration-300" x-text="type.name"></h2>
                                     
                                     <template x-if="type.review_count > 0">
                                         <div class="flex items-center bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
@@ -240,12 +242,12 @@
                                     <span class="text-primary-600 font-extrabold text-2xl" x-text="`Rp${type.formatted_price}`"></span>
                                     <span class="text-sm font-medium text-gray-400">/ malam</span>
                                 </div>
-                                <a :href="type.url" class="inline-flex items-center justify-center px-6 py-2.5 bg-primary-50 text-primary-700 rounded-xl text-sm font-bold hover:bg-primary-600 hover:text-white transition-colors duration-300">
+                                <span class="inline-flex items-center justify-center px-6 py-2.5 bg-primary-50 text-primary-700 rounded-xl text-sm font-bold shadow-sm group-hover:shadow-primary-600/20 group-hover:bg-primary-600 group-hover:text-white group-hover:-translate-y-0.5 transition-all duration-300">
                                     Lihat Detail
-                                </a>
+                                </span>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </template>
 
                 {{-- Empty State --}}
