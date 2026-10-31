@@ -44,12 +44,27 @@ class Setting extends Model
     /**
      * Set a setting value.
      */
-    public static function set(string $group, string $key, mixed $value, ?int $adminId = null, string $type = 'string', bool $isPublic = false): void
+    public static function set(string $group, string $key, mixed $value, ?int $adminId = null, ?string $type = null, bool $isPublic = false): void
     {
+        if ($type === null) {
+            $type = match (true) {
+                is_bool($value) => 'boolean',
+                is_int($value) => 'integer',
+                is_array($value) => 'json',
+                default => 'string',
+            };
+        }
+
+        $storedValue = match ($type) {
+            'boolean' => $value ? '1' : '0',
+            'json' => is_array($value) ? json_encode($value) : (string) $value,
+            default => (string) $value,
+        };
+
         static::updateOrCreate(
             ['group' => $group, 'key' => $key],
             [
-                'value' => is_array($value) ? json_encode($value) : (string) $value,
+                'value' => $storedValue,
                 'type' => $type,
                 'is_public' => $isPublic,
                 'updated_by_admin_id' => $adminId,

@@ -108,6 +108,11 @@ class Booking extends Model
         return 'Rp' . number_format($this->total_amount, 0, ',', '.');
     }
 
+    public function isPaid(): bool
+    {
+        return $this->payment_status === \App\Enums\PaymentStatus::Paid;
+    }
+
     public function getIsExpiredAttribute(): bool
     {
         return $this->status === BookingStatus::Expired;

@@ -61,7 +61,7 @@ class PromotionService
 
         // Percentage
         $discount = (int) floor($subtotal * $promo->value / 100);
-        if ($promo->maximum_discount !== null) {
+        if ($promo->maximum_discount !== null && $promo->maximum_discount > 0) {
             $discount = min($discount, $promo->maximum_discount);
         }
 
@@ -88,6 +88,31 @@ class PromotionService
                 'status' => PromotionUsageStatus::Reserved->value,
                 'discount_amount' => $booking->promotion_discount,
                 'reserved_at' => now(),
+            ]);
+        });
+    }
+
+    public function consumeImmediatelyForBooking(Promotion $promo, Booking $booking, ?User $user = null): void
+    {
+        DB::transaction(function () use ($promo, $booking, $user) {
+            $promo = Promotion::where('id', $promo->id)->lockForUpdate()->first();
+
+            if ($promo->usage_quota !== null) {
+                $usedCount = PromotionUsage::where('promotion_id', $promo->id)
+                    ->whereIn('status', [PromotionUsageStatus::Reserved->value, PromotionUsageStatus::Consumed->value])->count();
+                if ($usedCount >= $promo->usage_quota) {
+                    throw new \RuntimeException('Kuota promo habis.');
+                }
+            }
+
+            PromotionUsage::create([
+                'promotion_id' => $promo->id,
+                'booking_id' => $booking->id,
+                'user_id' => $user?->id,
+                'status' => PromotionUsageStatus::Consumed->value,
+                'discount_amount' => $booking->promotion_discount,
+                'reserved_at' => now(),
+                'consumed_at' => now(),
             ]);
         });
     }

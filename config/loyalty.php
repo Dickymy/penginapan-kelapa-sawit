@@ -23,7 +23,7 @@ return [
     |
     */
 
-    'point_value' => (int) env('LOYALTY_POINT_VALUE', 50),
+    'point_value' => (int) env('LOYALTY_POINT_VALUE', 1),
 
     /*
     |--------------------------------------------------------------------------

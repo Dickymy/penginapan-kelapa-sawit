@@ -12,44 +12,62 @@
 
 @section('content')
 {{-- Hero --}}
-<section class="relative text-white py-20 md:py-32 bg-primary-900 overflow-hidden">
-    {{-- Hero Background Pattern --}}
-    <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#4ade80 1.5px, transparent 1.5px); background-size: 32px 32px;"></div>
+<section class="relative text-white py-20 md:py-32 bg-primary-900 overflow-hidden"
+         x-data="{ scrollY: 0 }" 
+         @scroll.window="scrollY = window.scrollY">
+    {{-- Hero Background Pattern with Parallax --}}
+    <div class="absolute inset-0 opacity-20 transition-transform duration-75" 
+         :style="`transform: translateY(${scrollY * 0.4}px)`" 
+         style="background-image: radial-gradient(#4ade80 1.5px, transparent 1.5px); background-size: 32px 32px;"></div>
     
     {{-- Gradient Overlay for Depth --}}
     <div class="absolute inset-0 bg-gradient-to-t from-primary-950 via-primary-900/60 to-transparent"></div>
     
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center min-h-[30vh]">
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center min-h-[30vh] transition-transform duration-75"
+         :style="`transform: translateY(${scrollY * 0.15}px); opacity: ${1 - scrollY/600}`">
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-tight drop-shadow-lg">{{ $propertyName }}</h1>
         <p class="text-base md:text-lg text-gray-200 mb-6 flex items-center justify-center gap-1.5 drop-shadow-md">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             Kota Bangun II, Kutai Kartanegara, Kalimantan Timur
         </p>
         @if($cheapestPrice)
-            <p class="text-gray-100 mb-8 bg-black/30 backdrop-blur-sm px-6 py-2 rounded-full border border-white/10 drop-shadow-md">Mulai dari <span class="text-2xl font-bold text-white">Rp{{ number_format($cheapestPrice, 0, ',', '.') }}</span> / malam</p>
+            <p class="text-gray-100 mb-6 bg-black/30 backdrop-blur-sm px-5 py-1.5 rounded-full border border-white/10 text-xs sm:text-sm drop-shadow-md">
+                Mulai dari <span class="text-lg sm:text-2xl font-bold text-white">Rp{{ number_format($cheapestPrice, 0, ',', '.') }}</span> / malam
+            </p>
         @endif
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="#cari-kamar" class="px-8 py-3.5 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-500 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary-600/30 transition-all duration-300">
+        {{-- Desktop buttons --}}
+        <div class="hidden sm:flex items-center justify-center gap-4">
+            <a href="#cari-kamar" class="px-8 py-3.5 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-500 hover:-translate-y-1 active:scale-95 hover:shadow-xl hover:shadow-primary-600/30 transition-all duration-300">
                 Cari Kamar
             </a>
-            <a href="{{ route('location') }}" class="px-8 py-3.5 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-xl font-semibold hover:bg-white/20 hover:-translate-y-1 transition-all duration-300">
+            <a href="{{ route('location') }}" class="px-8 py-3.5 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-xl font-semibold hover:bg-white/20 hover:-translate-y-1 active:scale-95 transition-all duration-300">
                 Lihat Lokasi
+            </a>
+        </div>
+        {{-- Mobile subtle location link --}}
+        <div class="sm:hidden">
+            <a href="{{ route('location') }}" class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-xs text-white border border-white/25 active:scale-95 transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span>Lihat Panduan Rute & Lokasi</span>
             </a>
         </div>
     </div>
 </section>
 
 {{-- Search Availability --}}
-<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10 scroll-mt-28 md:scroll-mt-32" id="cari-kamar"
+<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 md:-mt-16 relative z-10 scroll-mt-20 md:scroll-mt-32" id="cari-kamar"
          x-data="{ shown: false, highlight: false }" 
          x-intersect.once="shown = true" 
          @click.document="if ($event.target.closest('a[href$=\'#cari-kamar\']')) { highlight = false; setTimeout(() => highlight = true, 50); setTimeout(() => highlight = false, 2000) }"
          x-init="if(window.location.hash === '#cari-kamar') { setTimeout(() => highlight = true, 500); setTimeout(() => highlight = false, 2500) }"
          :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'" 
          class="transition-all duration-700 ease-out">
-    <div :class="highlight ? 'ring-4 ring-primary-500 ring-offset-4 shadow-2xl shadow-primary-500/40 scale-[1.02]' : 'ring-1 ring-black/5 shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)]'"
-         class="bg-white rounded-2xl p-6 md:p-8 border border-white/50 transition-all duration-500">
-        <h2 class="text-xl font-bold text-gray-800 mb-5 text-center md:text-left">Cari Kamar Tersedia</h2>
+    <div :class="highlight ? 'ring-4 ring-primary-500 ring-offset-4 shadow-3xl shadow-primary-500/40 scale-[1.02]' : 'ring-1 ring-white/60 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)]'"
+         class="bg-white/95 backdrop-blur-xl rounded-2xl p-5 md:p-8 border border-white/50 transition-all duration-500">
+        <h2 class="text-lg md:text-xl font-bold text-gray-800 mb-4 text-center md:text-left flex items-center justify-center md:justify-start gap-2">
+            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            Cari Kamar Tersedia
+        </h2>
         <form action="{{ route('availability.search') }}" method="GET"
               class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end"
               x-data="{
@@ -84,13 +102,13 @@
                 <label for="check_in" class="block text-sm font-medium text-gray-700 mb-1">Check-in <span class="text-red-500">*</span></label>
                 <input type="date" name="check_in" id="check_in" min="{{ date('Y-m-d') }}" required
                        x-model="checkIn"
-                       class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500">
+                       class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow">
             </div>
             <div>
                 <label for="check_out" class="block text-sm font-medium text-gray-700 mb-1">Check-out <span class="text-red-500">*</span></label>
                 <input type="date" name="check_out" id="check_out" :min="checkIn || '{{ date('Y-m-d', strtotime('+1 day')) }}'" required
                        x-model="checkOut"
-                       class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500">
+                       class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah tamu</label>
@@ -110,7 +128,7 @@
             <div>
                 <button type="submit"
                         :disabled="submitting"
-                        class="w-full px-4 py-2.5 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center">
+                        class="w-full px-4 py-2.5 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 active:scale-95 transition disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center">
                     <svg x-show="submitting" x-cloak class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -137,7 +155,7 @@
             </div>
             <h3 class="text-lg font-bold text-gray-800 mb-2">Booking Langsung</h3>
             <p class="text-sm text-gray-500 mb-6">Tidak perlu membuat akun, langsung pesan kamar yang Anda inginkan.</p>
-            <a href="#cari-kamar" class="inline-block px-6 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-semibold hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-600/30 transition-all duration-300">Cari Kamar</a>
+            <a href="#cari-kamar" class="inline-block px-6 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-semibold hover:bg-primary-700 active:scale-95 hover:shadow-lg hover:shadow-primary-600/30 transition-all duration-300">Cari Kamar</a>
         </div>
         <div class="bg-white border border-gray-100 rounded-2xl p-8 text-center shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
             <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-primary-50 group-hover:bg-primary-100 flex items-center justify-center transition-colors">
@@ -145,7 +163,7 @@
             </div>
             <h3 class="text-lg font-bold text-gray-800 mb-2">Masuk sebagai Member</h3>
             <p class="text-sm text-gray-500 mb-6">Booking tersimpan otomatis di akun Anda dan kumpulkan poin loyalitas.</p>
-            <a href="{{ route('login') }}" class="inline-block px-6 py-2.5 border-2 border-primary-600 text-primary-600 rounded-xl text-sm font-semibold hover:bg-primary-50 hover:shadow-lg transition-all duration-300">Masuk / Daftar</a>
+            <a href="{{ route('login') }}" class="inline-block px-6 py-2.5 border-2 border-primary-600 text-primary-600 rounded-xl text-sm font-semibold hover:bg-primary-50 active:scale-95 hover:shadow-lg transition-all duration-300">Masuk / Daftar</a>
         </div>
     </div>
 </section>
@@ -163,7 +181,7 @@
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($roomTypes as $type)
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition group">
+        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
             @php $cover = $type->images->where('is_cover', true)->first() ?? $type->images->first(); @endphp
             @if($cover)
                 <div class="aspect-[4/3] overflow-hidden">
@@ -185,13 +203,14 @@
             <div class="p-5">
                 <h3 class="text-lg font-semibold text-gray-800">{{ $type->name }}</h3>
                 <p class="text-sm text-gray-500 mt-1">{{ $type->capacity }} tamu &middot; {{ $type->bed_count }} tempat tidur {{ $type->bed_type ?? '' }}</p>
-                <div class="mt-4 flex items-center justify-between">
-                    <div>
-                        <span class="text-primary-600 font-bold text-lg">Rp{{ number_format($type->base_price, 0, ',', '.') }}</span>
-                        <span class="text-sm text-gray-400">/ malam</span>
+                <div class="mt-4 flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <span class="text-primary-600 font-bold text-lg whitespace-nowrap">Rp{{ number_format($type->base_price, 0, ',', '.') }}</span>
+                        <span class="text-sm text-gray-400 whitespace-nowrap">/ malam</span>
                     </div>
-                    <a href="{{ route('rooms.show', $type->slug) }}" class="px-4 py-2 text-sm font-medium text-primary-600 border border-primary-600 rounded-lg hover:bg-primary-50 transition">
+                    <a href="{{ route('rooms.show', $type->slug) }}" class="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-primary-600 text-white rounded-xl text-sm font-semibold hover:bg-primary-700 transition shadow-sm hover:shadow active:scale-95 whitespace-nowrap">
                         Lihat Detail
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
                 </div>
             </div>
@@ -350,23 +369,31 @@
             </div>
             
             <div class="md:w-1/2 grid grid-cols-2 gap-4">
-                <div class="bg-gray-50/80 border border-gray-100 p-5 rounded-xl hover:shadow-sm hover:bg-white transition duration-300 group">
-                    <svg class="w-8 h-8 text-primary-500 mb-3 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div class="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-primary-100 transition-all duration-300 group">
+                    <div class="w-10 h-10 rounded-full bg-primary-50 group-hover:bg-primary-500 flex items-center justify-center mb-4 transition-colors duration-300">
+                        <svg class="w-5 h-5 text-primary-500 group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
                     <h3 class="font-semibold text-gray-800 text-sm mb-1">Resepsionis 24 Jam</h3>
                     <p class="text-xs text-gray-500">Staf siap sedia kapanpun Anda butuh</p>
                 </div>
-                <div class="bg-gray-50/80 border border-gray-100 p-5 rounded-xl hover:shadow-sm hover:bg-white transition duration-300 group">
-                    <svg class="w-8 h-8 text-primary-500 mb-3 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <div class="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-primary-100 transition-all duration-300 group">
+                    <div class="w-10 h-10 rounded-full bg-primary-50 group-hover:bg-primary-500 flex items-center justify-center mb-4 transition-colors duration-300">
+                        <svg class="w-5 h-5 text-primary-500 group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    </div>
                     <h3 class="font-semibold text-gray-800 text-sm mb-1">Nyaman & Bersih</h3>
                     <p class="text-xs text-gray-500">Istirahat tenang seperti di rumah sendiri</p>
                 </div>
-                <div class="bg-gray-50/80 border border-gray-100 p-5 rounded-xl hover:shadow-sm hover:bg-white transition duration-300 group">
-                    <svg class="w-8 h-8 text-primary-500 mb-3 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <div class="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-primary-100 transition-all duration-300 group">
+                    <div class="w-10 h-10 rounded-full bg-primary-50 group-hover:bg-primary-500 flex items-center justify-center mb-4 transition-colors duration-300">
+                        <svg class="w-5 h-5 text-primary-500 group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    </div>
                     <h3 class="font-semibold text-gray-800 text-sm mb-1">Proses Cepat</h3>
                     <p class="text-xs text-gray-500">Check-in dan check-out tanpa antri</p>
                 </div>
-                <div class="bg-gray-50/80 border border-gray-100 p-5 rounded-xl hover:shadow-sm hover:bg-white transition duration-300 group">
-                    <svg class="w-8 h-8 text-primary-500 mb-3 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <div class="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-primary-100 transition-all duration-300 group">
+                    <div class="w-10 h-10 rounded-full bg-primary-50 group-hover:bg-primary-500 flex items-center justify-center mb-4 transition-colors duration-300">
+                        <svg class="w-5 h-5 text-primary-500 group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
                     <h3 class="font-semibold text-gray-800 text-sm mb-1">Lokasi Strategis</h3>
                     <p class="text-xs text-gray-500">Akses mudah di Kota Bangun II</p>
                 </div>

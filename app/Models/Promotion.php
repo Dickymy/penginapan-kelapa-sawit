@@ -25,6 +25,7 @@ class Promotion extends Model
         'usage_quota',
         'max_usage_per_user',
         'is_active',
+        'show_in_listing',
     ];
 
     protected function casts(): array
@@ -37,6 +38,7 @@ class Promotion extends Model
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
             'is_active' => 'boolean',
+            'show_in_listing' => 'boolean',
             'usage_quota' => 'integer',
             'max_usage_per_user' => 'integer',
         ];
@@ -55,6 +57,14 @@ class Promotion extends Model
         return $query->where('is_active', true)
             ->where('starts_at', '<=', now())
             ->where('ends_at', '>=', now());
+    }
+
+    /**
+     * Scope: promotions that should appear in checkout listing.
+     */
+    public function scopeShowInListing(Builder $query): Builder
+    {
+        return $query->where('show_in_listing', true);
     }
 
     /**

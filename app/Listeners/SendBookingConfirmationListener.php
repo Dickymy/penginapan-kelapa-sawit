@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\BookingCreated;
 use App\Mail\BookingConfirmationMail;
+use App\Models\Booking;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Mail;
@@ -27,17 +28,33 @@ class SendBookingConfirmationListener implements ShouldQueue
             return;
         }
 
-        try {
-            Mail::to($booking->guest_email)->send(new BookingConfirmationMail($booking));
-            
-            $booking->update([
-                'confirmation_email_sent_at' => now(),
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Gagal mengirim email konfirmasi booking: ' . $e->getMessage(), [
-                'booking_id' => $booking->id,
-            ]);
-            throw $e; // Re-throw to retry in queue
+        $sendMail = function () use ($booking) {
+            try {
+                $freshBooking = Booking::find($booking->id);
+                if (!$freshBooking || $freshBooking->confirmation_email_sent_at !== null) {
+                    return;
+                }
+
+                Mail::to($freshBooking->guest_email)->send(new BookingConfirmationMail($freshBooking));
+                
+                $freshBooking->update([
+                    'confirmation_email_sent_at' => now(),
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Gagal mengirim email konfirmasi booking: ' . $e->getMessage(), [
+                    'booking_id' => $booking->id,
+                ]);
+
+                if (config('queue.default') !== 'sync') {
+                    throw $e;
+                }
+            }
+        };
+
+        if (config('queue.default') === 'sync' && !app()->runningUnitTests()) {
+            dispatch($sendMail)->afterResponse();
+        } else {
+            $sendMail();
         }
     }
 }

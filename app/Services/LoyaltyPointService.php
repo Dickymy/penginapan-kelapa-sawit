@@ -67,7 +67,7 @@ class LoyaltyPointService
 
     public function redeemForBooking(User $user, Booking $booking, int $requestedPoints): int
     {
-        $pointValue = config('loyalty.point_value', 50);
+        $pointValue = config('loyalty.point_value', 1);
         $maxPercent = config('loyalty.max_redemption_percent', 20);
         $minRedeem = config('loyalty.min_redeem', 100);
 

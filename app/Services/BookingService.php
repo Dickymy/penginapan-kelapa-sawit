@@ -23,6 +23,7 @@ class BookingService
         private PricingService $pricing,
         private DocumentSequenceService $sequence,
         private LoyaltyPointService $loyaltyService,
+        private PromotionService $promotionService,
     ) {}
 
     /**
@@ -131,23 +132,22 @@ class BookingService
                 );
             }
 
-            // Calculate price server-side
-            if (!empty($data['use_points']) && $data['use_points'] && $user) {
-                $availablePoints = $this->loyaltyService->getBalance($user);
-                $quote = $this->pricing->calculateQuoteWithPoints($roomType, $checkIn, $checkOut, $availablePoints, $user);
-            } else {
-                $quote = $this->pricing->calculateQuote($roomType, $checkIn, $checkOut);
-            }
+            // Calculate price server-side with support for promo, points, and addons
+            $promoCode = !empty($data['promo_code']) ? trim($data['promo_code']) : null;
+            $usePoints = !empty($data['use_points']) && (bool) $data['use_points'];
+            $addons = !empty($data['addons']) ? $data['addons'] : [];
 
-            if (!empty($data['addons'])) {
-                $quote = $this->pricing->calculateQuoteWithAddons($quote, $data['addons']);
-            }
+            $quote = $this->pricing->calculateFullQuote(
+                $roomType, $checkIn, $checkOut, $promoCode, $usePoints, $addons, $user
+            );
 
             // Generate booking code
             $bookingCode = $this->sequence->generateBookingCode();
 
             // Get current policy
             $policy = PolicyVersion::current()->first();
+
+            $isFree = ($quote['total_amount'] <= 0);
 
             // Create booking
             $booking = Booking::create([
@@ -156,8 +156,8 @@ class BookingService
                 'user_id' => $user?->id,
                 'room_id' => $room->id,
                 'source' => BookingSource::Website->value,
-                'status' => BookingStatus::PendingPayment->value,
-                'payment_status' => PaymentStatus::Unpaid->value,
+                'status' => $isFree ? BookingStatus::Confirmed->value : BookingStatus::PendingPayment->value,
+                'payment_status' => $isFree ? PaymentStatus::Paid->value : PaymentStatus::Unpaid->value,
                 'check_in' => $checkIn->toDateString(),
                 'check_out' => $checkOut->toDateString(),
                 'nights' => $quote['nights'],
@@ -171,13 +171,15 @@ class BookingService
                 'room_name_snapshot' => $room->name,
                 'price_per_night_snapshot' => $quote['price_per_night'],
                 'subtotal' => $quote['subtotal'],
+                'promotion_id' => $quote['promotion']?->id ?? null,
+                'promotion_code_snapshot' => $quote['promotion']?->code ?? null,
                 'promotion_discount' => $quote['promotion_discount'],
                 'points_discount' => $quote['points_discount'],
                 'points_redeemed' => $quote['points_redeemed'] ?? 0,
                 'total_amount' => $quote['total_amount'],
                 'currency' => 'IDR',
                 'eligible_loyalty_amount' => $quote['eligible_loyalty_amount'],
-                'payment_expires_at' => now()->addMinutes(config('booking.hold_minutes', 30)),
+                'payment_expires_at' => $isFree ? null : now()->addMinutes(config('booking.hold_minutes', 30)),
                 'policy_version_id' => $policy?->id,
                 'policy_accepted_at' => $policy ? now() : null,
                 'guest_access_token_hash' => $tokenHash,
@@ -213,6 +215,15 @@ class BookingService
                 \App\Models\BookingAddon::insert($addonData);
             }
 
+            // Reserve or consume promo if any applied in the quote
+            if (!empty($quote['promotion'])) {
+                if ($isFree) {
+                    $this->promotionService->consumeImmediatelyForBooking($quote['promotion'], $booking, $user);
+                } else {
+                    $this->promotionService->reserveForBooking($quote['promotion'], $booking, $user);
+                }
+            }
+
             // Redeem points if any were applied in the quote
             if ($quote['points_redeemed'] > 0 && $user) {
                 $this->loyaltyService->redeemForBooking($user, $booking, $quote['points_redeemed']);
@@ -222,8 +233,8 @@ class BookingService
             BookingStatusHistory::create([
                 'booking_id' => $booking->id,
                 'from_status' => null,
-                'to_status' => BookingStatus::PendingPayment->value,
-                'reason' => 'Booking dibuat',
+                'to_status' => $isFree ? BookingStatus::Confirmed->value : BookingStatus::PendingPayment->value,
+                'reason' => $isFree ? 'Booking gratis (diskon 100%) langsung terkonfirmasi' : 'Booking dibuat',
                 'actor_type' => $user ? 'user' : 'system',
                 'actor_id' => $user?->id,
                 'created_at' => now(),

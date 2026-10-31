@@ -28,5 +28,7 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="LOYALTY_EARN_DIVISOR" value="1000"/>
+        <env name="LOYALTY_POINT_VALUE" value="50"/>
     </php>
 </phpunit>

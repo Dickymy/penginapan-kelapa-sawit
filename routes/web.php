@@ -44,6 +44,7 @@ Route::get('/sekitar', [\App\Http\Controllers\Public\NearbyPlaceController::clas
 // Availability & Booking
 Route::get('/ketersediaan', [AvailabilityController::class, 'search'])->name('availability.search');
 Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('booking.checkout');
+Route::post('/checkout/apply-promo', [BookingController::class, 'applyPromo'])->name('booking.apply-promo')->middleware('throttle:30,1');
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store')->middleware('throttle:booking-store');
 Route::get('/booking/{bookingCode}/konfirmasi', [BookingController::class, 'confirmation'])->name('booking.confirmation');
 Route::get('/cek-booking', [BookingController::class, 'verifyForm'])->name('booking.verify.form');
@@ -191,6 +192,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('loyalty/{user}/adjust', [\App\Http\Controllers\Admin\LoyaltyController::class, 'adjust'])->name('loyalty.adjust');
 
         // Promotions
+        Route::post('promotions/toggle-checkout-listing', [\App\Http\Controllers\Admin\PromotionController::class, 'toggleCheckoutListing'])->name('promotions.toggle-checkout-listing');
         Route::resource('promotions', \App\Http\Controllers\Admin\PromotionController::class)->except(['show']);
 
         // Addons

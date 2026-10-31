@@ -55,9 +55,9 @@
                 </div>
 
                 <!-- Contact Form -->
-                <div class="p-8">
+                <div class="p-5 sm:p-8">
                     @if(session('success'))
-                        <div class="mb-6 rounded-md bg-green-50 p-4 border border-green-200">
+                        <div class="mb-6 rounded-xl bg-green-50 p-4 border border-green-200">
                             <div class="flex">
                                 <div class="flex-shrink-0">
                                     <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
@@ -71,13 +71,13 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('contact.store') }}" method="POST" class="space-y-6">
+                    <form action="{{ route('contact.store') }}" method="POST" class="space-y-5">
                         @csrf
                         
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700">Nama Lengkap <span class="text-red-500">*</span></label>
                             <div class="mt-1">
-                                <input type="text" name="name" id="name" value="{{ old('name') }}" required class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                <input type="text" name="name" id="name" value="{{ old('name') }}" required class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full text-base sm:text-sm border-gray-300 rounded-xl px-4 py-2.5">
                             </div>
                             @error('name')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -87,7 +87,7 @@
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700">Alamat Email <span class="text-red-500">*</span></label>
                             <div class="mt-1">
-                                <input type="email" name="email" id="email" value="{{ old('email') }}" required class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                <input type="email" name="email" id="email" value="{{ old('email') }}" required class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full text-base sm:text-sm border-gray-300 rounded-xl px-4 py-2.5">
                             </div>
                             @error('email')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -97,7 +97,7 @@
                         <div>
                             <label for="phone" class="block text-sm font-medium text-gray-700">No. Telepon / WhatsApp</label>
                             <div class="mt-1">
-                                <input type="text" name="phone" id="phone" value="{{ old('phone') }}" class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                <input type="text" name="phone" id="phone" value="{{ old('phone') }}" class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full text-base sm:text-sm border-gray-300 rounded-xl px-4 py-2.5">
                             </div>
                             @error('phone')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -107,7 +107,7 @@
                         <div>
                             <label for="subject" class="block text-sm font-medium text-gray-700">Subjek <span class="text-red-500">*</span></label>
                             <div class="mt-1">
-                                <input type="text" name="subject" id="subject" value="{{ old('subject') }}" required class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                <input type="text" name="subject" id="subject" value="{{ old('subject') }}" required class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full text-base sm:text-sm border-gray-300 rounded-xl px-4 py-2.5">
                             </div>
                             @error('subject')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -117,7 +117,7 @@
                         <div>
                             <label for="message" class="block text-sm font-medium text-gray-700">Pesan <span class="text-red-500">*</span></label>
                             <div class="mt-1">
-                                <textarea id="message" name="message" rows="4" required class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border border-gray-300 rounded-md">{{ old('message') }}</textarea>
+                                <textarea id="message" name="message" rows="4" required class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full text-base sm:text-sm border border-gray-300 rounded-xl px-4 py-2.5">{{ old('message') }}</textarea>
                             </div>
                             @error('message')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -125,7 +125,7 @@
                         </div>
 
                         <div>
-                            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            <button type="submit" class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition active:scale-[0.98]">
                                 Kirim Pesan
                             </button>
                         </div>

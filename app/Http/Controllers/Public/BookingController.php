@@ -37,7 +37,7 @@ class BookingController extends Controller
             'guest_count' => ['required', 'integer', 'min:1'],
         ]);
 
-        $roomType = RoomType::findOrFail($validated['room_type_id']);
+        $roomType = RoomType::with('images')->findOrFail($validated['room_type_id']);
         $checkIn = Carbon::parse($validated['check_in']);
         $checkOut = Carbon::parse($validated['check_out']);
         $guestCount = (int) $validated['guest_count'];
@@ -60,9 +60,72 @@ class BookingController extends Controller
         $user = auth()->user();
         $addons = \App\Models\Addon::active()->ordered()->get();
 
+        $showPromoListing = (bool) \App\Models\Setting::get('booking', 'show_promo_listing', true);
+        $activePromos = collect();
+
+        if ($showPromoListing) {
+            $activePromos = \App\Models\Promotion::active()
+                ->where('show_in_listing', true)
+                ->where(function ($q) {
+                    $q->whereNull('usage_quota')
+                      ->orWhereRaw('(SELECT COUNT(*) FROM promotion_usages WHERE promotion_usages.promotion_id = promotions.id AND promotion_usages.status IN ("reserved", "consumed")) < promotions.usage_quota');
+                })
+                ->orderByDesc('value')
+                ->take(6)
+                ->get();
+        }
+
         return view('public.booking.checkout', compact(
-            'roomType', 'checkIn', 'checkOut', 'guestCount', 'quote', 'idempotencyKey', 'user', 'addons'
+            'roomType', 'checkIn', 'checkOut', 'guestCount', 'quote', 'idempotencyKey', 'user', 'addons', 'activePromos'
         ));
+    }
+
+    /**
+     * Validate and calculate discount for a promo code via AJAX.
+     */
+    public function applyPromo(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validated = $request->validate([
+            'promo_code' => ['required', 'string', 'max:100'],
+            'room_type_id' => ['required', 'exists:room_types,id'],
+            'check_in' => ['required', 'date'],
+            'check_out' => ['required', 'date', 'after:check_in'],
+        ]);
+
+        $roomType = RoomType::findOrFail($validated['room_type_id']);
+        $checkIn = Carbon::parse($validated['check_in']);
+        $checkOut = Carbon::parse($validated['check_out']);
+        $user = auth()->user();
+
+        $quote = $this->pricing->calculateQuote($roomType, $checkIn, $checkOut);
+
+        try {
+            $result = app(\App\Services\PromotionService::class)->validateForQuote(
+                $validated['promo_code'],
+                $quote['subtotal'],
+                $user
+            );
+
+            $promo = $result['promotion'];
+            $discount = $result['discount'];
+
+            return response()->json([
+                'success' => true,
+                'code' => $promo->code,
+                'name' => $promo->name,
+                'description' => $promo->description,
+                'type' => $promo->type->value,
+                'value' => $promo->value,
+                'discount' => $discount,
+                'discount_formatted' => 'Rp' . number_format($discount, 0, ',', '.'),
+                'message' => "Promo {$promo->code} berhasil digunakan! Anda hemat Rp" . number_format($discount, 0, ',', '.'),
+            ]);
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 
     /**
@@ -86,6 +149,7 @@ class BookingController extends Controller
             'addons.*.addon_id' => ['required_with:addons', 'exists:addons,id'],
             'addons.*.quantity' => ['required_with:addons', 'integer', 'min:1'],
             'use_points' => ['nullable', 'boolean'],
+            'promo_code' => ['nullable', 'string', 'max:100'],
         ]);
 
         try {
@@ -114,6 +178,8 @@ class BookingController extends Controller
             return redirect()->route('booking.confirmation', $booking->booking_code);
 
         } catch (RoomNotAvailableException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        } catch (\RuntimeException $e) {
             return back()->withInput()->with('error', $e->getMessage());
         }
     }

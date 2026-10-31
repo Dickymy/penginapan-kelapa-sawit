@@ -191,14 +191,14 @@
                                     <span class="font-semibold text-gray-900">Rp{{ number_format($item['quote']['total_amount'], 0, ',', '.') }}</span>
                                 </p>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:items-center">
                                 <a href="{{ route('rooms.show', [
                                         'slug' => $item['room_type']->slug,
                                         'check_in' => $checkIn->format('Y-m-d'),
                                         'check_out' => $checkOut->format('Y-m-d'),
                                         'guest_count' => $guestCount
                                     ]) }}"
-                                   class="relative z-20 inline-flex items-center justify-center bg-white text-gray-700 border border-gray-300 px-4 py-3 rounded-lg font-medium hover:bg-gray-50 hover:text-primary-700 transition-all duration-300">
+                                   class="relative z-20 inline-flex items-center justify-center bg-white text-gray-700 border border-gray-300 px-4 py-2.5 sm:py-3 rounded-xl font-medium hover:bg-gray-50 hover:text-primary-700 text-sm sm:text-base transition-all duration-200 text-center active:scale-[0.98]">
                                     Lihat Detail
                                 </a>
                                 @if($item['available_count'] > 0)
@@ -208,12 +208,12 @@
                                             'check_out' => $checkOut->format('Y-m-d'),
                                             'guest_count' => $guestCount,
                                         ]) }}"
-                                       class="relative z-20 inline-flex items-center justify-center bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+                                       class="relative z-20 inline-flex items-center justify-center bg-primary-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium hover:bg-primary-700 hover:shadow-lg text-sm sm:text-base transition-all duration-200 text-center active:scale-[0.98]">
                                         Pilih Kamar
                                     </a>
                                 @else
                                     <button type="button" disabled
-                                            class="relative z-20 inline-flex items-center justify-center bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-medium cursor-not-allowed">
+                                            class="relative z-20 inline-flex items-center justify-center bg-gray-200 text-gray-400 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium text-sm sm:text-base cursor-not-allowed text-center">
                                         Tidak Tersedia
                                     </button>
                                 @endif

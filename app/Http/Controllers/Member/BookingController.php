@@ -9,7 +9,7 @@ use Illuminate\View\View;
 
 class BookingController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|\Illuminate\Http\RedirectResponse
     {
         $user = auth()->user();
         $tab = $request->get('tab', 'active');
@@ -24,7 +24,7 @@ class BookingController extends Controller
 
         // Proactively expire pending bookings that have passed their deadline
         // This ensures the UI is correct even if the background cron job hasn't run yet
-        if ($tab === 'active' || $tab === 'active' /* fallback for default */) {
+        if ($tab === 'active') {
             $hasExpired = false;
             foreach ($bookings as $booking) {
                 if ($booking->status === \App\Enums\BookingStatus::PendingPayment && 
@@ -53,7 +53,7 @@ class BookingController extends Controller
         if ($booking->user_id !== auth()->id()) {
             abort(403);
         }
-        $booking->load(['room.roomType', 'statusHistories', 'addons.addon']);
+        $booking->load(['room.roomType', 'statusHistories', 'addons.addon', 'nightPrices', 'changeRequests']);
         return view('member.bookings.show', compact('booking'));
     }
 

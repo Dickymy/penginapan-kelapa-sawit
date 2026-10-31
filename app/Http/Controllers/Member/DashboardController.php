@@ -13,7 +13,7 @@ class DashboardController extends Controller
         $user = auth()->user();
 
         $pointBalance = $user->loyalty_balance_cache ?? 0;
-        $pointValue = $pointBalance * config('loyalty.point_value', 50);
+        $pointValue = $pointBalance * config('loyalty.point_value', 1);
 
         // Priority 1: Pending payment bookings (most urgent)
         $pendingPaymentBookings = $user->bookings()

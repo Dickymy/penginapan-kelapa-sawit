@@ -1,9 +1,11 @@
 @extends('layouts.public')
 
+@php $hideBottomNav = true; @endphp
+
 @section('title', $roomType->name . ' - Penginapan Kelapa Sawit')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 pb-28 lg:pb-12">
     {{-- Breadcrumb & Back Button --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <nav class="text-sm text-gray-500">
@@ -36,6 +38,8 @@
                     autoSlideInterval: null,
                     lightboxOpen: false,
                     isHovering: false,
+                    touchStartX: 0,
+                    touchEndX: 0,
                     nextImage(manual = false) {
                         this.activeImage = (this.activeImage + 1) % this.totalImages;
                         if (manual) this.resetAutoSlide();
@@ -76,8 +80,14 @@
                  x-init="startAutoSlide()"
                  @mouseenter="isHovering = true; stopAutoSlide()"
                  @mouseleave="isHovering = false; startAutoSlide()"
-                 @touchstart="isHovering = true; stopAutoSlide()"
-                 @touchend="isHovering = false; startAutoSlide()"
+                 @touchstart="touchStartX = $event.touches[0].clientX; isHovering = true; stopAutoSlide()"
+                 @touchend="
+                    isHovering = false;
+                    startAutoSlide();
+                    touchEndX = $event.changedTouches[0].clientX;
+                    if (touchStartX - touchEndX > 45) nextImage(true);
+                    if (touchEndX - touchStartX > 45) prevImage(true);
+                 "
                  @keydown.window.escape="closeLightbox()"
                  @keydown.window.arrow-right="if(lightboxOpen) nextImage(true)"
                  @keydown.window.arrow-left="if(lightboxOpen) prevImage(true)"
@@ -192,6 +202,47 @@
             </div>
             @endif
 
+            {{-- Mobile-only Room Header Card --}}
+            <div class="lg:hidden bg-white border border-gray-100 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-black text-gray-900 tracking-tight leading-snug">{{ $roomType->name }}</h1>
+                    @if($roomType->review_count > 0)
+                        <div class="flex items-center mt-1.5 text-sm">
+                            <span class="font-bold text-gray-900 mr-2">{{ number_format($roomType->average_rating, 1) }}</span>
+                            <x-star-rating :rating="$roomType->average_rating" size="4" />
+                            <a href="#ulasan" class="ml-2 text-xs text-primary-600 font-medium">({{ $roomType->review_count }} Ulasan)</a>
+                        </div>
+                    @else
+                        <div class="mt-1 text-xs text-gray-500">Belum ada ulasan</div>
+                    @endif
+                </div>
+
+                <div class="flex flex-wrap gap-2 text-xs">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-50 border border-gray-100 text-gray-700 font-medium whitespace-nowrap">
+                        <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        Maks {{ $roomType->capacity }} Tamu
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-50 border border-gray-100 text-gray-700 font-medium whitespace-nowrap">
+                        <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        {{ $roomType->bed_count }} Kasur {{ $roomType->bed_type ?? '' }}
+                    </span>
+                </div>
+
+                <div class="pt-2.5 border-t border-gray-100 flex items-center justify-between gap-2">
+                    <div class="min-w-0 flex-1">
+                        <p class="text-[11px] text-gray-500 font-medium">Mulai dari</p>
+                        <div class="flex items-baseline gap-1.5 flex-nowrap">
+                            <span class="text-xl sm:text-2xl font-black text-primary-600 whitespace-nowrap">Rp{{ number_format($roomType->base_price, 0, ',', '.') }}</span>
+                            <span class="text-xs text-gray-400 whitespace-nowrap">/ malam</span>
+                        </div>
+                    </div>
+                    <a href="#form-pemesanan" class="shrink-0 px-3.5 py-2 bg-primary-50 text-primary-700 text-xs font-bold rounded-xl border border-primary-200 hover:bg-primary-100 transition active:scale-95 whitespace-nowrap flex items-center gap-1">
+                        <span>Pesan Sekarang</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+                </div>
+            </div>
+
             {{-- Description --}}
             @if($roomType->description)
             <div class="prose prose-sm max-w-none text-gray-700">
@@ -252,7 +303,7 @@
 
         {{-- Right: Info & CTA --}}
         <div>
-            <div class="bg-white border-gray-100 border rounded-2xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] p-6 sticky top-6 space-y-4">
+            <div id="form-pemesanan" class="bg-white border-gray-100 border rounded-2xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] p-6 sticky top-6 space-y-4 scroll-mt-24">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-800">{{ $roomType->name }}</h1>
                     @if($roomType->review_count > 0)
@@ -281,11 +332,11 @@
 
                 <div class="border-t border-gray-100 pt-5 mt-2">
                     <p class="text-sm text-gray-500 mb-1">Harga per malam</p>
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="text-xs font-bold text-white bg-red-500 px-1.5 py-0.5 rounded">Hemat 20%</span>
-                        <span class="text-sm text-gray-400 line-through decoration-gray-300">Rp {{ number_format($roomType->base_price * 1.25, 0, ',', '.') }}</span>
+                    <div class="flex items-center gap-2 mb-1 flex-wrap">
+                        <span class="text-xs font-bold text-white bg-red-500 px-1.5 py-0.5 rounded whitespace-nowrap">Hemat 20%</span>
+                        <span class="text-sm text-gray-400 line-through decoration-gray-300 whitespace-nowrap">Rp{{ number_format($roomType->base_price * 1.25, 0, ',', '.') }}</span>
                     </div>
-                    <p class="text-3xl font-extrabold text-primary-600">Rp {{ number_format($roomType->base_price, 0, ',', '.') }}</p>
+                    <p class="text-3xl font-extrabold text-primary-600 whitespace-nowrap">Rp{{ number_format($roomType->base_price, 0, ',', '.') }}</p>
                 </div>
 
                 {{-- Booking Form --}}
@@ -390,6 +441,24 @@
                 </form>
             </div>
         </div>
+    </div>
+</div>
+
+{{-- Sticky Mobile Booking Bar --}}
+<div class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-4 pt-2.5 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
+    <div class="flex items-center justify-between gap-2 max-w-md mx-auto">
+        <div class="min-w-0 flex-1">
+            <p class="text-[10px] uppercase font-bold tracking-wider text-gray-400 truncate">Harga per malam</p>
+            <div class="flex items-baseline gap-1.5 flex-nowrap">
+                <span class="text-base sm:text-lg font-black text-primary-600 whitespace-nowrap">Rp{{ number_format($roomType->base_price, 0, ',', '.') }}</span>
+                <span class="text-[10px] sm:text-[11px] text-gray-400 line-through decoration-gray-300 whitespace-nowrap">Rp{{ number_format($roomType->base_price * 1.25, 0, ',', '.') }}</span>
+            </div>
+        </div>
+        <a href="#form-pemesanan"
+           class="shrink-0 px-4 py-2.5 bg-primary-600 text-white rounded-xl font-bold text-xs sm:text-sm hover:bg-primary-700 active:scale-95 shadow-md shadow-primary-600/30 transition-all flex items-center gap-1 whitespace-nowrap">
+            <span>Pesan Kamar</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </a>
     </div>
 </div>
 @endsection

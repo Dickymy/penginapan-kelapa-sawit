@@ -40,20 +40,23 @@
                     
                     <div class="space-y-4">
                         @foreach($items as $index => $faq)
-                        <div class="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                        <div class="border rounded-xl overflow-hidden transition-all duration-300" :class="active === {{ $faq->id }} ? 'border-primary-200 shadow-md ring-4 ring-primary-50 bg-white' : 'border-gray-200 bg-white'">
                             <button @click="active !== {{ $faq->id }} ? active = {{ $faq->id }} : active = null" 
-                                    class="w-full px-5 py-4 text-left flex justify-between items-center focus:outline-none hover:bg-gray-50 transition">
-                                <span class="font-medium text-gray-900 pr-4">{{ $faq->question }}</span>
-                                <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-200" 
-                                     :class="{'rotate-180': active === {{ $faq->id }}}" 
-                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
+                                    class="w-full px-5 py-4 text-left flex justify-between items-center focus:outline-none transition-colors duration-300"
+                                    :class="active === {{ $faq->id }} ? 'bg-primary-50/50' : 'hover:bg-gray-50'">
+                                <span class="font-medium pr-4 transition-colors duration-300" :class="active === {{ $faq->id }} ? 'text-primary-700' : 'text-gray-900'">{{ $faq->question }}</span>
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors duration-300" :class="active === {{ $faq->id }} ? 'bg-primary-100 text-primary-600' : 'bg-gray-100 text-gray-500'">
+                                    <svg class="w-5 h-5 transform transition-transform duration-300" 
+                                         :class="{'rotate-180': active === {{ $faq->id }}}" 
+                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </div>
                             </button>
                             <div x-show="active === {{ $faq->id }}" 
                                  x-collapse
                                  x-cloak>
-                                <div class="px-5 pb-4 pt-1 text-gray-600 prose prose-sm max-w-none">
+                                <div class="px-5 pb-5 pt-2 text-gray-600 prose prose-sm max-w-none">
                                     {{ $faq->answer }}
                                 </div>
                             </div>
