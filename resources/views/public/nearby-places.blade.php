@@ -56,72 +56,69 @@
         @else
             <div x-data="{ selectedCategory: 'Semua' }">
                 {{-- Category Filters --}}
-                <div class="flex flex-wrap gap-3 justify-center mb-12">
+                <div class="flex flex-wrap gap-2 sm:gap-3 justify-center mb-8 sm:mb-12">
                     <button @click="selectedCategory = 'Semua'" 
                             :class="selectedCategory === 'Semua' ? 'bg-primary-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-primary-50 hover:text-primary-600'"
-                            class="px-6 py-2.5 rounded-full font-semibold border border-gray-200 transition-all duration-300">
+                            class="px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold border border-gray-200 transition-all duration-300 active:scale-95">
                         Semua Produk
                     </button>
                     @foreach($placesByCategory->keys() as $cat)
                     <button @click="selectedCategory = '{{ $cat }}'" 
                             :class="selectedCategory === '{{ $cat }}' ? 'bg-primary-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-primary-50 hover:text-primary-600'"
-                            class="px-6 py-2.5 rounded-full font-semibold border border-gray-200 transition-all duration-300">
+                            class="px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold border border-gray-200 transition-all duration-300 active:scale-95">
                         {{ $cat }}
                     </button>
                     @endforeach
                 </div>
 
-                {{-- Product Grid --}}
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {{-- Product Grid: 2 Columns on mobile, 3 Columns on lg --}}
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
                     @foreach($placesByCategory as $category => $places)
                         @foreach($places as $place)
                             <div x-show="selectedCategory === 'Semua' || selectedCategory === '{{ $category }}'"
                                  x-transition:enter="transition ease-out duration-300"
                                  x-transition:enter-start="opacity-0 transform scale-95"
                                  x-transition:enter-end="opacity-100 transform scale-100"
-                                 class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(8,_112,_184,_0.12)] hover:-translate-y-2 transition-all duration-500 border border-gray-100 overflow-hidden flex flex-col group cursor-default relative">
+                                 class="bg-white rounded-2xl sm:rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.04)] hover:shadow-[0_16px_40px_rgba(8,_112,_184,_0.1)] hover:-translate-y-1 transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col group cursor-default relative">
                                 
                                 {{-- Kategori Badge --}}
-                                <div class="absolute top-4 left-4 z-10">
-                                    <span class="bg-primary-600/95 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border border-primary-500/50">
+                                <div class="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 z-10">
+                                    <span class="bg-primary-600/90 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-3 sm:py-1 rounded-full shadow-md">
                                         {{ $category }}
                                     </span>
                                 </div>
 
                                 {{-- Image Area --}}
-                                <div class="relative overflow-hidden aspect-[4/3] bg-gradient-to-br from-primary-50 to-gray-100 flex items-center justify-center p-6">
+                                <div class="relative overflow-hidden aspect-square sm:aspect-[4/3] bg-gradient-to-br from-primary-50 to-gray-100 flex items-center justify-center p-4">
                                     @if($place->image)
-                                        <img src="{{ Storage::url($place->image) }}" alt="{{ $place->name }}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" loading="lazy" decoding="async">
+                                        <img src="{{ Storage::url($place->image) }}" alt="{{ $place->name }}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy" decoding="async">
                                     @else
-                                        {{-- Dummy Image / Placeholder SVG --}}
-                                        <div class="text-center z-10 group-hover:scale-110 transition-transform duration-500">
-                                            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white shadow-sm mb-4">
-                                                <svg class="w-10 h-10 text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                                        {{-- Placeholder SVG --}}
+                                        <div class="text-center z-10 group-hover:scale-105 transition-transform duration-300">
+                                            <div class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-white shadow-sm mb-2 sm:mb-3">
+                                                <svg class="w-6 h-6 sm:w-8 sm:h-8 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                                             </div>
-                                            <p class="text-primary-400 font-medium text-sm">Belum Ada Foto</p>
+                                            <p class="text-primary-500 font-medium text-[11px] sm:text-xs">Produk Toko</p>
                                         </div>
                                     @endif
-                                    
-                                    {{-- Overlay Gradient Bottom --}}
-                                    <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                                 </div>
                                 
                                 {{-- Card Content --}}
-                                <div class="p-6 md:p-8 flex flex-col flex-grow bg-white relative z-10">
-                                    <h4 class="text-xl md:text-2xl font-bold text-gray-900 leading-tight mb-3 group-hover:text-primary-600 transition-colors line-clamp-2">
+                                <div class="p-3 sm:p-5 md:p-6 flex flex-col flex-grow bg-white">
+                                    <h4 class="text-xs sm:text-base md:text-lg font-bold text-gray-900 leading-snug mb-1 sm:mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">
                                         {{ $place->name }}
                                     </h4>
                                     
                                     @if($place->description)
-                                        <p class="text-gray-500 text-sm md:text-base leading-relaxed mb-6 flex-grow">
+                                        <p class="text-gray-500 text-[11px] sm:text-xs md:text-sm leading-relaxed mb-3 flex-grow line-clamp-2">
                                             {{ $place->description }}
                                         </p>
                                     @endif
 
                                     @if($place->distance)
-                                    <div class="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
-                                        <div class="inline-flex items-center bg-green-50 text-green-700 font-bold px-4 py-2 rounded-xl text-sm border border-green-100">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                    <div class="mt-auto pt-2 sm:pt-3 border-t border-gray-100 flex items-center justify-between">
+                                        <div class="inline-flex items-center text-primary-700 font-bold text-[11px] sm:text-xs bg-primary-50 px-2 py-1 rounded-lg">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
                                             {{ $place->distance }}
                                         </div>
                                     </div>

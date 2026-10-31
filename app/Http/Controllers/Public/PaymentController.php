@@ -19,13 +19,18 @@ class PaymentController extends Controller
     /**
      * Show payment page with Snap.js.
      */
-    public function pay(Request $request, string $bookingCode): View
+    public function pay(Request $request, string $bookingCode): View|\Illuminate\Http\RedirectResponse
     {
         $booking = Booking::where('booking_code', $bookingCode)->firstOrFail();
 
         // Verify access
         if (!$this->accessService->hasAccess($request, $booking)) {
             abort(403, 'Anda tidak memiliki akses ke halaman pembayaran ini.');
+        }
+
+        if ($booking->isPaid() || $booking->status === \App\Enums\BookingStatus::Confirmed || $booking->total_amount <= 0) {
+            return redirect()->route('booking.finish', $booking->booking_code)
+                ->with('success', 'Booking Anda telah terkonfirmasi dan tidak memerlukan pembayaran.');
         }
 
         try {

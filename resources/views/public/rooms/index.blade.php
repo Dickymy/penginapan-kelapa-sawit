@@ -4,10 +4,15 @@
 
 @section('content')
 {{-- Page Hero --}}
-<section class="relative bg-primary-900 text-white py-16 lg:py-24 overflow-hidden">
-    <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#4ade80 1.5px, transparent 1.5px); background-size: 32px 32px;"></div>
+<section class="relative bg-primary-900 text-white py-16 lg:py-24 overflow-hidden"
+         x-data="{ scrollY: 0 }" 
+         @scroll.window="scrollY = window.scrollY">
+    <div class="absolute inset-0 opacity-20 transition-transform duration-75" 
+         :style="`transform: translateY(${scrollY * 0.4}px)`" 
+         style="background-image: radial-gradient(#4ade80 1.5px, transparent 1.5px); background-size: 32px 32px;"></div>
     <div class="absolute inset-0 bg-gradient-to-t from-primary-950 via-primary-900/60 to-transparent"></div>
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-transform duration-75"
+         :style="`transform: translateY(${scrollY * 0.15}px); opacity: ${1 - scrollY/500}`">
         <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg">Tipe Kamar Kami</h1>
         <p class="mt-4 text-lg text-primary-100 max-w-2xl mx-auto drop-shadow-md">Temukan kamar yang dirancang khusus untuk kenyamanan istirahat Anda.</p>
     </div>
@@ -15,6 +20,12 @@
 
 @php
     $roomsJson = $roomTypes->map(function ($type) {
+        $images = $type->images->map(function($img) {
+            return [
+                'thumb' => $img->thumb_url,
+                'medium' => $img->medium_url
+            ];
+        })->take(5)->toArray();
         $cover = $type->images->where('is_cover', true)->first() ?? $type->images->first();
         return [
             'id' => $type->id,
@@ -33,9 +44,7 @@
             'average_rating' => $type->average_rating ? number_format($type->average_rating, 1) : 0,
             'average_rating_raw' => $type->average_rating ?? 0,
             'active_room_count' => $type->rooms->count(),
-            'cover_thumb' => $cover ? $cover->thumb_url : null,
-            'cover_medium' => $cover ? $cover->medium_url : null,
-            'cover_large' => $cover ? $cover->large_url : null,
+            'images' => $images,
             'url' => route('rooms.show', $type->slug),
         ];
     })->values()->toJson();
@@ -108,6 +117,12 @@
                         <input type="range" x-model.number="filter.minCapacity" min="1" max="4" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600">
                         <span class="text-sm font-medium text-gray-700 w-12 text-right" x-text="`${filter.minCapacity} org`"></span>
                     </div>
+                    <div x-show="filter.minCapacity > 2" x-transition.opacity class="mt-3 bg-amber-50 rounded-lg border border-amber-200 p-3 flex items-start gap-2">
+                        <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <p class="text-xs text-amber-800 leading-relaxed">
+                            Kamar berkapasitas 2 orang. Untuk >2 orang, disarankan menyewa <strong>Kasur Ekstra (Extra Bed)</strong> saat Checkout.
+                        </p>
+                    </div>
                 </div>
 
                 {{-- Fasilitas --}}
@@ -151,20 +166,52 @@
             <div class="space-y-6 relative min-h-[400px]">
                 
                 <template x-for="type in filteredAndSortedRooms" :key="type.id">
-                    <a :href="type.url" x-transition.opacity.duration.300ms class="block bg-white rounded-2xl border border-gray-100/60 overflow-hidden shadow-sm hover:shadow-[0_20px_50px_rgba(8,_112,_184,_0.08)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col lg:flex-row group cursor-pointer">
+                    <a :href="type.url" x-transition.opacity.duration.300ms class="block bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col lg:flex-row group cursor-pointer">
                         
-                        {{-- Image --}}
-                        <div class="lg:w-80 xl:w-96 flex-shrink-0 relative overflow-hidden">
-                            <template x-if="type.cover_medium">
-                                <img :src="type.cover_medium"
-                                     :srcset="`${type.cover_thumb} 480w, ${type.cover_medium} 960w`"
-                                     sizes="(max-width: 1024px) 100vw, 320px"
-                                     :alt="type.name"
-                                     loading="lazy"
-                                     decoding="async"
-                                     class="w-full h-64 lg:h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        {{-- In-Card Carousel --}}
+                        <div class="lg:w-80 xl:w-96 flex-shrink-0 relative overflow-hidden bg-gray-100"
+                             x-data="{ activeSlide: 0, 
+                                       next() { this.activeSlide = this.activeSlide === type.images.length - 1 ? 0 : this.activeSlide + 1; },
+                                       prev() { this.activeSlide = this.activeSlide === 0 ? type.images.length - 1 : this.activeSlide - 1; }
+                                     }" 
+                             @click.prevent>
+                            <template x-if="type.images && type.images.length > 0">
+                                <div class="w-full h-64 lg:h-full relative group/carousel">
+                                    <template x-for="(img, index) in type.images" :key="index">
+                                        <div x-show="activeSlide === index" 
+                                             x-transition:enter="transition ease-out duration-300"
+                                             x-transition:enter-start="opacity-0"
+                                             x-transition:enter-end="opacity-100"
+                                             class="absolute inset-0 w-full h-full">
+                                            <img :src="img.medium"
+                                                 :srcset="`${img.thumb} 480w, ${img.medium} 960w`"
+                                                 sizes="(max-width: 1024px) 100vw, 320px"
+                                                 :alt="`${type.name} - Foto ${index + 1}`"
+                                                 loading="lazy"
+                                                 class="w-full h-full object-cover">
+                                        </div>
+                                    </template>
+                                    
+                                    {{-- Controls --}}
+                                    <template x-if="type.images.length > 1">
+                                        <div>
+                                            <button @click.prevent="prev()" class="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-gray-800 flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity shadow-sm hover:scale-110">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                            </button>
+                                            <button @click.prevent="next()" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-gray-800 flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity shadow-sm hover:scale-110">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                            </button>
+                                            <div class="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
+                                                <template x-for="(img, index) in type.images" :key="index">
+                                                    <div class="w-1.5 h-1.5 rounded-full transition-all duration-300" :class="activeSlide === index ? 'bg-white scale-125' : 'bg-white/50'"></div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
                             </template>
-                            <template x-if="!type.cover_medium">
+                            
+                            <template x-if="!type.images || type.images.length === 0">
                                 <div class="w-full h-64 lg:h-full min-h-[240px] flex flex-col items-center justify-center bg-gradient-to-br from-primary-50 to-gray-100">
                                     <div class="flex flex-col items-center text-primary-300 gap-3">
                                         <svg class="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1">
@@ -234,16 +281,19 @@
                             </div>
                             
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6 pt-5 border-t border-gray-50">
-                                <div>
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="text-xs font-medium text-white bg-red-500 px-1.5 py-0.5 rounded">Hemat 20%</span>
-                                        <span class="text-sm text-gray-400 line-through decoration-gray-300" x-text="`Rp${new Intl.NumberFormat('id-ID').format(type.base_price * 1.25)}`"></span>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                        <span class="text-xs font-medium text-white bg-red-500 px-1.5 py-0.5 rounded whitespace-nowrap">Hemat 20%</span>
+                                        <span class="text-sm text-gray-400 line-through decoration-gray-300 whitespace-nowrap" x-text="`Rp${new Intl.NumberFormat('id-ID').format(type.base_price * 1.25)}`"></span>
                                     </div>
-                                    <span class="text-primary-600 font-extrabold text-2xl" x-text="`Rp${type.formatted_price}`"></span>
-                                    <span class="text-sm font-medium text-gray-400">/ malam</span>
+                                    <div class="flex items-baseline gap-1.5 flex-nowrap">
+                                        <span class="text-primary-600 font-extrabold text-2xl whitespace-nowrap" x-text="`Rp${type.formatted_price}`"></span>
+                                        <span class="text-sm font-medium text-gray-400 whitespace-nowrap">/ malam</span>
+                                    </div>
                                 </div>
-                                <span class="inline-flex items-center justify-center px-6 py-2.5 bg-primary-50 text-primary-700 rounded-xl text-sm font-bold shadow-sm group-hover:shadow-primary-600/20 group-hover:bg-primary-600 group-hover:text-white group-hover:-translate-y-0.5 transition-all duration-300">
-                                    Lihat Detail
+                                <span class="inline-flex items-center justify-center gap-1.5 px-6 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-bold shadow-sm shadow-primary-600/20 hover:bg-primary-700 active:scale-95 transition-all duration-200">
+                                    <span>Lihat Detail</span>
+                                    <svg class="w-4 h-4 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                 </span>
                             </div>
                         </div>
@@ -319,7 +369,11 @@ document.addEventListener('alpine:init', () => {
                 if (this.filter.maxPrice && room.base_price > this.filter.maxPrice) return false;
                 
                 // Kapasitas
-                if (room.capacity < this.filter.minCapacity) return false;
+                // Karena semua kamar standar berkapasitas 2 orang, jika user memfilter > 2
+                // kita asumsikan mereka akan menambah Extra Bed. Jadi, jangan filter out kamar
+                // yang kapasitasnya 2 jika filter.minCapacity > 2.
+                let effectiveCapacity = room.capacity >= 2 ? Math.max(room.capacity, 4) : room.capacity;
+                if (effectiveCapacity < this.filter.minCapacity) return false;
                 
                 // Fasilitas (Harus punya SEMUA fasilitas yang dicentang)
                 if (this.filter.facilities.length > 0) {

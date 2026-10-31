@@ -26,24 +26,23 @@
         </div>
     @else
         {{-- Gallery Grid --}}
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             @foreach($galleries as $index => $gallery)
-            <div class="group cursor-pointer" @click="openLightbox({{ $index }})">
-                <div class="aspect-[4/3] overflow-hidden rounded-xl bg-gray-100 relative">
-                    <img src="{{ $gallery->medium_url }}"
-                         srcset="{{ $gallery->thumb_url }} 480w, {{ $gallery->medium_url }} 960w"
-                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                         alt="{{ $gallery->alt_text ?? $gallery->title ?? 'Foto Penginapan Kelapa Sawit' }}"
-                         loading="{{ $index < 8 ? 'eager' : 'lazy' }}"
-                         decoding="{{ $index < 4 ? 'sync' : 'async' }}"
-                         width="480" height="360"
-                         class="w-full h-full object-cover transition duration-300 group-hover:scale-105">
-                    {{-- Hover overlay --}}
-                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-xl"></div>
+            <div class="group cursor-pointer aspect-[4/3] relative overflow-hidden rounded-2xl bg-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300" @click="openLightbox({{ $index }})">
+                <img src="{{ $gallery->medium_url }}"
+                     srcset="{{ $gallery->thumb_url }} 480w, {{ $gallery->medium_url }} 960w"
+                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                     alt="{{ $gallery->alt_text ?? $gallery->title ?? 'Foto Penginapan Kelapa Sawit' }}"
+                     loading="{{ $index < 8 ? 'eager' : 'lazy' }}"
+                     decoding="{{ $index < 4 ? 'sync' : 'async' }}"
+                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                
+                {{-- Gradient Overlay with title --}}
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3 sm:p-4">
+                    @if($gallery->title)
+                    <p class="text-white text-xs sm:text-sm font-semibold truncate">{{ $gallery->title }}</p>
+                    @endif
                 </div>
-                @if($gallery->title)
-                <p class="mt-2 text-sm text-gray-700 font-medium truncate px-0.5">{{ $gallery->title }}</p>
-                @endif
             </div>
             @endforeach
         </div>
@@ -53,7 +52,10 @@
              @keydown.escape.window="open = false"
              @keydown.left.window="prev()"
              @keydown.right.window="next()"
-             class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+             @click.self="open = false"
+             x-on:touchstart.passive="touchStart($event)"
+             x-on:touchend.passive="touchEnd($event)"
+             class="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
              role="dialog" aria-modal="true" aria-label="Galeri foto">
 
             {{-- Close button --}}
@@ -89,11 +91,6 @@
 
             {{-- Caption --}}
             <div x-show="images[currentIndex]?.title" class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/60 text-white px-4 py-2 rounded-lg text-sm max-w-md text-center" x-text="images[currentIndex]?.title"></div>
-
-            {{-- Swipe support (mobile) --}}
-            <div class="absolute inset-0" @click="open = false"
-                 x-on:touchstart.passive="touchStart($event)"
-                 x-on:touchend.passive="touchEnd($event)"></div>
         </div>
     @endif
 

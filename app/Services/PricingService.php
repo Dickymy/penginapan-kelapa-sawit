@@ -124,7 +124,7 @@ class PricingService
     {
         $quote = $this->calculateQuote($roomType, $checkIn, $checkOut);
 
-        $pointValue = config('loyalty.point_value', 50);
+        $pointValue = config('loyalty.point_value', 1);
         $maxPercent = config('loyalty.max_redemption_percent', 20);
         $minRedeem = config('loyalty.min_redeem', 100);
 
@@ -150,6 +150,66 @@ class PricingService
         $quote['total_amount'] = $totalAmount;
         // Points discount is NOT eligible for loyalty earn
         $quote['eligible_loyalty_amount'] = $totalAmount;
+
+        return $quote;
+    }
+
+    /**
+     * Calculate comprehensive quote considering promo code, addons, and loyalty points altogether.
+     */
+    public function calculateFullQuote(
+        RoomType $roomType,
+        Carbon $checkIn,
+        Carbon $checkOut,
+        ?string $promoCode = null,
+        bool $usePoints = false,
+        array $selectedAddons = [],
+        ?User $user = null
+    ): array {
+        $quote = $this->calculateQuote($roomType, $checkIn, $checkOut);
+
+        // 1. Promo code applied to room subtotal
+        if (!empty($promoCode)) {
+            $result = $this->promotionService->validateForQuote($promoCode, $quote['subtotal'], $user);
+            $quote['promotion_discount'] = $result['discount'];
+            $quote['promotion'] = $result['promotion'];
+        }
+
+        // 2. Addons added to total
+        if (!empty($selectedAddons)) {
+            $quote = $this->calculateQuoteWithAddons($quote, $selectedAddons);
+        }
+
+        // 3. Loyalty points (applied against remaining payable amount)
+        $subtotalWithAddons = $quote['subtotal'] + ($quote['addon_total'] ?? 0);
+        $remainingBeforePoints = max(0, $subtotalWithAddons - $quote['promotion_discount']);
+
+        if ($usePoints && $user && $remainingBeforePoints > 0) {
+            $pointValue = config('loyalty.point_value', 1);
+            $maxPercent = config('loyalty.max_redemption_percent', 20);
+            $minRedeem = config('loyalty.min_redeem', 100);
+
+            $balance = $this->loyaltyService->getBalance($user);
+
+            if ($balance >= $minRedeem) {
+                // Max discount based on base room subtotal policy percentage
+                $maxDiscountAllowed = (int) floor($quote['subtotal'] * ($maxPercent / 100));
+                $maxPossible = min($maxDiscountAllowed, $remainingBeforePoints);
+
+                $requestedDiscount = $balance * $pointValue;
+                $actualDiscount = min($requestedDiscount, $maxPossible);
+
+                if ($actualDiscount > 0) {
+                    $actualPoints = (int) ceil($actualDiscount / $pointValue);
+                    $quote['points_discount'] = $actualDiscount;
+                    $quote['points_redeemed'] = $actualPoints;
+                }
+            }
+        }
+
+        $finalTotal = max(0, $subtotalWithAddons - $quote['promotion_discount'] - $quote['points_discount']);
+        $quote['total_amount'] = $finalTotal;
+        $quote['eligible_loyalty_amount'] = $finalTotal;
 
         return $quote;
     }

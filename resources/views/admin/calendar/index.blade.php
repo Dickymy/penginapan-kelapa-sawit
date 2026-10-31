@@ -84,8 +84,8 @@
                         <template x-for="block in getRoomBlocks(room.id)" :key="'rb-'+block.id">
                             <div class="absolute h-10 top-2 rounded-md border border-gray-300 bg-gray-200 opacity-80 flex items-center justify-center text-xs text-gray-600 font-medium overflow-hidden cursor-help diagonal-stripes"
                                  :style="getBlockStyle(block)"
-                                 :title="`Diblokir: ${block.reason}\n${block.start_date} s/d ${block.end_date}`">
-                                <span class="bg-white/80 px-1 rounded truncate" x-text="block.reason"></span>
+                                 :title="`Diblokir: ${block.reason}\n${block.start_date} s/d ${block.end_date ? block.end_date : 'Seterusnya'}`">
+                                <span class="bg-white/80 px-1 rounded truncate text-gray-700" x-text="block.reason"></span>
                             </div>
                         </template>
                     </div>
@@ -115,145 +115,183 @@
 
 @push('scripts')
 <script>
-document.addEventListener('alpine:init', () => {
-    Alpine.data('calendarApp', () => ({
-        loading: true,
-        currentDate: new Date(),
-        rooms: [],
-        bookings: [],
-        roomBlocks: [],
-        
-        get monthYearString() {
-            return this.currentDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-        },
-        
-        get daysInMonth() {
-            const year = this.currentDate.getFullYear();
-            const month = this.currentDate.getMonth();
-            const daysCount = new Date(year, month + 1, 0).getDate();
+(() => {
+    const parseLocalDate = (str) => {
+        if (!str) return null;
+        const parts = str.split('T')[0].split('-');
+        return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    };
+
+    const formatDateStr = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
+    const initCalendarApp = () => {
+        Alpine.data('calendarApp', () => ({
+            loading: true,
+            currentDate: new Date(),
+            rooms: [],
+            bookings: [],
+            roomBlocks: [],
             
-            const days = [];
-            for (let i = 1; i <= daysCount; i++) {
-                const date = new Date(year, month, i);
-                // Adjust for timezone offset to avoid JS date shifting
-                const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+            get monthYearString() {
+                return this.currentDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+            },
+            
+            get daysInMonth() {
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                const daysCount = new Date(year, month + 1, 0).getDate();
                 
-                days.push({
-                    date: dateString,
-                    dayNumber: i,
-                    dayName: date.toLocaleDateString('id-ID', { weekday: 'short' }),
-                    dateObj: date
-                });
-            }
-            return days;
-        },
-        
-        changeMonth(delta) {
-            this.currentDate.setMonth(this.currentDate.getMonth() + delta);
-            this.fetchData();
-        },
-        
-        isToday(dateString) {
-            const today = new Date();
-            const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-            return dateString === todayString;
-        },
-        
-        isWeekend(dateString) {
-            const date = new Date(dateString);
-            return date.getDay() === 0 || date.getDay() === 6;
-        },
-        
-        async fetchData() {
-            this.loading = true;
-            try {
-                const days = this.daysInMonth;
-                const startDate = days[0].date;
-                const endDate = days[days.length - 1].date;
+                const days = [];
+                for (let i = 1; i <= daysCount; i++) {
+                    const date = new Date(year, month, i);
+                    const dateString = formatDateStr(date);
+                    
+                    days.push({
+                        date: dateString,
+                        dayNumber: i,
+                        dayName: date.toLocaleDateString('id-ID', { weekday: 'short' }),
+                        dateObj: date
+                    });
+                }
+                return days;
+            },
+            
+            changeMonth(delta) {
+                const newDate = new Date(this.currentDate);
+                newDate.setDate(1); // Set to 1 to prevent month overflow
+                newDate.setMonth(newDate.getMonth() + delta);
+                this.currentDate = newDate;
+                this.fetchData();
+            },
+            
+            isToday(dateString) {
+                const today = new Date();
+                return dateString === formatDateStr(today);
+            },
+            
+            isWeekend(dateString) {
+                const date = parseLocalDate(dateString);
+                return date ? (date.getDay() === 0 || date.getDay() === 6) : false;
+            },
+            
+            async fetchData() {
+                this.loading = true;
+                try {
+                    const days = this.daysInMonth;
+                    if (days.length === 0) return;
+                    const startDate = days[0].date;
+                    const endDate = days[days.length - 1].date;
+                    
+                    const response = await fetch(`/admin/calendar/data?start_date=${startDate}&end_date=${endDate}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    
+                    this.rooms = data.rooms || [];
+                    this.bookings = data.bookings || [];
+                    this.roomBlocks = data.room_blocks || [];
+                } catch (error) {
+                    console.error('Error fetching calendar data:', error);
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            getRoomBookings(roomId) {
+                return this.bookings.filter(b => b.room_id === roomId);
+            },
+            
+            getRoomBlocks(roomId) {
+                return this.roomBlocks.filter(b => b.room_id === roomId);
+            },
+            
+            getBookingColorClass(status) {
+                switch(status) {
+                    case 'pending_payment': return 'bg-pink-500';
+                    case 'confirmed': return 'bg-green-600';
+                    case 'checked_in': return 'bg-blue-600';
+                    case 'checked_out': return 'bg-gray-400';
+                    default: return 'bg-gray-500';
+                }
+            },
+            
+            // Calculate style for absolute positioning on grid
+            _calculatePositionStyle(startStr, endStr) {
+                const monthDays = this.daysInMonth;
+                if (monthDays.length === 0) return 'display: none;';
                 
-                const response = await fetch(`/admin/calendar/data?start_date=${startDate}&end_date=${endDate}`);
-                const data = await response.json();
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                const gridStart = new Date(year, month, 1);
+                const gridEnd = new Date(year, month + 1, 1);
                 
-                this.rooms = data.rooms;
-                this.bookings = data.bookings;
-                this.roomBlocks = data.room_blocks;
-            } catch (error) {
-                console.error('Error fetching calendar data:', error);
-                alert('Gagal mengambil data kalender.');
-            } finally {
-                this.loading = false;
+                let itemStart = parseLocalDate(startStr);
+                let itemEnd = parseLocalDate(endStr);
+                
+                if (!itemStart || !itemEnd) return 'display: none;';
+                
+                // If item is completely before or after this month view
+                if (itemEnd <= gridStart || itemStart >= gridEnd) {
+                    return 'display: none;';
+                }
+                
+                // Clamp item range to the visible month window
+                if (itemStart < gridStart) {
+                    itemStart = gridStart;
+                }
+                if (itemEnd > gridEnd) {
+                    itemEnd = gridEnd;
+                }
+                
+                // Cell width is 64px (w-16)
+                const CELL_WIDTH = 64;
+                const msPerDay = 1000 * 60 * 60 * 24;
+                
+                const startOffsetDays = Math.round((itemStart - gridStart) / msPerDay);
+                const durationDays = Math.round((itemEnd - itemStart) / msPerDay);
+                
+                if (durationDays <= 0) return 'display: none;';
+                
+                const left = startOffsetDays * CELL_WIDTH;
+                const width = durationDays * CELL_WIDTH;
+                
+                return `left: ${left}px; width: ${width}px;`;
+            },
+            
+            getBookingStyle(booking) {
+                return this._calculatePositionStyle(booking.check_in, booking.check_out);
+            },
+            
+            getBlockStyle(block) {
+                let endAdjusted;
+                if (block.end_date) {
+                    const endD = parseLocalDate(block.end_date);
+                    endD.setDate(endD.getDate() + 1);
+                    endAdjusted = formatDateStr(endD);
+                } else {
+                    // Indefinite block extends through the end of the displayed month
+                    const year = this.currentDate.getFullYear();
+                    const month = this.currentDate.getMonth();
+                    const nextMonthFirst = new Date(year, month + 1, 1);
+                    endAdjusted = formatDateStr(nextMonthFirst);
+                }
+                return this._calculatePositionStyle(block.start_date, endAdjusted);
             }
-        },
-        
-        getRoomBookings(roomId) {
-            return this.bookings.filter(b => b.room_id === roomId);
-        },
-        
-        getRoomBlocks(roomId) {
-            return this.roomBlocks.filter(b => b.room_id === roomId);
-        },
-        
-        getBookingColorClass(status) {
-            switch(status) {
-                case 'pending_payment': return 'bg-pink-400';
-                case 'confirmed': return 'bg-green-500';
-                case 'checked_in': return 'bg-blue-500';
-                case 'checked_out': return 'bg-gray-400';
-                default: return 'bg-gray-500';
-            }
-        },
-        
-        // Calculate style for absolute positioning on grid
-        _calculatePositionStyle(startStr, endStr) {
-            const monthDays = this.daysInMonth;
-            if (monthDays.length === 0) return '';
-            
-            const monthStart = new Date(monthDays[0].date);
-            const monthEnd = new Date(monthDays[monthDays.length - 1].date);
-            
-            let itemStart = new Date(startStr);
-            let itemEnd = new Date(endStr);
-            
-            // Adjust if starts before this month
-            if (itemStart < monthStart) {
-                itemStart = monthStart;
-            }
-            
-            // Adjust if ends after this month
-            if (itemEnd > monthEnd) {
-                itemEnd = monthEnd;
-            }
-            
-            // Cell width is 64px (w-16)
-            const CELL_WIDTH = 64;
-            
-            // Calculate start offset (days from start of month)
-            const startOffsetDays = Math.round((itemStart - monthStart) / (1000 * 60 * 60 * 24));
-            
-            // Calculate width (days duration)
-            const durationDays = Math.round((itemEnd - itemStart) / (1000 * 60 * 60 * 24));
-            
-            const left = startOffsetDays * CELL_WIDTH;
-            const width = Math.max(1, durationDays) * CELL_WIDTH;
-            
-            return `left: ${left}px; width: ${width}px;`;
-        },
-        
-        getBookingStyle(booking) {
-            return this._calculatePositionStyle(booking.check_in, booking.check_out);
-        },
-        
-        getBlockStyle(block) {
-            // Blocks are full days, so we add 1 day to end to cover it visually.
-            const endParts = block.end_date.split('-');
-            const endD = new Date(block.end_date);
-            endD.setDate(endD.getDate() + 1);
-            const endAdjusted = `${endD.getFullYear()}-${String(endD.getMonth()+1).padStart(2,'0')}-${String(endD.getDate()).padStart(2,'0')}`;
-            
-            return this._calculatePositionStyle(block.start_date, endAdjusted);
-        }
-    }));
-});
+        }));
+    };
+
+    if (window.Alpine) {
+        initCalendarApp();
+    } else {
+        document.addEventListener('alpine:init', initCalendarApp);
+    }
+})();
 </script>
 @endpush
 @endsection

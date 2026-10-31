@@ -18,28 +18,27 @@ class CalendarController extends Controller
 
     public function data(Request $request)
     {
-        $startDate = Carbon::parse($request->input('start_date', now()->startOfMonth()->toDateString()));
-        $endDate = Carbon::parse($request->input('end_date', now()->endOfMonth()->toDateString()));
+        $startDate = Carbon::parse($request->input('start_date', now()->startOfMonth()->toDateString()))->startOfDay();
+        $endDate = Carbon::parse($request->input('end_date', now()->endOfMonth()->toDateString()))->endOfDay();
+
+        $startDateStr = $startDate->toDateString();
+        $endDateStr = $endDate->toDateString();
 
         // Get all active rooms
         $rooms = Room::with('roomType')->where('is_active', true)->orderBy('sort_order')->get()->map(function ($room) {
             return [
                 'id' => $room->id,
                 'name' => $room->name,
-                'room_type' => $room->roomType->name,
+                'room_type' => $room->roomType?->name ?? '-',
             ];
         });
 
         // Get overlapping bookings
         $bookings = Booking::with('room')
             ->whereIn('status', ['pending_payment', 'confirmed', 'checked_in', 'checked_out'])
-            ->where(function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('check_in', [$startDate, $endDate])
-                      ->orWhereBetween('check_out', [$startDate, $endDate])
-                      ->orWhere(function ($q) use ($startDate, $endDate) {
-                          $q->where('check_in', '<=', $startDate)
-                            ->where('check_out', '>=', $endDate);
-                      });
+            ->where(function ($query) use ($startDateStr, $endDateStr) {
+                $query->where('check_in', '<=', $endDateStr)
+                      ->where('check_out', '>=', $startDateStr);
             })
             ->get()
             ->map(function ($booking) {
@@ -48,28 +47,28 @@ class CalendarController extends Controller
                     'booking_code' => $booking->booking_code,
                     'room_id' => $booking->room_id,
                     'guest_name' => $booking->guest_name,
-                    'check_in' => $booking->check_in->toDateString(),
-                    'check_out' => $booking->check_out->toDateString(),
-                    'status' => $booking->status->value,
-                    'status_label' => $booking->status->label(),
+                    'check_in' => $booking->check_in?->toDateString(),
+                    'check_out' => $booking->check_out?->toDateString(),
+                    'status' => $booking->status instanceof \App\Enums\BookingStatus ? $booking->status->value : (string) $booking->status,
+                    'status_label' => $booking->status instanceof \App\Enums\BookingStatus ? $booking->status->label() : (string) $booking->status,
                 ];
             });
 
         // Get overlapping room blocks
-        $roomBlocks = RoomBlock::where(function ($query) use ($startDate, $endDate) {
-            $query->whereBetween('start_date', [$startDate, $endDate])
-                  ->orWhereBetween('end_date', [$startDate, $endDate])
-                  ->orWhere(function ($q) use ($startDate, $endDate) {
-                      $q->where('start_date', '<=', $startDate)
-                        ->where('end_date', '>=', $endDate);
+        // Room blocks can be indefinite (end_date is null)
+        $roomBlocks = RoomBlock::where(function ($query) use ($startDateStr, $endDateStr) {
+            $query->where('start_date', '<=', $endDateStr)
+                  ->where(function ($sub) use ($startDateStr) {
+                      $sub->where('end_date', '>=', $startDateStr)
+                          ->orWhereNull('end_date');
                   });
         })->get()->map(function ($block) {
             return [
                 'id' => $block->id,
                 'room_id' => $block->room_id,
-                'start_date' => $block->start_date->toDateString(),
-                'end_date' => $block->end_date->toDateString(),
-                'reason' => $block->reason,
+                'start_date' => $block->start_date?->toDateString(),
+                'end_date' => $block->end_date?->toDateString(),
+                'reason' => $block->reason ?? 'Diblokir',
             ];
         });
 

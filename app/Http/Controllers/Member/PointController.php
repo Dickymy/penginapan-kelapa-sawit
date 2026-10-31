@@ -18,7 +18,7 @@ class PointController extends Controller
     {
         $user = $request->user();
         $balance = $this->loyaltyService->getBalance($user);
-        $pointValue = config('loyalty.point_value', 50);
+        $pointValue = config('loyalty.point_value', 1);
 
         $transactions = LoyaltyTransaction::where('user_id', $user->id)
             ->orderByDesc('created_at')

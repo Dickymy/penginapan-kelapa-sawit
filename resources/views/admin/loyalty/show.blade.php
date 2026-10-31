@@ -22,7 +22,7 @@
     <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
         <h3 class="text-sm font-medium text-gray-500 mb-1">Saldo Poin Saat Ini</h3>
         <p class="text-3xl font-bold text-primary-700">{{ number_format($balance) }}</p>
-        <p class="text-xs text-gray-400 mt-1">≈ Rp{{ number_format($balance * config('loyalty.point_value', 50), 0, ',', '.') }}</p>
+        <p class="text-xs text-gray-400 mt-1">≈ Rp{{ number_format($balance * config('loyalty.point_value', 1), 0, ',', '.') }}</p>
     </div>
 
     {{-- Adjust Form --}}

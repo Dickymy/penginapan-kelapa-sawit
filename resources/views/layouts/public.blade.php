@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,14 +9,22 @@
     <link rel="icon" href="{{ asset('images/logo.webp') }}" type="image/webp">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <link rel="preload" as="image" href="{{ asset('images/logo.webp') }}">
-    <meta name="theme-color" content="#0284c7">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#16a34a">
     {{-- x-cloak harus aktif sebelum Alpine init agar tidak ada flash of unstyled Alpine elements --}}
     <style>[x-cloak] { display: none !important; }</style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen flex flex-col bg-white text-gray-800 font-sans">
+<body class="min-h-screen flex flex-col bg-white text-gray-800 font-sans" x-data>
+    <div id="page-progress-bar"></div>
     {{-- Header --}}
-    <header class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-40" x-data="{ open: false }" @keydown.escape.window="open = false">
+    <header class="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100/50 sticky top-0 z-40 transition-all duration-300" 
+            x-data="{ scrolled: false }" 
+            @scroll.window="scrolled = (window.pageYOffset > 20)" 
+            :class="{'bg-white/95 shadow-md': scrolled, 'bg-white/80': !scrolled}" 
+            @keydown.escape.window="$store.mobileNav.close()">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 {{-- Logo --}}
@@ -40,10 +48,12 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         Galeri
                     </a>
-                    <a href="{{ route('booking.my') }}" class="flex items-center gap-1.5 px-3 py-2 rounded-md transition border-b-2 {{ request()->routeIs('booking.my') || request()->routeIs('booking.verify*') || request()->routeIs('booking.guest.detail') || request()->routeIs('member.bookings.*') ? 'border-primary-600 text-primary-700 bg-primary-50' : 'border-transparent text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">
+                    @guest
+                    <a href="{{ route('booking.my') }}" class="flex items-center gap-1.5 px-3 py-2 rounded-md transition border-b-2 {{ request()->routeIs('booking.my') || request()->routeIs('booking.verify*') || request()->routeIs('booking.guest.detail') ? 'border-primary-600 text-primary-700 bg-primary-50' : 'border-transparent text-gray-600 hover:text-primary-600 hover:bg-gray-50' }}">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
                         Booking Saya
                     </a>
+                    @endguest
 
                     {{-- Dropdown Lainnya --}}
                     @php
@@ -98,7 +108,7 @@
                         </div>
                     </div>
 
-                    <a href="{{ route('home') }}#cari-kamar" class="ml-2 flex items-center gap-1.5 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700 transition shadow-sm hover:shadow-md">
+                    <a href="{{ route('home') }}#cari-kamar" class="ml-2 flex items-center gap-1.5 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-500 active:scale-95 transition-all duration-300 shadow-sm hover:shadow-primary-600/30">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         Cari Kamar
                     </a>
@@ -163,11 +173,11 @@
                 </div>
 
                 {{-- Mobile Hamburger --}}
-                <button @click="open = !open" class="lg:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100 transition" aria-label="Buka menu navigasi">
-                    <svg x-show="!open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button @click="$store.mobileNav.toggle()" class="lg:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100 transition" aria-label="Buka menu navigasi">
+                    <svg x-show="!$store.mobileNav.open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
-                    <svg x-show="open" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg x-show="$store.mobileNav.open" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
@@ -175,20 +185,21 @@
         </div>
 
         {{-- Mobile Drawer Overlay --}}
-        <div x-show="open" x-cloak class="fixed inset-0 z-40 lg:hidden">
+        <template x-teleport="body">
+            <div x-show="$store.mobileNav.open" x-cloak class="fixed inset-0 z-50 lg:hidden">
             {{-- Backdrop --}}
-            <div x-show="open"
+            <div x-show="$store.mobileNav.open"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
                  x-transition:leave="transition ease-in duration-150"
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
-                 @click="open = false"
-                 class="fixed inset-0 bg-black/40"></div>
+                 @click="$store.mobileNav.close()"
+                 class="fixed inset-0 bg-black/50 backdrop-blur-sm"></div>
 
             {{-- Drawer Panel --}}
-            <div x-show="open"
+            <div x-show="$store.mobileNav.open"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="translate-x-full"
                  x-transition:enter-end="translate-x-0"
@@ -196,119 +207,197 @@
                  x-transition:leave-start="translate-x-0"
                  x-transition:leave-end="translate-x-full"
                  class="fixed inset-y-0 right-0 w-72 max-w-[85vw] bg-white shadow-xl flex flex-col"
-                 x-effect="document.body.style.overflow = open ? 'hidden' : ''">
+                 x-effect="document.body.style.overflow = $store.mobileNav.open ? 'hidden' : ''"
+                 x-data="{
+                     canScrollDown: false,
+                     canScrollUp: false,
+                     checkScroll(el) {
+                         if (!el) return;
+                         this.canScrollDown = (el.scrollHeight - el.scrollTop - el.clientHeight > 15);
+                         this.canScrollUp = (el.scrollTop > 15);
+                     }
+                 }"
+                 x-init="
+                     $watch('$store.mobileNav.open', val => {
+                         if (val) {
+                             setTimeout(() => {
+                                 checkScroll($refs.navContent);
+                             }, 150);
+                         }
+                     });
+                 ">
                 {{-- Drawer Header --}}
-                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-white">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-white shrink-0">
                     <a href="{{ route('home') }}" class="flex items-center gap-2 text-lg font-bold text-primary-700">
                         <img src="{{ asset('images/logo.webp') }}" alt="Logo" class="h-6 w-auto object-contain">
-                        <span>Penginapan Kelapa Sawit</span>
+                        <span class="truncate">Penginapan Kelapa Sawit</span>
                     </a>
-                    <button @click="open = false" class="p-2 -mr-2 rounded-md text-gray-500 hover:bg-gray-100" aria-label="Tutup menu">
+                    <button @click="$store.mobileNav.close()" class="p-2 -mr-2 rounded-md text-gray-500 hover:bg-gray-100" aria-label="Tutup menu">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
 
-                {{-- Drawer Navigation --}}
-                <nav class="flex-1 overflow-y-auto px-4 py-5 space-y-1 bg-gray-50/50">
-                    {{-- CTA Utama --}}
-                    <div class="mb-6 px-1">
-                        <a href="{{ route('home') }}#cari-kamar" @click="open = false" class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-primary-600 text-white rounded-xl text-sm font-semibold hover:bg-primary-700 transition shadow-sm hover:shadow-md">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                            Cari Kamar Tersedia
+                {{-- Relative wrapper for Nav + Scroll indicators --}}
+                <div class="relative flex-1 min-h-0 flex flex-col bg-gray-50/50">
+                    {{-- Top Scroll Shadow --}}
+                    <div x-show="canScrollUp" x-cloak
+                         x-transition.opacity.duration.200ms
+                         class="pointer-events-none absolute top-0 inset-x-0 h-6 bg-gradient-to-b from-gray-200/60 to-transparent z-10"></div>
+
+                    {{-- Drawer Navigation --}}
+                    <nav x-ref="navContent"
+                         @scroll="checkScroll($event.target)"
+                         class="flex-1 overflow-y-auto px-4 py-5 space-y-1 custom-scrollbar overscroll-contain">
+                        {{-- CTA Utama --}}
+                        <div class="mb-6 px-1">
+                            <a href="{{ route('home') }}#cari-kamar" @click="$store.mobileNav.close()" class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-primary-600 text-white rounded-xl text-sm font-semibold hover:bg-primary-700 transition shadow-sm hover:shadow-md">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                Cari Kamar Tersedia
+                            </a>
+                        </div>
+
+                        <p class="px-3 py-1 text-xs font-bold text-primary-600/80 uppercase tracking-wider">Jelajahi</p>
+                        <a href="{{ route('home') }}" @click="$store.mobileNav.close()" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('home') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
+                            <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                            Beranda
                         </a>
+                        <a href="{{ route('rooms.index') }}" @click="$store.mobileNav.close()" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('rooms.*') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
+                            <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                            Kamar
+                        </a>
+                        <a href="{{ route('gallery') }}" @click="$store.mobileNav.close()" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('gallery') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
+                            <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            Galeri
+                        </a>
+                        <a href="{{ route('nearby-places') }}" @click="$store.mobileNav.close()" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('nearby-places') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
+                            <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Sekitar
+                        </a>
+                        <a href="{{ route('location') }}" @click="$store.mobileNav.close()" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('location') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
+                            <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            Lokasi
+                        </a>
+
+                        @guest
+                        <p class="px-3 py-1 pt-6 text-xs font-bold text-primary-600/80 uppercase tracking-wider">Akun Saya</p>
+                        <a href="{{ route('booking.my') }}" @click="$store.mobileNav.close()" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('booking.my') || request()->routeIs('booking.verify*') || request()->routeIs('booking.guest.detail') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
+                            <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                            Booking Saya
+                        </a>
+                        @endguest
+                        
+                        <p class="px-3 py-1 pt-6 text-xs font-bold text-primary-600/80 uppercase tracking-wider">Bantuan & Info</p>
+                        <a href="{{ route('faq') }}" @click="$store.mobileNav.close()" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('faq') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
+                            <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            FAQ
+                        </a>
+                        <a href="{{ route('contact.create') }}" @click="$store.mobileNav.close()" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('contact.*') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
+                            <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                            Hubungi Kami
+                        </a>
+                        <a href="{{ route('about') }}" @click="$store.mobileNav.close()" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('about') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
+                            <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Tentang
+                        </a>
+                        <a href="{{ route('policy') }}" @click="$store.mobileNav.close()" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('policy') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
+                            <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Kebijakan
+                        </a>
+                    </nav>
+
+                    {{-- Bottom Scroll Shadow --}}
+                    <div x-show="canScrollDown" x-cloak
+                         x-transition.opacity.duration.200ms
+                         class="pointer-events-none absolute bottom-0 inset-x-0 h-8 bg-gradient-to-t from-gray-200/80 to-transparent z-10"></div>
+
+                    {{-- Scroll Down Indicator Floating Badge --}}
+                    <div x-show="canScrollDown" x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 translate-y-2"
+                         @click="$refs.navContent.scrollBy({ top: 140, behavior: 'smooth' })"
+                         class="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-3 py-1 bg-primary-600 text-white text-[11px] font-bold rounded-full shadow-lg border border-primary-500 cursor-pointer animate-bounce hover:bg-primary-700 transition-all select-none">
+                        <span>Menu Lainnya</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                     </div>
-
-                    <p class="px-3 py-1 text-xs font-bold text-primary-600/80 uppercase tracking-wider">Jelajahi</p>
-                    <a href="{{ route('home') }}" @click="open = false" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('home') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
-                        <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                        Beranda
-                    </a>
-                    <a href="{{ route('rooms.index') }}" @click="open = false" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('rooms.*') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
-                        <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                        Kamar
-                    </a>
-                    <a href="{{ route('gallery') }}" @click="open = false" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('gallery') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
-                        <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        Galeri
-                    </a>
-                    <a href="{{ route('nearby-places') }}" @click="open = false" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('nearby-places') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
-                        <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        Sekitar
-                    </a>
-                    <a href="{{ route('location') }}" @click="open = false" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('location') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
-                        <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                        Lokasi
-                    </a>
-
-                    <p class="px-3 py-1 pt-6 text-xs font-bold text-primary-600/80 uppercase tracking-wider">Akun Saya</p>
-                    <a href="{{ route('booking.my') }}" @click="open = false" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('booking.my') || request()->routeIs('booking.verify*') || request()->routeIs('booking.guest.detail') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
-                        <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                        Booking Saya
-                    </a>
-                    
-                    <p class="px-3 py-1 pt-6 text-xs font-bold text-primary-600/80 uppercase tracking-wider">Bantuan & Info</p>
-                    <a href="{{ route('faq') }}" @click="open = false" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('faq') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
-                        <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        FAQ
-                    </a>
-                    <a href="{{ route('contact.create') }}" @click="open = false" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('contact.*') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
-                        <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                        Hubungi Kami
-                    </a>
-                    <a href="{{ route('about') }}" @click="open = false" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('about') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
-                        <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        Tentang
-                    </a>
-                    <a href="{{ route('policy') }}" @click="open = false" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('policy') ? 'text-primary-700 bg-primary-100/50' : 'text-gray-700 hover:bg-gray-100 hover:text-primary-600' }}">
-                        <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        Kebijakan
-                    </a>
-                </nav>
+                </div>
 
                 {{-- Drawer Footer (Account) --}}
-                <div class="border-t border-gray-100 px-4 py-4 space-y-2">
+                <div class="border-t border-gray-100 px-4 py-4 bg-white shrink-0">
                     @auth
-                        {{-- User Identity --}}
-                        <div class="flex items-center gap-3 px-3 py-2 mb-2">
-                            @if(auth()->user()->avatar_url)
-                                <img src="{{ auth()->user()->avatar_url }}" alt="" class="w-9 h-9 rounded-full object-cover">
-                            @else
-                                <div class="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center">
-                                    <span class="text-sm font-bold text-primary-700">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
+                        <div x-data="{ accountMenuOpen: false }" class="bg-gray-50 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
+                            {{-- User Identity Button (Accordion trigger) --}}
+                            <button @click="accountMenuOpen = !accountMenuOpen" class="w-full flex items-center justify-between p-3 transition hover:bg-gray-100">
+                                <div class="flex items-center gap-3 text-left">
+                                    @if(auth()->user()->avatar_url)
+                                        <img src="{{ auth()->user()->avatar_url }}" alt="" class="w-10 h-10 rounded-full object-cover shadow-sm">
+                                    @else
+                                        <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center shadow-sm">
+                                            <span class="text-sm font-bold text-primary-700">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
+                                        </div>
+                                    @endif
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 truncate">{{ auth()->user()->name }}</p>
+                                        <p class="text-xs text-gray-500 truncate">{{ auth()->user()->email }}</p>
+                                    </div>
                                 </div>
-                            @endif
-                            <div class="min-w-0">
-                                <p class="text-sm font-medium text-gray-900 truncate">{{ auth()->user()->name }}</p>
-                                <p class="text-xs text-gray-500 truncate">{{ auth()->user()->email }}</p>
+                                <svg :class="{'rotate-180': accountMenuOpen}" class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            
+                            {{-- Collapsed Menu --}}
+                            <div x-show="accountMenuOpen" 
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 -translate-y-2"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 class="bg-white border-t border-gray-100">
+                                <div class="p-2 space-y-1">
+                                    <a href="{{ route('member.dashboard') }}" @click="$store.mobileNav.close()" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors">
+                                        <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                                        Dashboard
+                                    </a>
+                                    <a href="{{ route('member.bookings.index') }}" @click="$store.mobileNav.close()" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors">
+                                        <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                        Booking Saya
+                                    </a>
+                                    <a href="{{ route('member.points.index') }}" @click="$store.mobileNav.close()" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors">
+                                        <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        Poin Saya
+                                    </a>
+                                    <a href="{{ route('member.profile.edit') }}" @click="$store.mobileNav.close()" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors">
+                                        <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                        Profil
+                                    </a>
+                                    <div class="border-t border-gray-100 my-1 mx-2"></div>
+                                    <button type="button" @click="$store.mobileNav.close(); $dispatch('open-confirm', { id: 'member-logout' })"
+                                            class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                                        <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                        Keluar
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <a href="{{ route('member.dashboard') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Dashboard</a>
-                        <a href="{{ route('member.bookings.index') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Booking Saya</a>
-                        <a href="{{ route('member.points.index') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Poin Saya</a>
-                        <a href="{{ route('member.profile.edit') }}" @click="open = false" class="flex items-center px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Profil</a>
-                        <button type="button" @click="open = false; $dispatch('open-confirm', { id: 'member-logout' })"
-                                class="flex items-center w-full px-3 py-2.5 rounded-lg text-sm text-red-600 hover:bg-red-50">
-                            Keluar
-                        </button>
                     @else
                         <p class="text-xs text-gray-500 px-3 mb-1">Simpan booking dan kumpulkan poin.</p>
-                        <a href="{{ route('login') }}" @click="open = false" class="block w-full px-4 py-2.5 text-center text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition">
+                        <a href="{{ route('login') }}" @click="$store.mobileNav.close()" class="block w-full px-4 py-2.5 text-center text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition">
                             Masuk
                         </a>
-                        <a href="{{ route('register') }}" @click="open = false" class="block w-full px-4 py-2.5 text-center text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                        <a href="{{ route('register') }}" @click="$store.mobileNav.close()" class="block w-full px-4 py-2.5 text-center text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
                             Daftar
                         </a>
                     @endauth
                 </div>
             </div>
-        </div>
+        </template>
     </header>
 
     {{-- Toast Component --}}
     <x-toast />
 
     {{-- Content --}}
-    <main class="flex-1">
+    <main class="flex-1 pb-16 lg:pb-0">
         {{-- Flash Alerts (for warnings and errors that need to stay visible) --}}
         @if (session('error'))
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
@@ -325,11 +414,11 @@
     </main>
 
     {{-- Footer --}}
-    <footer class="bg-gray-900 border-t border-gray-800 text-gray-400">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 text-sm">
+    <footer class="bg-gray-900 border-t border-gray-800 text-gray-400 pb-20 lg:pb-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
+            <div class="grid grid-cols-12 lg:grid-cols-4 gap-x-4 gap-y-10 lg:gap-8 text-sm">
                 {{-- Property Branding --}}
-                <div class="lg:col-span-1">
+                <div class="col-span-12 lg:col-span-1">
                     <a href="{{ route('home') }}" class="text-2xl font-bold text-white flex items-center gap-2 mb-4">
                         <div class="bg-white p-1 rounded-lg flex items-center justify-center">
                             <img src="{{ asset('images/logo.webp') }}" alt="Logo" class="h-8 w-auto object-contain">
@@ -350,38 +439,65 @@
                 </div>
 
                 {{-- Quick Links --}}
-                <div>
-                    <h3 class="text-white font-bold text-lg mb-4">Tautan Cepat</h3>
-                    <nav class="space-y-3">
-                        <a href="{{ route('rooms.index') }}" class="block text-gray-400 hover:text-white hover:translate-x-1 transition-all">Kamar Tersedia</a>
-                        <a href="{{ route('gallery') }}" class="block text-gray-400 hover:text-white hover:translate-x-1 transition-all">Galeri Penginapan</a>
-                        <a href="{{ route('faq') }}" class="block text-gray-400 hover:text-white hover:translate-x-1 transition-all">Tanya Jawab (FAQ)</a>
-                        <a href="{{ route('nearby-places') }}" class="block text-gray-400 hover:text-white hover:translate-x-1 transition-all">Destinasi Sekitar</a>
-                        <a href="{{ route('policy') }}" class="block text-gray-400 hover:text-white hover:translate-x-1 transition-all">Kebijakan & Syarat</a>
+                <div class="col-span-5 lg:col-span-1">
+                    <h3 class="text-white font-semibold text-xs uppercase tracking-widest mb-5">Tautan Cepat</h3>
+                    <nav class="flex flex-col gap-1">
+                        <a href="{{ route('rooms.index') }}" class="group flex items-center justify-between p-2 -mx-2 rounded-lg hover:bg-gray-800/50 transition-colors">
+                            <span class="text-[13px] text-gray-400 group-hover:text-white transition-colors">Kamar Tersedia</span>
+                            <svg class="w-4 h-4 text-gray-600 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                        <a href="{{ route('gallery') }}" class="group flex items-center justify-between p-2 -mx-2 rounded-lg hover:bg-gray-800/50 transition-colors">
+                            <span class="text-[13px] text-gray-400 group-hover:text-white transition-colors">Galeri</span>
+                            <svg class="w-4 h-4 text-gray-600 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                        <a href="{{ route('faq') }}" class="group flex items-center justify-between p-2 -mx-2 rounded-lg hover:bg-gray-800/50 transition-colors">
+                            <span class="text-[13px] text-gray-400 group-hover:text-white transition-colors">FAQ</span>
+                            <svg class="w-4 h-4 text-gray-600 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                        <a href="{{ route('nearby-places') }}" class="group flex items-center justify-between p-2 -mx-2 rounded-lg hover:bg-gray-800/50 transition-colors">
+                            <span class="text-[13px] text-gray-400 group-hover:text-white transition-colors">Sekitar</span>
+                            <svg class="w-4 h-4 text-gray-600 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                        <a href="{{ route('policy') }}" class="group flex items-center justify-between p-2 -mx-2 rounded-lg hover:bg-gray-800/50 transition-colors">
+                            <span class="text-[13px] text-gray-400 group-hover:text-white transition-colors">Kebijakan</span>
+                            <svg class="w-4 h-4 text-gray-600 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </a>
                     </nav>
                 </div>
 
                 {{-- Contact Info --}}
-                <div>
-                    <h3 class="text-white font-bold text-lg mb-4">Hubungi Kami</h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-primary-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            <span class="text-gray-400 leading-relaxed">{{ \App\Models\Setting::get('contact', 'address', 'Gunung Kelambu, SP 2, Kota Bangun Darat, Kalimantan Timur.') }}</span>
+                <div class="col-span-7 lg:col-span-1">
+                    <h3 class="text-white font-semibold text-xs uppercase tracking-widest mb-5">Hubungi Kami</h3>
+                    <ul class="flex flex-col gap-4">
+                        <li>
+                            <a href="tel:{{ \App\Models\Setting::get('contact', 'phone', '') }}" class="flex items-center gap-3 text-gray-400 hover:text-white transition-colors group">
+                                <div class="w-8 h-8 rounded-full bg-gray-800/80 flex items-center justify-center group-hover:bg-primary-600 transition-colors shrink-0">
+                                    <svg class="w-4 h-4 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                </div>
+                                <span class="text-[13px]">Telepon / WA</span>
+                            </a>
                         </li>
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-primary-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                            <a href="tel:{{ \App\Models\Setting::get('contact', 'phone', '') }}" class="text-gray-400 hover:text-white transition-colors">{{ \App\Models\Setting::get('contact', 'phone', '') ?: \App\Models\Setting::get('contact', 'whatsapp', '') }}</a>
+                        <li>
+                            <a href="mailto:{{ \App\Models\Setting::get('contact', 'email', 'penginapankelapasawit@gmail.com') }}" class="flex items-center gap-3 text-gray-400 hover:text-white transition-colors group">
+                                <div class="w-8 h-8 rounded-full bg-gray-800/80 flex items-center justify-center group-hover:bg-primary-600 transition-colors shrink-0">
+                                    <svg class="w-4 h-4 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                </div>
+                                <span class="text-[13px]">Kirim Email</span>
+                            </a>
                         </li>
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-primary-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            <a href="mailto:{{ \App\Models\Setting::get('contact', 'email', 'penginapankelapasawit@gmail.com') }}" class="text-gray-400 hover:text-white transition-colors">{{ \App\Models\Setting::get('contact', 'email', 'penginapankelapasawit@gmail.com') }}</a>
+                        <li>
+                            <a href="{{ route('location') }}" class="flex items-start gap-3 text-gray-400 hover:text-white transition-colors group pt-1">
+                                <div class="mt-0.5 w-8 h-8 rounded-full bg-gray-800/80 flex items-center justify-center group-hover:bg-primary-600 transition-colors shrink-0">
+                                    <svg class="w-4 h-4 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                </div>
+                                <span class="text-[12px] leading-relaxed pt-1">{{ \App\Models\Setting::get('contact', 'address', 'Gunung Kelambu, SP 2, Kota Bangun Darat, Kalimantan Timur.') }}</span>
+                            </a>
                         </li>
                     </ul>
                 </div>
                 
                 {{-- Payments & Support --}}
-                <div>
+                <div class="col-span-12 lg:col-span-1">
                     <h3 class="text-white font-bold text-lg mb-4">Pembayaran & Dukungan</h3>
                     <p class="text-gray-400 mb-4">Mendukung berbagai metode pembayaran untuk kenyamanan Anda.</p>
                     <div class="flex flex-wrap gap-2 mb-6">
@@ -410,6 +526,84 @@
             </div>
         </div>
     </footer>
+
+    {{-- Mobile Bottom Navigation Bar --}}
+    @if(!isset($hideBottomNav) || !$hideBottomNav)
+    <nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-[0_-4px_25px_rgba(0,0,0,0.06)] pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+         aria-label="Navigasi Utama Mobile"
+         x-data>
+        <div class="grid grid-cols-5 h-14 max-w-md mx-auto items-center px-1">
+            {{-- 1. Beranda --}}
+            <a href="{{ route('home') }}"
+               class="flex flex-col items-center justify-center gap-0.5 text-[11px] transition duration-200 active:scale-95 {{ request()->routeIs('home') ? 'text-primary-700 font-bold' : 'text-gray-500 hover:text-gray-700' }}">
+                <div class="relative">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('home') ? '2.5' : '1.8' }}" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    @if(request()->routeIs('home'))
+                        <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary-600"></span>
+                    @endif
+                </div>
+                <span>Beranda</span>
+            </a>
+
+            {{-- 2. Kamar --}}
+            <a href="{{ route('rooms.index') }}"
+               class="flex flex-col items-center justify-center gap-0.5 text-[11px] transition duration-200 active:scale-95 {{ request()->routeIs('rooms.*') ? 'text-primary-700 font-bold' : 'text-gray-500 hover:text-gray-700' }}">
+                <div class="relative">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('rooms.*') ? '2.5' : '1.8' }}" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                    @if(request()->routeIs('rooms.*'))
+                        <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary-600"></span>
+                    @endif
+                </div>
+                <span>Kamar</span>
+            </a>
+
+            {{-- 3. Cari Kamar (FAB Floating Action Button) --}}
+            <a href="{{ route('home') }}#cari-kamar"
+               class="flex flex-col items-center justify-center relative -top-3 group active:scale-90 transition-transform">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-primary-700 to-primary-500 text-white flex items-center justify-center shadow-lg shadow-primary-600/40 ring-4 ring-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+                <span class="text-[10px] font-semibold text-primary-700 mt-0.5">Cari</span>
+            </a>
+
+            {{-- 4. Booking Saya / Akun --}}
+            @auth
+            <a href="{{ route('member.bookings.index') }}"
+               class="flex flex-col items-center justify-center gap-0.5 text-[11px] transition duration-200 active:scale-95 {{ request()->routeIs('member.*') ? 'text-primary-700 font-bold' : 'text-gray-500 hover:text-gray-700' }}">
+                <div class="relative">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('member.*') ? '2.5' : '1.8' }}" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    @if(request()->routeIs('member.*'))
+                        <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary-600"></span>
+                    @endif
+                </div>
+                <span>Booking</span>
+            </a>
+            @else
+            <a href="{{ route('booking.my') }}"
+               class="flex flex-col items-center justify-center gap-0.5 text-[11px] transition duration-200 active:scale-95 {{ request()->routeIs('booking.my') || request()->routeIs('booking.verify*') || request()->routeIs('booking.guest.detail') ? 'text-primary-700 font-bold' : 'text-gray-500 hover:text-gray-700' }}">
+                <div class="relative">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('booking.my') ? '2.5' : '1.8' }}" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    @if(request()->routeIs('booking.my') || request()->routeIs('booking.verify*') || request()->routeIs('booking.guest.detail'))
+                        <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary-600"></span>
+                    @endif
+                </div>
+                <span>Booking</span>
+            </a>
+            @endauth
+
+            {{-- 5. Menu Lainnya --}}
+            <button type="button"
+                    @click="$store.mobileNav.toggle()"
+                    class="flex flex-col items-center justify-center gap-0.5 text-[11px] transition duration-200 active:scale-95"
+                    :class="$store.mobileNav.open ? 'text-primary-700 font-bold' : 'text-gray-500 hover:text-gray-700'"
+                    aria-label="Buka menu lainnya">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                <span>Menu</span>
+            </button>
+        </div>
+    </nav>
+    @endif
+
     {{-- Member Logout Confirmation Modal --}}
     @auth
     <x-confirm-modal

@@ -20,7 +20,11 @@ class ContactController extends Controller
     {
         $message = ContactMessage::create($request->validated());
 
-        Mail::to($message->email)->send(new ContactAutoReplyMail($message));
+        try {
+            Mail::to($message->email)->send(new ContactAutoReplyMail($message));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal mengirim auto-reply kontak: ' . $e->getMessage());
+        }
 
         return redirect()->back()->with('success', 'Terima kasih! Pesan Anda telah terkirim. Kami akan segera merespons Anda.');
     }

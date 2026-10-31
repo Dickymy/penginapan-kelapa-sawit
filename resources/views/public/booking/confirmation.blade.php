@@ -9,6 +9,7 @@
 @section('content')
 @php
     use App\Enums\BookingStatus;
+    $isPaidOrConfirmed = $booking->isPaid() || $booking->status === BookingStatus::Confirmed;
     $accessUrl = $rawToken
         ? route('booking.guest.detail', ['bookingCode' => $booking->booking_code, 'access' => $rawToken])
         : route('booking.guest.detail', $booking->booking_code);
@@ -23,7 +24,11 @@
             </svg>
         </div>
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Booking Berhasil!</h1>
-        <p class="text-gray-600 mt-2">Booking Anda telah berhasil dibuat. Silakan lakukan pembayaran sebelum batas waktu.</p>
+        @if($isPaidOrConfirmed)
+            <p class="text-gray-600 mt-2">Reservasi Anda telah terkonfirmasi dan tidak memerlukan pembayaran lagi.</p>
+        @else
+            <p class="text-gray-600 mt-2">Booking Anda telah berhasil dibuat. Silakan lakukan pembayaran sebelum batas waktu.</p>
+        @endif
     </div>
 
     {{-- Booking Summary Card --}}
@@ -33,9 +38,15 @@
                 <p class="text-xs text-gray-500">Kode Booking</p>
                 <p class="text-lg font-bold text-gray-900 font-mono">{{ $booking->booking_code }}</p>
             </div>
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
-                Menunggu Pembayaran
-            </span>
+            @if($isPaidOrConfirmed)
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                    Terkonfirmasi
+                </span>
+            @else
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                    Menunggu Pembayaran
+                </span>
+            @endif
         </div>
 
         <div class="px-5 sm:px-6 py-5">
@@ -66,15 +77,25 @@
                 </div>
             </div>
 
-            <div class="flex items-center justify-between mt-5 pt-4 border-t border-gray-100">
-                <span class="text-sm text-gray-600">Total Pembayaran</span>
+            @if($booking->promotion_discount > 0)
+            <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 text-sm text-green-700">
+                <span class="flex items-center gap-1.5 font-medium">
+                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                    Diskon Promo ({{ $booking->promotion_code_snapshot }})
+                </span>
+                <span class="font-bold text-green-700">-Rp{{ number_format($booking->promotion_discount, 0, ',', '.') }}</span>
+            </div>
+            @endif
+
+            <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                <span class="text-sm font-semibold text-gray-700">Total Pembayaran</span>
                 <span class="text-xl font-bold text-primary-600">{{ $booking->formatted_total }}</span>
             </div>
         </div>
     </div>
 
-    {{-- Payment Deadline Warning --}}
-    @if($booking->payment_expires_at)
+    {{-- Payment Deadline Warning (only if unpaid) --}}
+    @if(!$isPaidOrConfirmed && $booking->payment_expires_at)
     <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex items-start gap-3">
         <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -89,10 +110,12 @@
 
     {{-- CTA Buttons --}}
     <div class="space-y-3 mb-8">
+        @if(!$isPaidOrConfirmed)
         <a href="{{ route('booking.pay', $booking->booking_code) }}"
            class="w-full flex items-center justify-center px-6 py-3.5 bg-primary-600 text-white rounded-xl font-semibold text-base hover:bg-primary-700 transition shadow-sm">
             Bayar Sekarang
         </a>
+        @endif
         <a href="{{ route('booking.guest.detail', $booking->booking_code) }}"
            class="w-full flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-50 transition">
             Lihat Detail Booking

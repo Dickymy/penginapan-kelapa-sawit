@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\BookingCancelled;
 use App\Mail\BookingCancelledMail;
+use App\Models\Booking;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Mail;
@@ -27,17 +28,33 @@ class SendBookingCancelledListener implements ShouldQueue
             return;
         }
 
-        try {
-            Mail::to($booking->guest_email)->send(new BookingCancelledMail($booking));
-            
-            $booking->update([
-                'cancellation_email_sent_at' => now(),
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Gagal mengirim email pembatalan booking: ' . $e->getMessage(), [
-                'booking_id' => $booking->id,
-            ]);
-            throw $e;
+        $sendMail = function () use ($booking) {
+            try {
+                $freshBooking = Booking::find($booking->id);
+                if (!$freshBooking || $freshBooking->cancellation_email_sent_at !== null) {
+                    return;
+                }
+
+                Mail::to($freshBooking->guest_email)->send(new BookingCancelledMail($freshBooking));
+                
+                $freshBooking->update([
+                    'cancellation_email_sent_at' => now(),
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Gagal mengirim email pembatalan booking: ' . $e->getMessage(), [
+                    'booking_id' => $booking->id,
+                ]);
+
+                if (config('queue.default') !== 'sync') {
+                    throw $e;
+                }
+            }
+        };
+
+        if (config('queue.default') === 'sync' && !app()->runningUnitTests()) {
+            dispatch($sendMail)->afterResponse();
+        } else {
+            $sendMail();
         }
     }
 }

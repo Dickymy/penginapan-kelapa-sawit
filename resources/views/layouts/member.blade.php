@@ -4,9 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="theme-color" content="#16a34a">
     <title>@yield('title', 'Member - Penginapan Kelapa Sawit')</title>
     <link rel="icon" href="{{ asset('images/logo.webp') }}" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>[x-cloak] { display: none !important; }</style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -50,7 +53,7 @@
                         Profil
                     </a>
                     <a href="{{ route('home') }}#cari-kamar"
-                       class="ml-2 px-4 py-2 bg-primary-600 text-white text-sm rounded-lg font-medium hover:bg-primary-700 transition">
+                       class="ml-2 px-4 py-2 bg-primary-600 text-white text-sm rounded-lg font-medium hover:bg-primary-700 active:scale-95 transition">
                         Cari Kamar
                     </a>
                 </div>
@@ -170,7 +173,7 @@
             <a href="{{ route('home') }}#cari-kamar"
                class="flex flex-col items-center justify-center gap-0.5 text-xs text-gray-500"
                aria-label="Pesan Kamar">
-                <div class="w-10 h-10 -mt-3 rounded-full bg-primary-600 flex items-center justify-center shadow-lg">
+                <div class="w-10 h-10 -mt-3 rounded-full bg-primary-600 flex items-center justify-center shadow-lg active:scale-95 transition-transform">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
                 <span class="mt-0.5 text-primary-600 font-medium">Pesan</span>

@@ -41,7 +41,11 @@ class ReviewController extends Controller
         // Kirim notifikasi ke admin
         $adminEmail = config('mail.from.address');
         if ($adminEmail) {
-            Mail::to($adminEmail)->send(new NewReviewNotificationMail($review));
+            try {
+                Mail::to($adminEmail)->send(new NewReviewNotificationMail($review));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Gagal mengirim notifikasi ulasan ke admin: ' . $e->getMessage());
+            }
         }
 
         return redirect()->route('member.dashboard')->with('success', 'Terima kasih! Ulasan Anda telah berhasil dikirim dan menunggu moderasi.');

@@ -108,4 +108,36 @@ class CalendarTest extends TestCase
         $this->assertEquals($bookingIn->id, $response->json('bookings.0.id'));
         $this->assertEquals($blockIn->id, $response->json('room_blocks.0.id'));
     }
+
+    public function test_calendar_handles_indefinite_room_block()
+    {
+        $startDate = Carbon::today()->startOfMonth();
+        $endDate = Carbon::today()->endOfMonth();
+
+        $room = Room::factory()->create([
+            'is_active' => true,
+        ]);
+
+        // Indefinite block with null end_date
+        $indefiniteBlock = RoomBlock::create([
+            'room_id' => $room->id,
+            'start_date' => $startDate->copy()->subDays(2),
+            'end_date' => null,
+            'reason' => 'Renovation',
+        ]);
+
+        $response = $this->actingAs($this->admin, 'admin')
+            ->getJson(route('admin.calendar.data', [
+                'start_date' => $startDate->toDateString(),
+                'end_date' => $endDate->toDateString(),
+            ]));
+
+        $response->assertStatus(200);
+        $response->assertJsonFragment([
+            'id' => $indefiniteBlock->id,
+            'room_id' => $room->id,
+            'end_date' => null,
+            'reason' => 'Renovation',
+        ]);
+    }
 }

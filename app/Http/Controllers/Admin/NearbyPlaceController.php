@@ -12,8 +12,13 @@ class NearbyPlaceController extends Controller
 {
     public function index()
     {
-        $places = NearbyPlace::orderBy('sort_order')->orderBy('id')->paginate(15);
-        return view('admin.nearby-places.index', compact('places'));
+        $places = NearbyPlace::orderBy('sort_order')->orderBy('id')->paginate(16);
+        $totalCount = NearbyPlace::count();
+        $activeCount = NearbyPlace::where('is_active', true)->count();
+        $inactiveCount = NearbyPlace::where('is_active', false)->count();
+        $categories = NearbyPlace::select('category')->distinct()->whereNotNull('category')->pluck('category');
+
+        return view('admin.nearby-places.index', compact('places', 'totalCount', 'activeCount', 'inactiveCount', 'categories'));
     }
 
     public function create()
@@ -25,13 +30,15 @@ class NearbyPlaceController extends Controller
     {
         $data = $request->validated();
 
-        if ($request->has('image') && $request->input('image')) {
+        if ($request->hasFile('image')) {
+            $data['image'] = $imageUploadService->upload($request->file('image'), 'nearby-places');
+        } elseif ($request->filled('image')) {
             $data['image'] = $request->input('image');
         }
 
         NearbyPlace::create($data);
 
-        return redirect()->route('admin.nearby-places.index')->with('success', 'Tempat sekitar berhasil ditambahkan.');
+        return redirect()->route('admin.nearby-places.index')->with('success', 'Data produk / foto Toko Sembako berhasil ditambahkan.');
     }
 
     public function show(NearbyPlace $nearbyPlace)
@@ -48,18 +55,20 @@ class NearbyPlaceController extends Controller
     {
         $data = $request->validated();
 
-        if ($request->has('image') && $request->input('image')) {
+        if ($request->hasFile('image')) {
+            $data['image'] = $imageUploadService->upload($request->file('image'), 'nearby-places');
+        } elseif ($request->filled('image')) {
             $data['image'] = $request->input('image');
         }
 
         $nearbyPlace->update($data);
 
-        return redirect()->route('admin.nearby-places.index')->with('success', 'Tempat sekitar berhasil diperbarui.');
+        return redirect()->route('admin.nearby-places.index')->with('success', 'Data produk / foto Toko Sembako berhasil diperbarui.');
     }
 
     public function destroy(NearbyPlace $nearbyPlace)
     {
         $nearbyPlace->delete();
-        return redirect()->route('admin.nearby-places.index')->with('success', 'Tempat sekitar berhasil dihapus.');
+        return redirect()->route('admin.nearby-places.index')->with('success', 'Data produk / foto Toko Sembako berhasil dihapus.');
     }
 }
