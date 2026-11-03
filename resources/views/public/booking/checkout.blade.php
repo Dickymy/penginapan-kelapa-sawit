@@ -117,7 +117,17 @@
          if (promoCode) {
              applyPromo(promoCode);
          }
-     ">
+     "
+     x-effect="
+         if (mobileSummaryOpen) {
+             document.documentElement.classList.add('overflow-hidden');
+             document.body.classList.add('overflow-hidden', 'touch-none');
+         } else {
+             document.documentElement.classList.remove('overflow-hidden');
+             document.body.classList.remove('overflow-hidden', 'touch-none');
+         }
+     "
+     @keydown.escape.window="mobileSummaryOpen = false">
 
     {{-- Progress Steps --}}
     <div class="mb-6">
@@ -202,14 +212,14 @@
                     <div>
                         <span class="text-[10px] uppercase font-bold tracking-wider text-gray-400 block">Total Tagihan</span>
                         <div class="flex items-baseline gap-1.5">
-                            <span x-show="totalSavings > 0" class="text-xs text-gray-400 line-through" x-text="'Rp' + formatPrice(baseSubtotal + addonTotal)"></span>
+                            <span x-show="totalSavings > 0" x-cloak class="text-xs text-gray-400 line-through" x-text="'Rp' + formatPrice(baseSubtotal + addonTotal)"></span>
                             <span class="text-base font-extrabold text-primary-700">Rp<span x-text="formatPrice(finalTotal)">{{ number_format($quote['total_amount'], 0, ',', '.') }}</span></span>
                         </div>
                     </div>
-                    <button type="button" @click="mobileSummaryOpen = true"
-                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold transition">
+                    <button type="button" @click.stop="mobileSummaryOpen = true"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-50 hover:bg-primary-100 active:scale-95 text-primary-700 text-xs font-semibold transition cursor-pointer">
                         <span>Rincian Biaya</span>
-                        <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        <svg class="w-3.5 h-3.5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
                     </button>
                 </div>
             </div>
@@ -578,21 +588,26 @@
                 </div>
 
                 {{-- Mobile Floating Bottom Bar --}}
-                <div class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-gray-200/90 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden z-40 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
+                <div class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200/90 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden z-40 shadow-[0_-4px_25px_rgba(0,0,0,0.08)]">
                     <div class="flex items-center justify-between gap-3 max-w-md mx-auto">
-                        <div class="flex-1 min-w-0" @click="mobileSummaryOpen = true">
-                            <div class="flex items-center gap-1 cursor-pointer">
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Tagihan</p>
-                                <svg class="w-3.5 h-3.5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                        <button type="button"
+                                @click.stop="mobileSummaryOpen = true"
+                                class="flex-1 min-w-0 text-left cursor-pointer group active:opacity-75 transition-opacity pr-1">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total Tagihan</span>
+                                <span class="inline-flex items-center gap-0.5 text-[10px] font-semibold text-primary-700 bg-primary-50 px-1.5 py-0.5 rounded-md group-hover:bg-primary-100 transition">
+                                    Rincian
+                                    <svg class="w-3 h-3 text-primary-600 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/></svg>
+                                </span>
                             </div>
-                            <div class="flex items-baseline gap-1.5 flex-wrap">
-                                <span x-show="totalSavings > 0" class="text-xs text-gray-400 line-through" x-text="'Rp' + formatPrice(baseSubtotal + addonTotal)"></span>
+                            <div class="flex items-baseline gap-1.5 mt-0.5 flex-wrap">
+                                <span x-show="totalSavings > 0" x-cloak class="text-[11px] text-gray-400 line-through" x-text="'Rp' + formatPrice(baseSubtotal + addonTotal)"></span>
                                 <p class="text-lg font-black text-primary-700 leading-tight">Rp<span x-text="formatPrice(finalTotal)">{{ number_format($quote['total_amount'], 0, ',', '.') }}</span></p>
                             </div>
-                            <p x-show="totalSavings > 0" class="text-[10px] font-bold text-emerald-600 leading-none mt-0.5">
+                            <p x-show="totalSavings > 0" x-cloak class="text-[10px] font-bold text-emerald-600 leading-none mt-0.5">
                                 Hemat Rp<span x-text="formatPrice(totalSavings)"></span>
                             </p>
-                        </div>
+                        </button>
                         <button type="submit"
                                 :disabled="$store.checkoutForm.submitting"
                                 class="shrink-0 bg-primary-600 text-white py-3 px-5 rounded-xl font-bold text-sm hover:bg-primary-700 active:scale-95 transition shadow-sm disabled:opacity-60 flex items-center gap-1.5 cursor-pointer">
@@ -745,120 +760,162 @@
     </div>
 
     {{-- Mobile Full Breakdown Bottom Sheet (Modal) --}}
-    <div x-show="mobileSummaryOpen" x-cloak class="fixed inset-0 z-50 md:hidden"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0">
-        {{-- Backdrop --}}
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-xs" @click="mobileSummaryOpen = false"></div>
+    <div x-show="mobileSummaryOpen"
+         x-cloak
+         class="fixed inset-0 z-50 lg:hidden"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="mobile-summary-title">
 
-        {{-- Slide-up Sheet --}}
-        <div class="fixed inset-x-0 bottom-0 max-h-[85vh] bg-white rounded-t-3xl shadow-2xl overflow-y-auto p-5 pb-8"
-             x-transition:enter="transition ease-out duration-300"
+        {{-- Backdrop (Standard subtle blur overlay with touch-scroll cancellation) --}}
+        <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-all duration-200"
+             x-show="mobileSummaryOpen"
+             x-transition:enter="ease-out duration-200"
+             x-transition:enter-start="opacity-0 backdrop-blur-none"
+             x-transition:enter-end="opacity-100 backdrop-blur-xs"
+             x-transition:leave="ease-in duration-150"
+             x-transition:leave-start="opacity-100 backdrop-blur-xs"
+             x-transition:leave-end="opacity-0 backdrop-blur-none"
+             @click="mobileSummaryOpen = false"
+             @touchmove.prevent
+             aria-hidden="true"></div>
+
+        {{-- Slide-up Sheet Container --}}
+        <div class="fixed inset-x-0 bottom-0 max-h-[85vh] bg-white rounded-t-[28px] shadow-[0_-12px_45px_rgba(0,0,0,0.2)] flex flex-col will-change-transform transform transition-transform duration-300 ease-out z-10 touch-auto"
+             x-show="mobileSummaryOpen"
+             x-transition:enter="transform transition-transform ease-out duration-250"
              x-transition:enter-start="translate-y-full"
              x-transition:enter-end="translate-y-0"
-             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave="transform transition-transform ease-in duration-200"
              x-transition:leave-start="translate-y-0"
-             x-transition:leave-end="translate-y-full">
-            {{-- Drag Handle --}}
-            <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4"></div>
+             x-transition:leave-end="translate-y-full"
+             @click.stop>
 
-            <div class="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
-                <div>
-                    <h3 class="text-base font-bold text-gray-900">Rincian Pemesanan</h3>
-                    <p class="text-xs text-gray-500">{{ $quote['nights'] }} malam menginap</p>
+            {{-- Fixed Sheet Header (Drag handle + Title + Close Button) --}}
+            <div class="shrink-0 pt-3 pb-3 px-5 border-b border-gray-100">
+                <div class="w-12 h-1.5 bg-gray-300/80 rounded-full mx-auto mb-3 cursor-grab"></div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 id="mobile-summary-title" class="text-base font-bold text-gray-900 tracking-tight flex items-center gap-2">
+                            <span>Rincian Pemesanan</span>
+                            <span class="inline-flex text-[11px] font-bold text-primary-700 bg-primary-50 px-2 py-0.5 rounded-full">
+                                {{ $quote['nights'] }} Malam
+                            </span>
+                        </h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Ringkasan akomodasi, jadwal &amp; tarif</p>
+                    </div>
+                    <button type="button"
+                            @click="mobileSummaryOpen = false"
+                            class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:text-gray-800 active:bg-gray-200 flex items-center justify-center transition cursor-pointer"
+                            aria-label="Tutup Rincian">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                 </div>
-                <button type="button" @click="mobileSummaryOpen = false" class="p-1 rounded-full text-gray-400 hover:text-gray-600 cursor-pointer">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
             </div>
 
-            <div class="space-y-4 text-sm">
-                {{-- Room and stay preview --}}
-                <div class="bg-gray-50 rounded-xl p-3.5 border border-gray-100">
-                    <div class="flex items-center gap-3">
-                        @if($roomType->cover_image)
-                            <img src="{{ $roomType->cover_image->thumb_url ?? $roomType->cover_image->url }}"
-                                 alt="{{ $roomType->name }}"
-                                 class="w-12 h-12 rounded-lg object-cover shrink-0">
-                        @endif
-                        <div class="min-w-0 flex-1">
-                            <p class="font-bold text-gray-900 text-sm truncate">{{ $roomType->name }}</p>
-                            <p class="text-xs text-gray-500 mt-0.5">
-                                {{ $checkIn->translatedFormat('d M Y') }} &ndash; {{ $checkOut->translatedFormat('d M Y') }}
-                            </p>
+            {{-- Scrollable Sheet Content --}}
+            <div class="flex-1 overflow-y-auto overscroll-contain px-5 py-4 space-y-3.5 text-sm custom-scrollbar">
+                {{-- Room Preview Card --}}
+                <div class="bg-gray-50/90 rounded-2xl p-3.5 border border-gray-100 flex items-center gap-3.5">
+                    @if($roomType->cover_image)
+                        <img src="{{ $roomType->cover_image->thumb_url ?? $roomType->cover_image->url }}"
+                             alt="{{ $roomType->name }}"
+                             class="w-14 h-14 rounded-xl object-cover shrink-0 border border-gray-200/60 shadow-xs">
+                    @else
+                        <div class="w-14 h-14 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400 shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         </div>
+                    @endif
+                    <div class="min-w-0 flex-1">
+                        <h4 class="font-bold text-gray-900 text-sm truncate leading-snug">{{ $roomType->name }}</h4>
+                        <p class="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5 flex-wrap">
+                            <span>{{ $roomType->capacity ?? 2 }} Tamu</span>
+                            <span>&bull;</span>
+                            <span>{{ $roomType->bed_type ?? '1 Bed' }}</span>
+                        </p>
+                        <p class="text-[11px] font-semibold text-primary-700 mt-1">
+                            {{ $checkIn->translatedFormat('d M') }} &ndash; {{ $checkOut->translatedFormat('d M Y') }}
+                        </p>
                     </div>
                 </div>
 
-                {{-- Prices itemized --}}
-                <div class="space-y-2.5 text-xs text-gray-600">
-                    <div class="flex justify-between">
-                        <span>Biaya Kamar ({{ $quote['nights'] }} malam)</span>
-                        <span class="font-semibold text-gray-900">Rp{{ number_format($quote['subtotal'], 0, ',', '.') }}</span>
+                {{-- Schedule 2-Column Grid --}}
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="bg-gray-50/70 border border-gray-100 rounded-xl p-2.5">
+                        <span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">Waktu Check-in</span>
+                        <p class="font-bold text-gray-900 mt-0.5 text-xs">{{ $checkIn->translatedFormat('d M Y') }}</p>
+                        <p class="text-[11px] font-medium text-emerald-700 mt-0.5">Mulai 14:00 WITA</p>
+                    </div>
+                    <div class="bg-gray-50/70 border border-gray-100 rounded-xl p-2.5">
+                        <span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">Waktu Check-out</span>
+                        <p class="font-bold text-gray-900 mt-0.5 text-xs">{{ $checkOut->translatedFormat('d M Y') }}</p>
+                        <p class="text-[11px] font-medium text-gray-600 mt-0.5">Maks. 12:00 WITA</p>
+                    </div>
+                </div>
+
+                {{-- Prices Breakdown --}}
+                <div class="border border-gray-100 bg-gray-50/50 rounded-2xl p-4 space-y-2.5 text-xs">
+                    <div class="flex justify-between items-center text-gray-600">
+                        <span>Sewa Kamar ({{ $quote['nights'] }} malam)</span>
+                        <span class="font-bold text-gray-900">Rp{{ number_format($quote['subtotal'], 0, ',', '.') }}</span>
                     </div>
 
                     @if(isset($quote['night_prices']) && count($quote['night_prices']) > 1)
-                    <div class="bg-gray-50/70 border border-gray-100 rounded-lg p-2 text-[11px] space-y-1">
+                    <div class="bg-white/80 border border-gray-100 rounded-xl p-2.5 space-y-1.5 text-[11px]">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Rincian Per Malam:</span>
                         @foreach($quote['night_prices'] as $np)
                         <div class="flex justify-between text-gray-500">
-                            <span>{{ \Carbon\Carbon::parse($np['date'])->translatedFormat('d M') }}</span>
-                            <span class="font-mono text-gray-700">Rp{{ number_format($np['price'], 0, ',', '.') }}</span>
+                            <span>{{ \Carbon\Carbon::parse($np['date'])->translatedFormat('l, d M Y') }}</span>
+                            <span class="font-medium text-gray-800">Rp{{ number_format($np['price'], 0, ',', '.') }}</span>
                         </div>
                         @endforeach
                     </div>
                     @endif
 
-                    <div class="flex justify-between" x-show="addonTotal > 0" x-cloak>
+                    <div class="flex justify-between items-center text-gray-600" x-show="addonTotal > 0" x-cloak>
                         <span>Layanan Tambahan</span>
-                        <span class="font-semibold text-gray-900">+Rp<span x-text="formatPrice(addonTotal)"></span></span>
+                        <span class="font-bold text-gray-900">+Rp<span x-text="formatPrice(addonTotal)"></span></span>
                     </div>
 
-                    <div class="flex justify-between text-emerald-700 font-semibold" x-show="promoDiscount > 0" x-cloak>
-                        <span>Diskon Promo (<span class="font-mono" x-text="promoCode"></span>)</span>
+                    <div class="flex justify-between items-center text-emerald-700 font-semibold" x-show="promoDiscount > 0" x-cloak>
+                        <span class="flex items-center gap-1.5">
+                            Diskon Promo
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-mono font-bold" x-text="promoCode"></span>
+                        </span>
                         <span>-Rp<span x-text="formatPrice(promoDiscount)"></span></span>
                     </div>
 
-                    <div class="flex justify-between text-emerald-700 font-semibold" x-show="usePoints && pointDiscount > 0" x-cloak>
+                    <div class="flex justify-between items-center text-emerald-700 font-semibold" x-show="usePoints && pointDiscount > 0" x-cloak>
                         <span>Potongan Poin Loyalti</span>
                         <span>-Rp<span x-text="formatPrice(pointDiscount)"></span></span>
                     </div>
 
-                    <div x-show="totalSavings > 0" x-cloak class="p-2.5 bg-emerald-50 rounded-lg text-emerald-800 text-xs font-semibold flex justify-between">
-                        <span>Total Hemat Anda</span>
-                        <span>Rp<span x-text="formatPrice(totalSavings)"></span></span>
+                    <div x-show="totalSavings > 0" x-cloak class="p-2.5 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-800 text-xs font-semibold flex items-center justify-between">
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Total Hemat Anda
+                        </span>
+                        <span class="font-bold">Rp<span x-text="formatPrice(totalSavings)"></span></span>
                     </div>
 
-                    <div class="pt-3 border-t border-gray-200 flex justify-between items-baseline font-bold text-base text-gray-900">
+                    <div class="pt-3 border-t border-gray-200 flex justify-between items-baseline">
                         <div>
-                            <span>Total Pembayaran</span>
-                            <span class="text-[10px] text-gray-400 font-normal block">Termasuk pajak &amp; biaya</span>
+                            <span class="text-sm font-bold text-gray-900 block">Total Tagihan</span>
+                            <span class="text-[10px] text-gray-400 font-normal">Termasuk pajak &amp; biaya</span>
                         </div>
-                        <span class="text-xl font-black text-primary-700">Rp<span x-text="formatPrice(finalTotal)"></span></span>
+                        <span class="text-xl font-black text-primary-700 tracking-tight">Rp<span x-text="formatPrice(finalTotal)"></span></span>
                     </div>
                 </div>
+            </div>
 
-                {{-- Schedule footnote --}}
-                <div class="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 space-y-1 border border-gray-100">
-                    <p class="flex justify-between">
-                        <span>Waktu Check-in:</span>
-                        <strong class="text-gray-800">14:00 WITA</strong>
-                    </p>
-                    <p class="flex justify-between">
-                        <span>Waktu Check-out:</span>
-                        <strong class="text-gray-800">12:00 WITA</strong>
-                    </p>
-                </div>
-
-                <div class="pt-2">
-                    <button type="button" @click="mobileSummaryOpen = false"
-                            class="w-full bg-primary-600 text-white py-3.5 rounded-xl font-bold text-sm hover:bg-primary-700 transition shadow-xs cursor-pointer">
-                        Lanjutkan Pengisian Form
-                    </button>
-                </div>
+            {{-- Fixed Sheet Footer (Action Button) --}}
+            <div class="shrink-0 p-4 border-t border-gray-100 bg-white pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+                <button type="button"
+                        @click="mobileSummaryOpen = false"
+                        class="w-full bg-primary-600 hover:bg-primary-700 active:scale-[0.99] text-white py-3.5 rounded-xl font-bold text-sm shadow-sm transition cursor-pointer flex items-center justify-center gap-2">
+                    <span>Tutup &amp; Lanjutkan Form</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
             </div>
         </div>
     </div>

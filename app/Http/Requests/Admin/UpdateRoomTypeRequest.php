@@ -26,6 +26,7 @@ class UpdateRoomTypeRequest extends FormRequest
             'facilities.*' => ['exists:facilities,id'],
             'images' => ['nullable', 'array'],
             'images.*' => ['string'],
+            'set_new_as_cover' => ['nullable', 'boolean'],
         ];
     }
 }

@@ -32,7 +32,9 @@ class PageController extends Controller
     public function policy(): View
     {
         $policy = PolicyVersion::current()->first();
+        $sections = $policy ? \App\Support\PolicyFormatter::parse($policy->content) : [];
+        $whatsapp = Setting::get('contact', 'whatsapp', '');
 
-        return view('public.policy', compact('policy'));
+        return view('public.policy', compact('policy', 'sections', 'whatsapp'));
     }
 }

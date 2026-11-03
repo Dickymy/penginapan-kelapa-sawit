@@ -16,9 +16,11 @@ Alpine.store('mobileNav', {
     open: false,
     toggle() {
         this.open = !this.open;
+        document.body.style.overflow = this.open ? 'hidden' : '';
     },
     close() {
         this.open = false;
+        document.body.style.overflow = '';
     },
 });
 
@@ -65,7 +67,13 @@ const completeProgressBar = () => {
     }
 };
 
-window.addEventListener('pageshow', completeProgressBar);
+window.addEventListener('pageshow', () => {
+    completeProgressBar();
+    document.body.style.overflow = '';
+    if (window.Alpine && window.Alpine.store('mobileNav')) {
+        window.Alpine.store('mobileNav').close();
+    }
+});
 window.addEventListener('hashchange', completeProgressBar);
 
 document.addEventListener('click', (e) => {

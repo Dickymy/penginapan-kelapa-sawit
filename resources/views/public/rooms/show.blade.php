@@ -2,9 +2,27 @@
 
 @php $hideBottomNav = true; @endphp
 
-@section('title', $roomType->name . ' - Penginapan Kelapa Sawit')
+@section('title', $roomType->name . ' — Penginapan Kelapa Sawit')
+@section('meta_description', \Illuminate\Support\Str::limit(strip_tags($roomType->description ?? 'Kamar ' . $roomType->name . ' di Penginapan Kelapa Sawit. Kapasitas hingga ' . $roomType->capacity . ' orang dengan fasilitas lengkap.'), 155))
+@if($roomType->cover_image)
+@section('og_image', $roomType->cover_image->large_url)
+@elseif($roomType->images->first())
+@section('og_image', $roomType->images->first()->large_url)
+@endif
 
 @section('content')
+<div x-data="{ formInView: false }"
+     x-init="
+         $nextTick(() => {
+             const el = document.getElementById('form-pemesanan');
+             if (el && 'IntersectionObserver' in window) {
+                 const obs = new IntersectionObserver(([entry]) => {
+                     formInView = entry.isIntersecting;
+                 }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+                 obs.observe(el);
+             }
+         })
+     ">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 pb-28 lg:pb-12">
     {{-- Breadcrumb & Back Button --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -105,6 +123,9 @@
                              {{ $index === 0 ? '' : 'loading=lazy' }}
                              decoding="{{ $index === 0 ? 'sync' : 'async' }}"
                              width="1920" height="1440"
+                             x-init="$nextTick(() => { if ($el.complete && $el.naturalWidth > 0) { $el.style.filter='blur(0px)'; $el.style.opacity='1'; $el.style.transform='scale(1)'; } })"
+                             x-on:load="$el.style.filter='blur(0px)'; $el.style.opacity='1'; $el.style.transform='scale(1)';"
+                             style="filter: blur(10px); transform: scale(1.02); opacity: 0.2; transition: filter 0.5s ease, transform 0.5s ease, opacity 0.5s ease;"
                              class="w-full h-72 md:h-96 lg:h-[450px] object-cover">
                     </div>
                     @endforeach
@@ -130,8 +151,12 @@
                 @if($roomType->images->count() > 1)
                 <div class="flex gap-2.5 overflow-x-auto pb-2 scroll-smooth" style="scrollbar-width: thin;">
                     @foreach($roomType->images as $index => $image)
-                    <button @click="setImage({{ $index }})" class="flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all duration-200" :class="activeImage === {{ $index }} ? 'border-primary-500 opacity-100 shadow-md' : 'border-transparent hover:border-gray-300 opacity-60 hover:opacity-100'">
-                        <img src="{{ $image->thumb_url }}" alt="" loading="lazy" decoding="async" width="80" height="56" class="w-24 h-16 object-cover">
+                    <button @click="setImage({{ $index }})" class="flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all duration-200 bg-gray-100" :class="activeImage === {{ $index }} ? 'border-primary-500 opacity-100 shadow-md ring-2 ring-primary-500/30' : 'border-transparent hover:border-gray-300 opacity-70 hover:opacity-100'">
+                        <img src="{{ $image->thumb_url }}" alt="" loading="lazy" decoding="async" width="80" height="56"
+                             x-init="$nextTick(() => { if ($el.complete && $el.naturalWidth > 0) { $el.style.filter='blur(0px)'; $el.style.opacity='1'; $el.style.transform='scale(1)'; } })"
+                             x-on:load="$el.style.filter='blur(0px)'; $el.style.opacity='1'; $el.style.transform='scale(1)';"
+                             style="filter: blur(4px); transform: scale(1.02); opacity: 0.3; transition: filter 0.4s ease, transform 0.4s ease, opacity 0.4s ease;"
+                             class="w-24 h-16 object-cover">
                     </button>
                     @endforeach
                 </div>
@@ -236,7 +261,9 @@
                             <span class="text-xs text-gray-400 whitespace-nowrap">/ malam</span>
                         </div>
                     </div>
-                    <a href="#form-pemesanan" class="shrink-0 px-3.5 py-2 bg-primary-50 text-primary-700 text-xs font-bold rounded-xl border border-primary-200 hover:bg-primary-100 transition active:scale-95 whitespace-nowrap flex items-center gap-1">
+                    <a href="#form-pemesanan"
+                       @click.prevent="document.getElementById('form-pemesanan')?.scrollIntoView({ behavior: 'smooth', block: 'start' })"
+                       class="shrink-0 px-3.5 py-2 bg-primary-50 text-primary-700 text-xs font-bold rounded-xl border border-primary-200 hover:bg-primary-100 transition active:scale-95 whitespace-nowrap flex items-center gap-1 cursor-pointer">
                         <span>Pesan Sekarang</span>
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                     </a>
@@ -303,7 +330,8 @@
 
         {{-- Right: Info & CTA --}}
         <div>
-            <div id="form-pemesanan" class="bg-white border-gray-100 border rounded-2xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] p-6 sticky top-6 space-y-4 scroll-mt-24">
+            <div id="form-pemesanan"
+                 class="bg-white border-gray-100 border rounded-2xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] p-6 sticky top-6 space-y-4 scroll-mt-24">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-800">{{ $roomType->name }}</h1>
                     @if($roomType->review_count > 0)
@@ -445,7 +473,14 @@
 </div>
 
 {{-- Sticky Mobile Booking Bar --}}
-<div class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-4 pt-2.5 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
+<div x-show="!formInView"
+     x-transition:enter="transition ease-out duration-300 transform"
+     x-transition:enter-start="translate-y-full opacity-0"
+     x-transition:enter-end="translate-y-0 opacity-100"
+     x-transition:leave="transition ease-in duration-200 transform"
+     x-transition:leave-start="translate-y-0 opacity-100"
+     x-transition:leave-end="translate-y-full opacity-0"
+     class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-4 pt-2.5 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
     <div class="flex items-center justify-between gap-2 max-w-md mx-auto">
         <div class="min-w-0 flex-1">
             <p class="text-[10px] uppercase font-bold tracking-wider text-gray-400 truncate">Harga per malam</p>
@@ -455,10 +490,12 @@
             </div>
         </div>
         <a href="#form-pemesanan"
+           @click.prevent="document.getElementById('form-pemesanan')?.scrollIntoView({ behavior: 'smooth', block: 'start' })"
            class="shrink-0 px-4 py-2.5 bg-primary-600 text-white rounded-xl font-bold text-xs sm:text-sm hover:bg-primary-700 active:scale-95 shadow-md shadow-primary-600/30 transition-all flex items-center gap-1 whitespace-nowrap">
             <span>Pesan Kamar</span>
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
         </a>
     </div>
+</div>
 </div>
 @endsection

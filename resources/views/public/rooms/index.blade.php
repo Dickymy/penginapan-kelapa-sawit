@@ -4,15 +4,13 @@
 
 @section('content')
 {{-- Page Hero --}}
-<section class="relative bg-primary-900 text-white py-16 lg:py-24 overflow-hidden"
+<section class="relative bg-primary-950 text-white py-16 lg:py-24 overflow-hidden"
          x-data="{ scrollY: 0 }" 
-         @scroll.window="scrollY = window.scrollY">
-    <div class="absolute inset-0 opacity-20 transition-transform duration-75" 
-         :style="`transform: translateY(${scrollY * 0.4}px)`" 
-         style="background-image: radial-gradient(#4ade80 1.5px, transparent 1.5px); background-size: 32px 32px;"></div>
-    <div class="absolute inset-0 bg-gradient-to-t from-primary-950 via-primary-900/60 to-transparent"></div>
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-transform duration-75"
-         :style="`transform: translateY(${scrollY * 0.15}px); opacity: ${1 - scrollY/500}`">
+         @scroll.window.passive="scrollY = window.scrollY">
+    <x-hero-background />
+    
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center will-change-transform"
+         :style="`transform: translateY(${scrollY * 0.15}px); opacity: ${Math.max(0, 1 - scrollY / 380)}`">
         <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg">Tipe Kamar Kami</h1>
         <p class="mt-4 text-lg text-primary-100 max-w-2xl mx-auto drop-shadow-md">Temukan kamar yang dirancang khusus untuk kenyamanan istirahat Anda.</p>
     </div>
@@ -26,7 +24,7 @@
                 'medium' => $img->medium_url
             ];
         })->take(5)->toArray();
-        $cover = $type->images->where('is_cover', true)->first() ?? $type->images->first();
+        $cover = $type->cover_image ?? $type->images->first();
         return [
             'id' => $type->id,
             'name' => $type->name,

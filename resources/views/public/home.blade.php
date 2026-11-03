@@ -12,19 +12,13 @@
 
 @section('content')
 {{-- Hero --}}
-<section class="relative text-white py-20 md:py-32 bg-primary-900 overflow-hidden"
+<section class="relative text-white py-20 md:py-32 bg-primary-950 overflow-hidden"
          x-data="{ scrollY: 0 }" 
-         @scroll.window="scrollY = window.scrollY">
-    {{-- Hero Background Pattern with Parallax --}}
-    <div class="absolute inset-0 opacity-20 transition-transform duration-75" 
-         :style="`transform: translateY(${scrollY * 0.4}px)`" 
-         style="background-image: radial-gradient(#4ade80 1.5px, transparent 1.5px); background-size: 32px 32px;"></div>
+         @scroll.window.passive="scrollY = window.scrollY">
+    <x-hero-background />
     
-    {{-- Gradient Overlay for Depth --}}
-    <div class="absolute inset-0 bg-gradient-to-t from-primary-950 via-primary-900/60 to-transparent"></div>
-    
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center min-h-[30vh] transition-transform duration-75"
-         :style="`transform: translateY(${scrollY * 0.15}px); opacity: ${1 - scrollY/600}`">
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center min-h-[30vh] will-change-transform"
+         :style="`transform: translateY(${scrollY * 0.15}px); opacity: ${Math.max(0, 1 - scrollY / 420)}`">
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-tight drop-shadow-lg">{{ $propertyName }}</h1>
         <p class="text-base md:text-lg text-gray-200 mb-6 flex items-center justify-center gap-1.5 drop-shadow-md">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -182,17 +176,20 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($roomTypes as $type)
         <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
-            @php $cover = $type->images->where('is_cover', true)->first() ?? $type->images->first(); @endphp
+            @php $cover = $type->cover_image ?? $type->images->first(); @endphp
             @if($cover)
                 <div class="aspect-[4/3] overflow-hidden">
-                    <img src="{{ $cover->medium_url }}"
-                         srcset="{{ $cover->thumb_url }} 480w, {{ $cover->medium_url }} 960w, {{ $cover->large_url }} 1920w"
-                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                         alt="Kamar {{ $type->name }}"
-                         loading="lazy"
-                         decoding="async"
-                         width="960" height="720"
-                         class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    <x-lazy-image
+                        :src="$cover->medium_url"
+                        :srcset="$cover->thumb_url . ' 480w, ' . $cover->medium_url . ' 960w, ' . $cover->large_url . ' 1920w'"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        :alt="'Kamar ' . $type->name"
+                        width="960" height="720"
+                        class="w-full h-full object-cover group-hover:scale-105 transition duration-500 ease-out"
+                        container-class="w-full h-full"
+                        fallback-icon="room"
+                        :fallback-text="'Kamar ' . $type->name"
+                    />
                 </div>
             @else
                 <div class="aspect-[4/3] bg-gray-100 flex flex-col items-center justify-center">
@@ -278,7 +275,14 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full group hover:shadow-md transition">
             <div class="aspect-[4/3] overflow-hidden bg-gray-100 relative">
                 @if($place->image)
-                    <img src="{{ Storage::url($place->image) }}" alt="{{ $place->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    <x-lazy-image
+                        :src="Storage::url($place->image)"
+                        :alt="$place->name"
+                        class="w-full h-full object-cover group-hover:scale-105 transition duration-500 ease-out"
+                        container-class="w-full h-full"
+                        fallback-icon="photo"
+                        :fallback-text="$place->name"
+                    />
                 @else
                     <div class="w-full h-full flex flex-col items-center justify-center bg-gray-50">
                         <svg class="h-8 w-8 text-primary-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
@@ -321,14 +325,17 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
         @foreach($galleryPhotos as $photo)
         <div class="aspect-[4/3] overflow-hidden rounded-xl bg-gray-100">
-            <img src="{{ $photo->medium_url }}"
-                 srcset="{{ $photo->thumb_url }} 480w, {{ $photo->medium_url }} 960w"
-                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                 alt="{{ $photo->alt_text ?? $photo->title ?? 'Foto Penginapan Kelapa Sawit' }}"
-                 loading="lazy"
-                 decoding="async"
-                 width="480" height="360"
-                 class="w-full h-full object-cover hover:scale-105 transition duration-300">
+            <x-lazy-image
+                :src="$photo->medium_url"
+                :srcset="$photo->thumb_url . ' 480w, ' . $photo->medium_url . ' 960w'"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                :alt="$photo->alt_text ?? $photo->title ?? 'Foto Penginapan Kelapa Sawit'"
+                width="480" height="360"
+                class="w-full h-full object-cover hover:scale-105 transition duration-500 ease-out"
+                container-class="w-full h-full"
+                fallback-icon="photo"
+                :fallback-text="$photo->title ?? 'Foto Galeri'"
+            />
         </div>
         @endforeach
     </div>

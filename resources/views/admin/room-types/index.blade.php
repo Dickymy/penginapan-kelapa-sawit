@@ -36,7 +36,7 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
-                                @php $cover = $type->images->where('is_cover', true)->first() ?? $type->images->first(); @endphp
+                                @php $cover = $type->cover_image ?? $type->images->first(); @endphp
                                 @if($cover)
                                 <img src="{{ $cover->thumb_url }}" alt="" class="w-10 h-10 rounded-lg object-cover flex-shrink-0">
                                 @else
@@ -83,7 +83,7 @@
         @foreach($roomTypes as $type)
         <div class="bg-white rounded-xl border border-gray-200 p-4">
             <div class="flex items-start gap-3">
-                @php $cover = $type->images->where('is_cover', true)->first() ?? $type->images->first(); @endphp
+                @php $cover = $type->cover_image ?? $type->images->first(); @endphp
                 @if($cover)
                 <img src="{{ $cover->thumb_url }}" alt="" class="w-14 h-14 rounded-lg object-cover flex-shrink-0">
                 @else

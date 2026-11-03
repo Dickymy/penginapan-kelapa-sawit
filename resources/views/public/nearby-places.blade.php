@@ -91,7 +91,14 @@
                                 {{-- Image Area --}}
                                 <div class="relative overflow-hidden aspect-square sm:aspect-[4/3] bg-gradient-to-br from-primary-50 to-gray-100 flex items-center justify-center p-4">
                                     @if($place->image)
-                                        <img src="{{ Storage::url($place->image) }}" alt="{{ $place->name }}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy" decoding="async">
+                                        <x-lazy-image
+                                            :src="Storage::url($place->image)"
+                                            :alt="$place->name"
+                                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                                            container-class="absolute inset-0 w-full h-full"
+                                            fallback-icon="photo"
+                                            :fallback-text="$place->name"
+                                        />
                                     @else
                                         {{-- Placeholder SVG --}}
                                         <div class="text-center z-10 group-hover:scale-105 transition-transform duration-300">

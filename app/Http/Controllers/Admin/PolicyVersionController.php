@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PolicyVersion;
+use App\Support\PolicyFormatter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,17 +33,37 @@ class PolicyVersionController extends Controller
             'content' => ['required', 'string'],
         ]);
 
-        PolicyVersion::create([
+        $policy = PolicyVersion::create([
             ...$request->only('policy_key', 'version', 'title', 'content'),
             'created_by_admin_id' => Auth::guard('admin')->id(),
         ]);
 
-        return redirect()->route('admin.policies.index')->with('success', 'Kebijakan berhasil dibuat.');
+        return redirect()->route('admin.policies.show', $policy)->with('success', 'Kebijakan berhasil dibuat.');
     }
 
     public function show(PolicyVersion $policy): View
     {
-        return view('admin.policies.show', compact('policy'));
+        $sections = PolicyFormatter::parse($policy->content);
+        return view('admin.policies.show', compact('policy', 'sections'));
+    }
+
+    public function edit(PolicyVersion $policy): View
+    {
+        return view('admin.policies.edit', compact('policy'));
+    }
+
+    public function update(Request $request, PolicyVersion $policy): RedirectResponse
+    {
+        $request->validate([
+            'policy_key' => ['required', 'string', 'max:100'],
+            'version' => ['required', 'string', 'max:50'],
+            'title' => ['required', 'string', 'max:191'],
+            'content' => ['required', 'string'],
+        ]);
+
+        $policy->update($request->only('policy_key', 'version', 'title', 'content'));
+
+        return redirect()->route('admin.policies.show', $policy)->with('success', 'Kebijakan berhasil diperbarui.');
     }
 
     public function publish(PolicyVersion $policy): RedirectResponse

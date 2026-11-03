@@ -1,2 +1,9 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin/
+Disallow: /member/
+Disallow: /booking/*/bayar
+Disallow: /cek-booking
+Disallow: /storage/framework/
+
+Sitemap: https://penginapankelapasawit.com/sitemap.xml

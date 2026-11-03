@@ -3,20 +3,241 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Offline - Penginapan Kelapa Sawit</title>
+    <title>Anda Sedang Offline — Penginapan Kelapa Sawit</title>
+    <meta name="theme-color" content="#16a34a">
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f8fafc; color: #1e293b; text-align: center; }
-        .container { max-width: 400px; padding: 2rem; background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-        h1 { font-size: 1.5rem; margin-bottom: 0.5rem; color: #0284c7; }
-        p { color: #64748b; margin-bottom: 1.5rem; }
-        button { background: #0284c7; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 40%, #f8fafc 100%);
+            color: #1e293b;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+            max-width: 440px;
+            width: 100%;
+            padding: 2.25rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #16a34a, #22c55e, #86efac);
+        }
+        .icon-wrap {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 1.5rem;
+            border-radius: 50%;
+            background: #f0fdf4;
+            border: 2px dashed #86efac;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            background: #fef3c7;
+            color: #b45309;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #f59e0b;
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        h1 {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 0.6rem;
+            line-height: 1.3;
+        }
+        p {
+            font-size: 0.925rem;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 1.75rem;
+        }
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.85rem 1.5rem;
+            border-radius: 0.85rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        .btn-primary {
+            background: #16a34a;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+        }
+        .btn-primary:hover {
+            background: #15803d;
+            box-shadow: 0 6px 16px rgba(22, 163, 74, 0.35);
+            transform: translateY(-1px);
+        }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #334155;
+        }
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+        .footer-note {
+            margin-top: 1.75rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid #f1f5f9;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            color: #15803d;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Anda Sedang Offline</h1>
-        <p>Silakan periksa koneksi internet Anda dan coba lagi.</p>
-        <button onclick="window.location.reload()">Coba Lagi</button>
+    <div class="card">
+        <div class="icon-wrap">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+                <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+                <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+                <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+                <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                <line x1="12" y1="20" x2="12.01" y2="20"></line>
+            </svg>
+        </div>
+
+        <div id="badge" class="status-badge">
+            <span id="badge-dot" class="status-dot"></span>
+            <span id="badge-text">Mode Offline</span>
+        </div>
+
+        <h1 id="title">Koneksi Internet Terputus</h1>
+        <p id="desc">Halaman ini belum tersimpan di memori perangkat. Silakan periksa jaringan Wi-Fi atau kuota data seluler Anda, lalu coba lagi.</p>
+
+        <div class="btn-group">
+            <button id="retry-btn" class="btn btn-primary" onclick="retryConnection()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                <span id="btn-text">Coba Lagi</span>
+            </button>
+            <a href="/" class="btn btn-secondary">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                Buka Beranda Tersimpan
+            </a>
+        </div>
+
+        <div class="footer-note">
+            <span>Halaman yang telah Anda kunjungi sebelumnya tetap dapat dibuka tanpa kuota internet.</span>
+            <div class="brand">
+                🌴 <span>Penginapan Kelapa Sawit</span>
+            </div>
+        </div>
     </div>
+
+    <script>
+        function retryConnection() {
+            const btn = document.getElementById('retry-btn');
+            const btnText = document.getElementById('btn-text');
+            btnText.textContent = 'Memeriksa koneksi...';
+            btn.style.opacity = '0.7';
+            btn.style.pointerEvents = 'none';
+
+            fetch('/manifest.json', { cache: 'no-store' })
+                .then(function(res) {
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        resetRetry();
+                    }
+                })
+                .catch(function() {
+                    setTimeout(resetRetry, 600);
+                });
+        }
+
+        function resetRetry() {
+            const btn = document.getElementById('retry-btn');
+            const btnText = document.getElementById('btn-text');
+            btnText.textContent = 'Coba Lagi';
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+        }
+
+        // Auto-reconnect when device regains connectivity
+        window.addEventListener('online', function() {
+            const badge = document.getElementById('badge');
+            const dot = document.getElementById('badge-dot');
+            const text = document.getElementById('badge-text');
+            const title = document.getElementById('title');
+            const desc = document.getElementById('desc');
+
+            badge.style.background = '#dcfce7';
+            badge.style.color = '#15803d';
+            dot.style.background = '#22c55e';
+            text.textContent = 'Koneksi Pulih!';
+            title.textContent = 'Menghubungkan Kembali...';
+            desc.textContent = 'Internet telah terdeteksi. Halaman akan segera dimuat ulang.';
+
+            setTimeout(function() {
+                window.location.reload();
+            }, 1000);
+        });
+    </script>
 </body>
 </html>
