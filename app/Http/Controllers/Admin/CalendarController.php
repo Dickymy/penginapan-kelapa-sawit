@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Room;
 use App\Models\RoomBlock;
+use App\Models\RoomType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -13,7 +14,8 @@ class CalendarController extends Controller
 {
     public function index()
     {
-        return view('admin.calendar.index');
+        $roomTypes = RoomType::active()->orderBy('sort_order')->get(['id', 'name']);
+        return view('admin.calendar.index', compact('roomTypes'));
     }
 
     public function data(Request $request)
@@ -29,12 +31,13 @@ class CalendarController extends Controller
             return [
                 'id' => $room->id,
                 'name' => $room->name,
+                'room_type_id' => $room->room_type_id,
                 'room_type' => $room->roomType?->name ?? '-',
             ];
         });
 
         // Get overlapping bookings
-        $bookings = Booking::with('room')
+        $bookings = Booking::with('room.roomType')
             ->whereIn('status', ['pending_payment', 'confirmed', 'checked_in', 'checked_out'])
             ->where(function ($query) use ($startDateStr, $endDateStr) {
                 $query->where('check_in', '<=', $endDateStr)
@@ -47,8 +50,11 @@ class CalendarController extends Controller
                     'booking_code' => $booking->booking_code,
                     'room_id' => $booking->room_id,
                     'guest_name' => $booking->guest_name,
+                    'guest_phone' => $booking->guest_phone,
                     'check_in' => $booking->check_in?->toDateString(),
                     'check_out' => $booking->check_out?->toDateString(),
+                    'nights' => $booking->check_in && $booking->check_out ? max(1, $booking->check_in->diffInDays($booking->check_out)) : 1,
+                    'total_amount' => (int) $booking->total_amount,
                     'status' => $booking->status instanceof \App\Enums\BookingStatus ? $booking->status->value : (string) $booking->status,
                     'status_label' => $booking->status instanceof \App\Enums\BookingStatus ? $booking->status->label() : (string) $booking->status,
                 ];

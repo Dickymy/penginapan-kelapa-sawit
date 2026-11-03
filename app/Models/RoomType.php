@@ -50,7 +50,10 @@ class RoomType extends Model
 
     public function images(): HasMany
     {
-        return $this->hasMany(RoomImage::class)->orderBy('sort_order');
+        return $this->hasMany(RoomImage::class)
+            ->orderByDesc('is_cover')
+            ->orderBy('sort_order')
+            ->orderBy('id');
     }
 
     // Scopes
@@ -69,8 +72,13 @@ class RoomType extends Model
 
     public function getCoverImageAttribute(): ?RoomImage
     {
-        return $this->images->firstWhere('is_cover', true)
-            ?? $this->images->first();
+        if ($this->relationLoaded('images') && $this->images->isNotEmpty()) {
+            return $this->images->firstWhere('is_cover', true)
+                ?? $this->images->first();
+        }
+
+        return $this->images()->where('is_cover', true)->first()
+            ?? $this->images()->first();
     }
 
     public function getFormattedPriceAttribute(): string

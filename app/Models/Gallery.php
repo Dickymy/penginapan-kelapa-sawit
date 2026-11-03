@@ -46,27 +46,27 @@ class Gallery extends Model
 
     public function getUrlAttribute(): string
     {
-        return Storage::disk('public')->url($this->large_path ?? $this->path);
+        return Storage::disk('public')->url($this->large_path ?? $this->path) . '?v=' . $this->updated_at?->timestamp;
     }
 
     public function getThumbUrlAttribute(): string
     {
         $path = $this->thumb_path ?? $this->path;
 
-        return Storage::disk('public')->url($path);
+        return Storage::disk('public')->url($path) . '?v=' . $this->updated_at?->timestamp;
     }
 
     public function getMediumUrlAttribute(): string
     {
         $path = $this->medium_path ?? $this->path;
 
-        return Storage::disk('public')->url($path);
+        return Storage::disk('public')->url($path) . '?v=' . $this->updated_at?->timestamp;
     }
 
     public function getLargeUrlAttribute(): string
     {
         $path = $this->large_path ?? $this->path;
 
-        return Storage::disk('public')->url($path);
+        return Storage::disk('public')->url($path) . '?v=' . $this->updated_at?->timestamp;
     }
 }

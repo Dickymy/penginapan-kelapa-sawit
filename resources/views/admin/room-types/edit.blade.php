@@ -92,18 +92,45 @@
     {{-- Existing Images --}}
     @if($roomType->images->isNotEmpty())
     <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Gambar Saat Ini</label>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="flex items-center justify-between mb-2">
+            <label class="block text-sm font-semibold text-gray-800">
+                Gambar Saat Ini <span class="text-xs text-gray-500 font-normal">({{ $roomType->images->count() }} foto)</span>
+            </label>
+            <span class="text-xs text-gray-500">Foto bertanda <span class="text-emerald-700 font-bold">★ Cover Utama</span> tampil di kartu kamar</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             @foreach($roomType->images as $image)
-            <div class="relative border rounded-lg overflow-hidden">
-                <img src="{{ $image->thumb_url }}" alt="Room image" class="w-full h-24 object-cover">
-                <div class="absolute top-1 right-1 flex space-x-1">
-                    @if($image->is_cover)
-                        <span class="bg-green-500 text-white text-xs px-1 rounded">Cover</span>
-                    @else
-                        <button type="submit" form="cover-form-{{ $image->id }}" class="bg-blue-500 text-white text-xs px-1 rounded hover:bg-blue-600" title="Jadikan Cover">★</button>
+            <div class="relative rounded-xl overflow-hidden border {{ $image->is_cover ? 'border-emerald-500 ring-2 ring-emerald-200 shadow-md' : 'border-gray-200 hover:border-gray-300' }} bg-gray-50 transition-all group">
+                <div class="aspect-[4/3] w-full overflow-hidden">
+                    <img src="{{ $image->thumb_url }}" alt="Room image" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                </div>
+
+                {{-- Badges & Controls Overlay --}}
+                <div class="absolute inset-0 p-2 flex flex-col justify-between pointer-events-none">
+                    <div class="flex items-start justify-between gap-1 pointer-events-auto">
+                        @if($image->is_cover)
+                            <span class="inline-flex items-center gap-1 bg-emerald-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-md">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                Cover Utama
+                            </span>
+                        @else
+                            <div></div>
+                        @endif
+                        <button type="button" @click="$dispatch('open-confirm', { id: 'delete-image-{{ $image->id }}' })" 
+                                class="p-1.5 rounded-lg bg-black/60 hover:bg-red-600 text-white text-xs shadow-md transition" title="Hapus foto ini">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+
+                    @if(!$image->is_cover)
+                    <div class="pointer-events-auto">
+                        <button type="submit" form="cover-form-{{ $image->id }}" 
+                                class="w-full text-center py-1 px-2 rounded-lg bg-white/95 hover:bg-white text-gray-800 hover:text-emerald-700 text-xs font-semibold shadow-md border border-gray-200/80 transition flex items-center justify-center gap-1">
+                            <svg class="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            Jadikan Cover
+                        </button>
+                    </div>
                     @endif
-                    <button type="button" @click="$dispatch('open-confirm', { id: 'delete-image-{{ $image->id }}' })" class="bg-red-500 text-white text-xs px-1 rounded hover:bg-red-600">&times;</button>
                 </div>
             </div>
             @endforeach
@@ -111,7 +138,7 @@
     </div>
     @endif
 
-    <div>
+    <div class="border-t border-gray-100 pt-5">
         <x-image-uploader 
             name="images" 
             directory="room-images" 
@@ -123,6 +150,17 @@
             hint="Maksimal 10 gambar per tipe kamar. JPG/PNG/WEBP hingga 15MB." />
         <x-form-error field="images" />
         <x-form-error field="images.*" />
+
+        <div class="mt-3 space-y-2">
+            <label class="inline-flex items-center gap-2.5 p-3 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-sm text-emerald-950 cursor-pointer hover:bg-emerald-50 transition w-full select-none">
+                <input type="checkbox" name="set_new_as_cover" value="1" class="rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4">
+                <span>Jadikan foto baru yang diunggah sebagai <strong>Cover / Foto Utama</strong> di halaman depan.</span>
+            </label>
+            <p class="text-xs text-gray-500 flex items-center gap-1.5 px-1">
+                <svg class="w-4 h-4 text-primary-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Setelah memilih foto, tekan tombol <strong>"Perbarui"</strong> di bawah untuk menyimpan perubahan.</span>
+            </p>
+        </div>
     </div>
 
     <div class="pt-4">

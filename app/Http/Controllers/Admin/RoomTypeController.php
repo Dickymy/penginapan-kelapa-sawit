@@ -20,6 +20,7 @@ class RoomTypeController extends Controller
     public function index(): View
     {
         $roomTypes = RoomType::withCount('rooms')
+            ->with('images')
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
@@ -45,11 +46,14 @@ class RoomTypeController extends Controller
         }
 
         if ($request->has('images')) {
+            $hasCover = false;
             foreach ($request->input('images') as $index => $jsonOrPath) {
                 $variants = json_decode($jsonOrPath, true);
                 if (!$variants || !is_array($variants)) {
                     $variants = ['original' => $jsonOrPath, 'large' => $jsonOrPath];
                 }
+
+                $isCover = (!$hasCover && $index === 0);
 
                 $roomType->images()->create([
                     'path' => $variants['original'] ?? $variants['large'] ?? $jsonOrPath,
@@ -57,8 +61,12 @@ class RoomTypeController extends Controller
                     'medium_path' => $variants['medium'] ?? null,
                     'large_path' => $variants['large'] ?? null,
                     'sort_order' => $index,
-                    'is_cover' => $index === 0 && $roomType->images()->count() === 0,
+                    'is_cover' => $isCover,
                 ]);
+
+                if ($isCover) {
+                    $hasCover = true;
+                }
             }
         }
 
@@ -83,12 +91,22 @@ class RoomTypeController extends Controller
         }
 
         if ($request->has('images')) {
+            $forceNewCover = $request->boolean('set_new_as_cover');
+            $hasCover = $roomType->images()->where('is_cover', true)->exists();
             $maxSort = $roomType->images()->max('sort_order') ?? 0;
+
+            if ($forceNewCover && !empty($request->input('images'))) {
+                $roomType->images()->where('is_cover', true)->update(['is_cover' => false]);
+                $hasCover = false;
+            }
+
             foreach ($request->input('images') as $index => $jsonOrPath) {
                 $variants = json_decode($jsonOrPath, true);
                 if (!$variants || !is_array($variants)) {
                     $variants = ['original' => $jsonOrPath, 'large' => $jsonOrPath];
                 }
+
+                $isCover = ((!$hasCover || $forceNewCover) && $index === 0);
 
                 $roomType->images()->create([
                     'path' => $variants['original'] ?? $variants['large'] ?? $jsonOrPath,
@@ -96,8 +114,19 @@ class RoomTypeController extends Controller
                     'medium_path' => $variants['medium'] ?? null,
                     'large_path' => $variants['large'] ?? null,
                     'sort_order' => $maxSort + 1 + $index,
+                    'is_cover' => $isCover,
                 ]);
+
+                if ($isCover) {
+                    $hasCover = true;
+                    $forceNewCover = false;
+                }
             }
+        }
+
+        // Ensure at least one image is cover if images exist
+        if ($roomType->images()->exists() && !$roomType->images()->where('is_cover', true)->exists()) {
+            $roomType->images()->orderBy('sort_order')->orderBy('id')->first()?->update(['is_cover' => true]);
         }
 
         return redirect()->route('admin.room-types.index')

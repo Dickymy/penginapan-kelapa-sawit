@@ -16,7 +16,7 @@ class HomeController extends Controller
     {
         $roomTypes = RoomType::active()
             ->ordered()
-            ->with(['images' => fn ($q) => $q->where('is_cover', true)->orWhere('sort_order', 0), 'facilities'])
+            ->with(['images', 'facilities'])
             ->take(3)
             ->get();
 

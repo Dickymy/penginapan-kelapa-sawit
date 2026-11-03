@@ -41,6 +41,39 @@ Route::get('/galeri', [PublicGalleryController::class, 'index'])->name('gallery'
 Route::get('/faq', [\App\Http\Controllers\Public\FaqController::class, 'index'])->name('faq');
 Route::get('/sekitar', [\App\Http\Controllers\Public\NearbyPlaceController::class, 'index'])->name('nearby-places');
 
+// Dynamic Sitemap XML
+Route::get('/sitemap.xml', function () {
+    $roomTypes = \App\Models\RoomType::active()->get();
+    $now = now()->toAtomString();
+    
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+    
+    $staticUrls = [
+        ['url' => url('/'), 'priority' => '1.0', 'changefreq' => 'daily'],
+        ['url' => route('rooms.index'), 'priority' => '0.9', 'changefreq' => 'weekly'],
+        ['url' => route('gallery'), 'priority' => '0.8', 'changefreq' => 'weekly'],
+        ['url' => route('about'), 'priority' => '0.7', 'changefreq' => 'monthly'],
+        ['url' => route('location'), 'priority' => '0.7', 'changefreq' => 'monthly'],
+        ['url' => route('policy'), 'priority' => '0.6', 'changefreq' => 'monthly'],
+        ['url' => route('faq'), 'priority' => '0.6', 'changefreq' => 'monthly'],
+        ['url' => route('nearby-places'), 'priority' => '0.7', 'changefreq' => 'weekly'],
+    ];
+    
+    foreach ($staticUrls as $item) {
+        $xml .= '<url><loc>' . htmlspecialchars($item['url']) . '</loc><lastmod>' . $now . '</lastmod><changefreq>' . $item['changefreq'] . '</changefreq><priority>' . $item['priority'] . '</priority></url>';
+    }
+    
+    foreach ($roomTypes as $room) {
+        $lastmod = ($room->updated_at ?? now())->toAtomString();
+        $xml .= '<url><loc>' . htmlspecialchars(route('rooms.show', $room->slug)) . '</loc><lastmod>' . $lastmod . '</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>';
+    }
+    
+    $xml .= '</urlset>';
+    
+    return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+})->name('sitemap');
+
 // Availability & Booking
 Route::get('/ketersediaan', [AvailabilityController::class, 'search'])->name('availability.search');
 Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('booking.checkout');
@@ -144,13 +177,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('settings/{group}', [SettingsController::class, 'update'])->name('settings.update');
 
         // Policy Versions
-        Route::resource('policies', PolicyVersionController::class)->except(['edit', 'update', 'destroy']);
+        Route::resource('policies', PolicyVersionController::class)->except(['destroy']);
         Route::patch('policies/{policy}/publish', [PolicyVersionController::class, 'publish'])->name('policies.publish');
 
         // Gallery
         Route::get('galleries', [AdminGalleryController::class, 'index'])->name('galleries.index');
         Route::post('galleries', [AdminGalleryController::class, 'store'])->name('galleries.store');
         Route::patch('galleries/{gallery}', [AdminGalleryController::class, 'update'])->name('galleries.update');
+        Route::match(['post', 'patch'], 'galleries/{gallery}/replace', [AdminGalleryController::class, 'replaceImage'])->name('galleries.replace');
         Route::patch('galleries/{gallery}/toggle', [AdminGalleryController::class, 'toggleActive'])->name('galleries.toggle');
         Route::post('galleries/reorder', [AdminGalleryController::class, 'reorder'])->name('galleries.reorder');
         Route::delete('galleries/{gallery}', [AdminGalleryController::class, 'destroy'])->name('galleries.destroy');

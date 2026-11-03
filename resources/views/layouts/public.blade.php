@@ -1,11 +1,28 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Penginapan Kelapa Sawit — Penginapan di Kota Bangun II')</title>
     @yield('meta')
+    <meta name="description" content="@yield('meta_description', 'Penginapan Kelapa Sawit — Penginapan bersih, nyaman, dan terjangkau di Kota Bangun II, Kutai Kartanegara. Fasilitas lengkap dengan reservasi online mudah.')">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    {{-- Open Graph / WhatsApp / Facebook --}}
+    <meta property="og:site_name" content="Penginapan Kelapa Sawit">
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="@yield('title', 'Penginapan Kelapa Sawit — Penginapan Nyaman di Kota Bangun II')">
+    <meta property="og:description" content="@yield('meta_description', 'Penginapan bersih, nyaman, dan terjangkau di Kota Bangun II, Kutai Kartanegara. Reservasi mudah langsung online.')">
+    <meta property="og:image" content="@yield('og_image', asset('images/hero.jpg'))">
+
+    {{-- Twitter Cards --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('title', 'Penginapan Kelapa Sawit — Penginapan Nyaman di Kota Bangun II')">
+    <meta name="twitter:description" content="@yield('meta_description', 'Penginapan bersih, nyaman, dan terjangkau di Kota Bangun II, Kutai Kartanegara.')">
+    <meta name="twitter:image" content="@yield('og_image', asset('images/hero.jpg'))">
+
     <link rel="icon" href="{{ asset('images/logo.webp') }}" type="image/webp">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <link rel="preload" as="image" href="{{ asset('images/logo.webp') }}">
@@ -16,13 +33,61 @@
     {{-- x-cloak harus aktif sebelum Alpine init agar tidak ada flash of unstyled Alpine elements --}}
     <style>[x-cloak] { display: none !important; }</style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @yield('head')
 </head>
-<body class="min-h-screen flex flex-col bg-white text-gray-800 font-sans" x-data>
+<body class="min-h-screen flex flex-col bg-white text-gray-800 font-sans" x-data="{ scrollY: 0 }" @scroll.window.passive="scrollY = window.pageYOffset">
     <div id="page-progress-bar"></div>
+
+    {{-- Network Connectivity Status Banner (Online/Offline) --}}
+    <div x-data="{
+            isOnline: navigator.onLine,
+            showReconnected: false,
+            init() {
+                window.addEventListener('offline', () => { this.isOnline = false; this.showReconnected = false; });
+                window.addEventListener('online', () => {
+                    this.isOnline = true;
+                    this.showReconnected = true;
+                    setTimeout(() => { this.showReconnected = false; }, 3500);
+                });
+            }
+         }"
+         x-cloak
+         class="fixed top-0 left-0 right-0 z-50 pointer-events-none select-none">
+        
+        {{-- Offline Warning Banner --}}
+        <div x-show="!isOnline"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="-translate-y-full opacity-0"
+             x-transition:enter-end="translate-y-0 opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="translate-y-0 opacity-100"
+             x-transition:leave-end="-translate-y-full opacity-0"
+             class="bg-amber-600 text-white px-4 py-2 text-center text-xs sm:text-sm font-semibold shadow-md flex items-center justify-center gap-2 pointer-events-auto">
+            <svg class="w-4 h-4 animate-pulse shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"/>
+            </svg>
+            <span>Koneksi internet terputus. Anda sedang menjelajah dalam mode offline.</span>
+        </div>
+
+        {{-- Reconnected Success Banner --}}
+        <div x-show="showReconnected && isOnline"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="-translate-y-full opacity-0"
+             x-transition:enter-end="translate-y-0 opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="translate-y-0 opacity-100"
+             x-transition:leave-end="-translate-y-full opacity-0"
+             class="bg-emerald-600 text-white px-4 py-2 text-center text-xs sm:text-sm font-semibold shadow-md flex items-center justify-center gap-2 pointer-events-auto">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span>Koneksi internet terhubung kembali!</span>
+        </div>
+    </div>
     {{-- Header --}}
-    <header class="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100/50 sticky top-0 z-40 transition-all duration-300" 
+    <header class="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100/50 sticky top-0 z-40 transition-[background-color,box-shadow,border-color] duration-200" 
             x-data="{ scrolled: false }" 
-            @scroll.window="scrolled = (window.pageYOffset > 20)" 
+            @scroll.window.passive="scrolled = (window.pageYOffset > 20)" 
             :class="{'bg-white/95 shadow-md': scrolled, 'bg-white/80': !scrolled}" 
             @keydown.escape.window="$store.mobileNav.close()">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -390,6 +455,7 @@
                     @endauth
                 </div>
             </div>
+            </div>
         </template>
     </header>
 
@@ -397,7 +463,7 @@
     <x-toast />
 
     {{-- Content --}}
-    <main class="flex-1 pb-16 lg:pb-0">
+    <main class="flex-1 pb-8 lg:pb-0">
         {{-- Flash Alerts (for warnings and errors that need to stay visible) --}}
         @if (session('error'))
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
@@ -414,7 +480,7 @@
     </main>
 
     {{-- Footer --}}
-    <footer class="bg-gray-900 border-t border-gray-800 text-gray-400 pb-20 lg:pb-0">
+    <footer class="bg-gray-900 border-t border-gray-800 text-gray-400 pb-32 sm:pb-36 lg:pb-0">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
             <div class="grid grid-cols-12 lg:grid-cols-4 gap-x-4 gap-y-10 lg:gap-8 text-sm">
                 {{-- Property Branding --}}
@@ -618,14 +684,32 @@
     />
     @endauth
 
+    {{-- Scroll-to-Top Floating Button --}}
+    <button x-data
+            x-show="scrollY > 350"
+            @click="window.scrollTo({ top: 0, behavior: 'smooth' })"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-4 scale-90"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 translate-y-4 scale-90"
+            class="fixed right-4 md:right-6 bottom-20 md:bottom-8 z-30 w-11 h-11 rounded-full bg-white/95 hover:bg-white text-primary-700 shadow-lg border border-gray-100 backdrop-blur-xs flex items-center justify-center transition-transform hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary-500/40 cursor-pointer"
+            aria-label="Kembali ke atas"
+            style="display: none;">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+        </svg>
+    </button>
+
     @stack('scripts')
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for(let registration of registrations) {
-                        registration.unregister();
-                    }
+                navigator.serviceWorker.register('/sw.js').then((reg) => {
+                    // ServiceWorker successfully registered
+                }).catch((err) => {
+                    // Registration failed gracefully
                 });
             });
         }
